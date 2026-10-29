@@ -1,0 +1,350 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                  String               @id @default(uuid())
+  email               String?              @unique
+  phone               String               @unique
+  name                String
+  passwordHash        String
+  role                String               // SUPER_ADMIN, POOL_OWNER, STAFF
+  status              String               @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  permissions         String               @default("[]") // JSON string of granted permission codes
+  failedLoginAttempts Int                  @default(0)
+  lockoutUntil        DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  createdBookings     Booking[]            @relation("StaffBookings")
+  recordedPayments    Payment[]
+  approvedRefunds     Refund[]
+  walkIns             WalkIn[]
+  maintenanceChecks   MaintenanceChecklist[]
+  waterReadings       WaterReading[]
+  reportedIssues      MaintenanceIssue[]   @relation("ReportedIssues")
+  resolvedIssues      MaintenanceIssue[]   @relation("ResolvedIssues")
+  endOfDayClosings    EndOfDayClosing[]
+  assignedComplaints  Complaint[]
+  auditLogs           AuditLog[]
+}
+
+model Customer {
+  id          String    @id @default(uuid())
+  name        String
+  phone       String    @unique
+  email       String?
+  isVerified  Boolean   @default(false)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  bookings    Booking[]
+}
+
+model PoolSetting {
+  id                     String   @id @default("singleton_settings")
+  poolName               String   @default("M.A.K Indoor Pool")
+  address                String   @default("M.A.K Indoor Pool, Kerala, India")
+  contactPhone           String   @default("+91 98765 43210")
+  contactEmail           String   @default("info@makindoorpool.com")
+  openHour               Int      @default(9)      // 9:00 AM
+  closeHour              Int      @default(23)     // 11:00 PM
+  publicEndHour          Int      @default(16)     // 4:00 PM
+  maxCapacity            Int      @default(25)     // Max public concurrent swimmers
+  defaultPublicRate      Float    @default(150.0)  // ₹150 / person / hr
+  defaultFamilyBaseRate  Float    @default(1500.0) // ₹1500 / hr for up to 12 guests
+  familyBaseGuests       Int      @default(12)
+  familyExtraRate        Float    @default(100.0)  // ₹100 / person / hr over 12
+  familyAdvanceAmount    Float    @default(750.0)  // ₹750 flat advance required
+  holdTtlMinutes         Int      @default(15)     // 15-minute slot hold
+  maintenanceMode        Boolean  @default(false)
+  maintenanceMessage     String?
+  cancellationCutoffHours Int     @default(12)
+  rescheduleCutoffHours   Int     @default(6)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model Booking {
+  id                String       @id // Human-friendly e.g. MAK-20261029-001
+  type              String       // PUBLIC, FAMILY
+  status            String       @default("CONFIRMED") // HOLD, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW
+  bookingDate       String       // YYYY-MM-DD
+  startTime         String       // HH:mm (e.g. 10:00)
+  endTime           String       // HH:mm (e.g. 12:00)
+  durationHours     Float
+  guestCount        Int
+  
+  // Authoritative server-calculated pricing breakdown
+  basePrice         Float
+  extraGuestPrice   Float        @default(0.0)
+  totalAmount       Float
+  advanceRequired   Float        @default(0.0)
+  totalPaid         Float        @default(0.0)
+  balanceAmount     Float        @default(0.0)
+  paymentStatus     String       @default("UNPAID") // UNPAID, PARTIAL, PAID, REFUNDED
+
+  customerId        String?
+  customer          Customer?    @relation(fields: [customerId], references: [id])
+  customerName      String
+  customerPhone     String
+  customerEmail     String?
+  notes             String?
+
+  isStaffCreated    Boolean      @default(false)
+  createdByUserId   String?
+  createdByUser     User?        @relation("StaffBookings", fields: [createdByUserId], references: [id])
+
+  cancellationReason String?
+  cancelledAt       DateTime?
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  payments          Payment[]
+  refunds           Refund[]
+  receipts          Receipt[]
+  reminders         ScheduledReminder[]
+  feedbacks         CustomerFeedback[]
+}
+
+model SlotHold {
+  id           String   @id @default(uuid())
+  bookingType  String   // PUBLIC, FAMILY
+  date         String   // YYYY-MM-DD
+  startTime    String   // HH:mm
+  endTime      String   // HH:mm
+  guestCount   Int
+  holdToken    String   @unique
+  expiresAt    DateTime
+  status       String   @default("ACTIVE") // ACTIVE, CONVERTED, EXPIRED
+  createdAt    DateTime @default(now())
+}
+
+model WalkIn {
+  id               String    @id @default(uuid())
+  visitorCount     Int
+  checkInTime      DateTime  @default(now())
+  checkOutTime     DateTime?
+  durationHours    Float?
+  ratePerHour      Float     @default(150.0)
+  calculatedCharge Float
+  overrideCharge   Float?
+  overrideReason   String?
+  collectedAmount  Float
+  paymentMethod    String    // CASH, UPI
+  status           String    @default("ACTIVE") // ACTIVE, CHECKED_OUT
+  customerName     String?
+  customerPhone    String?
+  staffUserId      String?
+  staffUser        User?     @relation(fields: [staffUserId], references: [id])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  payments         Payment[]
+  receipts         Receipt[]
+}
+
+model Payment {
+  id                String    @id @default(uuid())
+  bookingId         String?
+  booking           Booking?  @relation(fields: [bookingId], references: [id])
+  walkInId          String?
+  walkIn            WalkIn?   @relation(fields: [walkInId], references: [id])
+  amount            Float
+  method            String    // CASH, UPI, GATEWAY
+  status            String    @default("SUCCESS") // PENDING, SUCCESS, FAILED, REFUNDED
+  transactionRef    String?
+  gatewayPaymentId  String?
+  gatewayOrderId    String?
+  idempotencyKey    String?   @unique
+  notes             String?
+  recordedByUserId  String?
+  recordedByUser    User?     @relation(fields: [recordedByUserId], references: [id])
+  createdAt         DateTime  @default(now())
+
+  refunds           Refund[]
+}
+
+model Refund {
+  id               String    @id @default(uuid())
+  bookingId        String
+  booking          Booking   @relation(fields: [bookingId], references: [id])
+  paymentId        String?
+  payment          Payment?  @relation(fields: [paymentId], references: [id])
+  requestedAmount  Float
+  approvedAmount   Float
+  status           String    @default("PENDING") // PENDING, APPROVED, REJECTED, PROCESSED
+  reason           String
+  approvedByUserId String?
+  approvedByUser   User?     @relation(fields: [approvedByUserId], references: [id])
+  transactionRef   String?
+  processedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Receipt {
+  id             String    @id @default(uuid())
+  receiptNumber  String    @unique // e.g. REC-20261029-XXXX
+  bookingId      String?
+  booking        Booking?  @relation(fields: [bookingId], references: [id])
+  walkInId       String?
+  walkIn         WalkIn?   @relation(fields: [walkInId], references: [id])
+  customerName   String
+  customerPhone  String
+  totalAmount    Float
+  paidAmount     Float
+  balanceAmount  Float
+  paymentMethod  String
+  issuedAt       DateTime  @default(now())
+}
+
+model MaintenanceChecklist {
+  id                   String   @id @default(uuid())
+  date                 String   // YYYY-MM-DD
+  shift                String   // MORNING, EVENING
+  poolCleaned          Boolean  @default(false)
+  surroundingsCleaned  Boolean  @default(false)
+  deckSanitized        Boolean  @default(false)
+  skimmerCleaned       Boolean  @default(false)
+  filtersChecked       Boolean  @default(false)
+  safetyGearChecked    Boolean  @default(false)
+  notes                String?
+  staffUserId          String?
+  staffUser            User?    @relation(fields: [staffUserId], references: [id])
+  createdAt            DateTime @default(now())
+}
+
+model WaterReading {
+  id            String   @id @default(uuid())
+  date          String   // YYYY-MM-DD
+  time          String   // HH:mm
+  chlorinePpm   Float    // e.g. 1.5 - 3.0 ppm ideal
+  phLevel       Float    // e.g. 7.2 - 7.6 ideal
+  waterClarity  String   // CLEAR, SLIGHTLY_HAZY, HAZY, TURBID
+  temperatureC  Float?
+  status        String   // OPTIMAL, WARNING, CRITICAL
+  remarks       String?
+  staffUserId   String?
+  staffUser     User?    @relation(fields: [staffUserId], references: [id])
+  createdAt     DateTime @default(now())
+}
+
+model MaintenanceIssue {
+  id               String    @id @default(uuid())
+  title            String
+  description      String
+  severity         String    // LOW, MEDIUM, HIGH, CRITICAL
+  status           String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED
+  photoUrl         String?
+  reportedByUserId String?
+  reportedByUser   User?     @relation("ReportedIssues", fields: [reportedByUserId], references: [id])
+  resolvedByUserId String?
+  resolvedByUser   User?     @relation("ResolvedIssues", fields: [resolvedByUserId], references: [id])
+  resolutionNotes  String?
+  resolvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model EndOfDayClosing {
+  id              String   @id @default(uuid())
+  date            String   @unique // YYYY-MM-DD
+  expectedCash    Float    @default(0.0)
+  actualCash      Float    @default(0.0)
+  cashVariance    Float    @default(0.0)
+  expectedUpi     Float    @default(0.0)
+  actualUpi       Float    @default(0.0)
+  upiVariance     Float    @default(0.0)
+  expectedGateway Float    @default(0.0)
+  actualGateway   Float    @default(0.0)
+  totalCollections Float   @default(0.0)
+  totalGuests     Int      @default(0)
+  notes           String?
+  varianceReason  String?
+  closedByUserId  String?
+  closedByUser    User?    @relation(fields: [closedByUserId], references: [id])
+  status          String   @default("SUBMITTED") // DRAFT, SUBMITTED, REVIEWED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Complaint {
+  id             String    @id @default(uuid())
+  ticketNumber   String    @unique // CMP-20261029-XXXX
+  category       String    // WATER_QUALITY, FACILITY, STAFF, BILLING, OTHER
+  description    String
+  customerName   String
+  customerPhone  String
+  status         String    @default("OPEN") // OPEN, UNDER_INVESTIGATION, RESOLVED, DISMISSED
+  assignedUserId String?
+  assignedUser   User?     @relation(fields: [assignedUserId], references: [id])
+  resolution     String?
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model CustomerFeedback {
+  id                  String   @id @default(uuid())
+  bookingId           String?
+  booking             Booking? @relation(fields: [bookingId], references: [id])
+  customerName        String
+  rating              Int      // 1 to 5 stars
+  comment             String
+  isApprovedForPublic Boolean  @default(false)
+  createdAt           DateTime @default(now())
+}
+
+model NotificationLog {
+  id           String   @id @default(uuid())
+  recipient    String
+  channel      String   // WHATSAPP, SMS, EMAIL
+  templateName String
+  payload      String   // JSON string
+  status       String   @default("SENT") // PENDING, SENT, FAILED
+  errorMessage String?
+  attempts     Int      @default(1)
+  createdAt    DateTime @default(now())
+}
+
+model ScheduledReminder {
+  id           String    @id @default(uuid())
+  bookingId    String
+  booking      Booking   @relation(fields: [bookingId], references: [id])
+  reminderType String    // BEFORE_24H, BEFORE_2H, BALANCE_DUE, STAFF_DAILY_SUMMARY, CLEANING_ALERT
+  scheduledFor DateTime
+  status       String    @default("SCHEDULED") // SCHEDULED, SENT, CANCELLED, FAILED
+  sentAt       DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model AuditLog {
+  id               String   @id @default(uuid())
+  entityType       String   // BOOKING, PAYMENT, REFUND, SETTING, USER, CLOSING
+  entityId         String
+  action           String   // CREATE, UPDATE, DELETE, OVERRIDE, APPROVE, REJECT
+  performedByUserId String?
+  performedByUser  User?    @relation(fields: [performedByUserId], references: [id])
+  userRole         String?
+  details          String   // JSON or text audit message
+  ipAddress        String?
+  createdAt        DateTime @default(now())
+}
+
+model SystemAlert {
+  id                 String    @id @default(uuid())
+  type               String    // CAPACITY_WARNING, WATER_PARAM_ALERT, PAYMENT_MISMATCH, SYSTEM_ERROR
+  severity           String    // INFO, WARNING, CRITICAL
+  message            String
+  isAcknowledged     Boolean   @default(false)
+  acknowledgedByUserId String?
+  createdAt          DateTime  @default(now())
+}
