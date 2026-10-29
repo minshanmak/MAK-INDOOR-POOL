@@ -2,9 +2,17 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Waves, MapPin, Phone, Mail, Clock, ShieldCheck } from "lucide-react";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Do not render public footer on admin pages
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="bg-[#071322] text-slate-400 border-t border-slate-800 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
