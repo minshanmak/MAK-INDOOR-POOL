@@ -23,6 +23,68 @@ export default function AdminMaintenancePage() {
   const [readingRemarks, setReadingRemarks] = useState("");
   const [readingSubmitting, setReadingSubmitting] = useState(false);
 
+  // Safety Diagnostic Helpers
+  const getChlorineTolerance = (val: number) => {
+    if (val < 1.0) {
+      return {
+        label: "Critical Low",
+        detail: "Unsanitary risk; dose sodium hypochlorite immediately",
+        badgeClass: "bg-rose-100 text-rose-800 border-rose-300",
+        indicatorColor: "bg-rose-500",
+      };
+    }
+    if (val < 1.5) {
+      return {
+        label: "Low (Sub-optimal)",
+        detail: "Below target; increase chlorination rate",
+        badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
+        indicatorColor: "bg-amber-500",
+      };
+    }
+    if (val <= 3.0) {
+      return {
+        label: "Optimal (Sanitary)",
+        detail: "Ideal sanitary range (1.5–3.0 ppm)",
+        badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
+        indicatorColor: "bg-emerald-500",
+      };
+    }
+    return {
+      label: "Elevated / High",
+      detail: "Eye & skin irritation risk; pause chlorinator",
+      badgeClass: "bg-rose-100 text-rose-800 border-rose-300",
+      indicatorColor: "bg-rose-500",
+    };
+  };
+
+  const getPhTolerance = (val: number) => {
+    if (val < 7.2) {
+      return {
+        label: "Acidic (Corrosive)",
+        detail: "Corrosive to tile grout & pipes; add soda ash",
+        badgeClass: "bg-rose-100 text-rose-800 border-rose-300",
+        indicatorColor: "bg-rose-500",
+      };
+    }
+    if (val <= 7.6) {
+      return {
+        label: "Optimal Balance",
+        detail: "Maximum bather comfort & UV efficacy (7.2–7.6)",
+        badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
+        indicatorColor: "bg-emerald-500",
+      };
+    }
+    return {
+      label: "Alkaline (Scale-forming)",
+      detail: "Causes cloudy water and reduces sanitizer power",
+      badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
+      indicatorColor: "bg-amber-500",
+    };
+  };
+
+  const clTolerance = getChlorineTolerance(chlorinePpm);
+  const phTolerance = getPhTolerance(phLevel);
+
   // Checklist Form State
   const [shift, setShift] = useState<"MORNING" | "EVENING">("MORNING");
   const [poolCleaned, setPoolCleaned] = useState(true);
@@ -197,9 +259,16 @@ export default function AdminMaintenancePage() {
           </div>
 
           <form onSubmit={handleWaterReadingSubmit} className="space-y-3 text-xs">
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1 text-[11px]">Chlorine (ppm) *</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="block font-bold text-slate-700 text-[11px]">Chlorine (ppm) *</label>
+                  <span
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold font-mono border ${clTolerance.badgeClass}`}
+                  >
+                    {clTolerance.label}
+                  </span>
+                </div>
                 <input
                   type="number"
                   step="0.1"
@@ -208,10 +277,20 @@ export default function AdminMaintenancePage() {
                   onChange={(e) => setChlorinePpm(Number(e.target.value))}
                   className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono text-slate-900"
                 />
+                <p className="text-[10px] text-slate-500 leading-tight">
+                  {clTolerance.detail}
+                </p>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1 text-[11px]">pH Level *</label>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="block font-bold text-slate-700 text-[11px]">pH Level *</label>
+                  <span
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold font-mono border ${phTolerance.badgeClass}`}
+                  >
+                    {phTolerance.label}
+                  </span>
+                </div>
                 <input
                   type="number"
                   step="0.1"
@@ -220,10 +299,16 @@ export default function AdminMaintenancePage() {
                   onChange={(e) => setPhLevel(Number(e.target.value))}
                   className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono text-slate-900"
                 />
+                <p className="text-[10px] text-slate-500 leading-tight">
+                  {phTolerance.detail}
+                </p>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1 text-[11px]">Water Clarity</label>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="block font-bold text-slate-700 text-[11px]">Water Clarity</label>
+                  <span className="text-[9px] font-mono text-slate-400">Visual index</span>
+                </div>
                 <select
                   value={waterClarity}
                   onChange={(e) => setWaterClarity(e.target.value)}
@@ -234,6 +319,9 @@ export default function AdminMaintenancePage() {
                   <option value="HAZY">Hazy</option>
                   <option value="TURBID">Turbid (Alert)</option>
                 </select>
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  Target: 1.8m deep basin floor clearly visible
+                </p>
               </div>
             </div>
 

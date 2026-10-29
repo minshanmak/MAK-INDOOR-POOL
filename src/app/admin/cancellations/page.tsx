@@ -26,6 +26,10 @@ export default function AdminCancellationsPage() {
   const [decisionNotes, setDecisionNotes] = useState("");
   const [processing, setProcessing] = useState(false);
 
+  // Cancellation Confirmation Modal State
+  const [confirmCancellationBooking, setConfirmCancellationBooking] = useState<any | null>(null);
+  const [approving, setApproving] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -46,6 +50,7 @@ export default function AdminCancellationsPage() {
   const handleApproveCancellation = async (bookingId: string) => {
     setError(null);
     setActionSuccess(null);
+    setApproving(true);
     try {
       const res = await fetch("/api/admin/cancellations", {
         method: "POST",
@@ -61,9 +66,12 @@ export default function AdminCancellationsPage() {
         throw new Error(resJson.error || "Failed to approve cancellation.");
       }
       setActionSuccess("Cancellation approved and pool slot successfully released!");
+      setConfirmCancellationBooking(null);
       fetchData();
     } catch (err: any) {
       setError(err.message || "Failed to approve cancellation.");
+    } finally {
+      setApproving(false);
     }
   };
 
@@ -181,7 +189,7 @@ export default function AdminCancellationsPage() {
                     <td className="px-4 py-3 text-slate-600 max-w-xs">{b.cancellationReason}</td>
                     <td className="px-4 py-3 text-right">
                       <button
-                        onClick={() => handleApproveCancellation(b.id)}
+                        onClick={() => setConfirmCancellationBooking(b)}
                         className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] px-3 py-1.5 rounded-md shadow-xs transition"
                       >
                         Approve & Release Slot
@@ -297,6 +305,85 @@ export default function AdminCancellationsPage() {
           </div>
         )}
       </div>
+
+      {/* Cancellation Confirmation Guard Modal */}
+      {confirmCancellationBooking && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
+                  <ShieldAlert className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Confirm Slot Release</h3>
+                  <p className="text-xs text-slate-500 font-mono">
+                    Ref: {confirmCancellationBooking.id}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setConfirmCancellationBooking(null)}
+                className="p-1 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5 font-mono text-[11px]">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Customer:</span>
+                  <span className="font-bold text-slate-900 font-sans">
+                    {confirmCancellationBooking.customerName} ({confirmCancellationBooking.customerPhone})
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Session Date:</span>
+                  <span className="font-bold text-slate-900">
+                    {confirmCancellationBooking.bookingDate}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Time Slot:</span>
+                  <span className="font-bold text-slate-900">
+                    {confirmCancellationBooking.startTime} – {confirmCancellationBooking.endTime}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Paid Amount:</span>
+                  <span className="font-bold text-emerald-700 font-sans">
+                    ₹{confirmCancellationBooking.totalPaid}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-[11px] leading-relaxed">
+                <strong>Attention:</strong> Approving this request will cancel this customer booking and immediately release the locked slot back into the live public booking inventory on the website.
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+                <button
+                  type="button"
+                  disabled={approving}
+                  onClick={() => setConfirmCancellationBooking(null)}
+                  className="px-3.5 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs transition"
+                >
+                  Cancel / Keep Locked
+                </button>
+                <button
+                  type="button"
+                  disabled={approving}
+                  onClick={() => handleApproveCancellation(confirmCancellationBooking.id)}
+                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-xs transition"
+                >
+                  {approving ? "Releasing..." : "Confirm & Release Slot"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Owner Refund Decision Modal */}
       {selectedRefund && (

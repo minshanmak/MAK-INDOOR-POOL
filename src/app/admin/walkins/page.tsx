@@ -18,6 +18,14 @@ export default function AdminWalkinsPage() {
   const [walkIns, setWalkIns] = useState<any[]>([]);
   const [currentOccupancy, setCurrentOccupancy] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Form Mode: "QUICK" or "CHECK_IN"
   const [entryMode, setEntryMode] = useState<"QUICK" | "CHECK_IN">("QUICK");
@@ -350,46 +358,86 @@ export default function AdminWalkinsPage() {
                   <tr>
                     <th className="px-4 py-3">Reference</th>
                     <th className="px-4 py-3">Swimmers</th>
-                    <th className="px-4 py-3">Check-In Time</th>
+                    <th className="px-4 py-3">Session & Duration Tracker</th>
                     <th className="px-4 py-3">Customer</th>
                     <th className="px-4 py-3">Paid Amount</th>
-                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Deck Status</th>
                     <th className="px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {walkIns
                     .filter((w) => w.status === "ACTIVE")
-                    .map((w) => (
-                      <tr key={w.id} className="hover:bg-slate-50/60 transition">
-                        <td className="px-4 py-3 font-mono font-bold text-cyan-800">{w.id}</td>
-                        <td className="px-4 py-3 font-bold text-slate-900">{w.visitorCount} Swimmers</td>
-                        <td className="px-4 py-3 font-mono text-slate-600 tabular-nums">
-                          {new Date(w.entryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="font-semibold text-slate-900">{w.customerName || "Walk-in Visitor"}</span>
-                          {w.customerPhone && (
-                            <span className="text-[10px] text-slate-500 block font-mono">{w.customerPhone}</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 font-bold text-emerald-700 tabular-nums">₹{w.collectedAmount}</td>
-                        <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            IN POOL
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <button
-                            onClick={() => handleCheckOut(w.id)}
-                            className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] px-2.5 py-1 rounded transition flex items-center gap-1 ml-auto"
-                          >
-                            <LogOut className="w-3 h-3" />
-                            <span>Check Out</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    .map((w) => {
+                      const entryTimestamp = new Date(w.entryTime).getTime();
+                      const elapsedMinutes = Math.max(0, Math.floor((currentTime - entryTimestamp) / 60000));
+                      const totalDurationMinutes = Math.round((w.durationHours || 1) * 60);
+                      const remainingMinutes = totalDurationMinutes - elapsedMinutes;
+                      const isOverdue = remainingMinutes < 0;
+
+                      return (
+                        <tr
+                          key={w.id}
+                          className={`transition ${
+                            isOverdue
+                              ? "bg-rose-50/50 hover:bg-rose-50/80 border-l-4 border-l-rose-500"
+                              : "hover:bg-slate-50/60"
+                          }`}
+                        >
+                          <td className="px-4 py-3 font-mono font-bold text-cyan-800">{w.id}</td>
+                          <td className="px-4 py-3 font-bold text-slate-900">{w.visitorCount} Swimmers</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1.5 font-mono text-slate-800 text-[11px] tabular-nums">
+                              <Clock className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="font-semibold">
+                                {new Date(w.entryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              </span>
+                              <span className="text-slate-400">({w.durationHours || 1}h booked)</span>
+                            </div>
+                            <div className="mt-0.5 text-[10px]">
+                              {isOverdue ? (
+                                <span className="text-rose-700 font-bold font-mono flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3 text-rose-500" />
+                                  <span>Overstayed by {Math.abs(remainingMinutes)}m • {elapsedMinutes}m elapsed</span>
+                                </span>
+                              ) : (
+                                <span className="text-slate-500 font-mono">
+                                  Checked in {elapsedMinutes}m ago •{" "}
+                                  <strong className="text-emerald-700">{remainingMinutes}m remaining</strong>
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="font-semibold text-slate-900">{w.customerName || "Walk-in Visitor"}</span>
+                            {w.customerPhone && (
+                              <span className="text-[10px] text-slate-500 block font-mono">{w.customerPhone}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 font-bold text-emerald-700 tabular-nums">₹{w.collectedAmount}</td>
+                          <td className="px-4 py-3">
+                            {isOverdue ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">
+                                OVERDUE (+{Math.abs(remainingMinutes)}m)
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                ACTIVE ({remainingMinutes}m left)
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => handleCheckOut(w.id)}
+                              className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] px-2.5 py-1 rounded transition flex items-center gap-1 ml-auto"
+                            >
+                              <LogOut className="w-3 h-3" />
+                              <span>Check Out</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   {walkIns.filter((w) => w.status === "ACTIVE").length === 0 && (
                     <tr>
                       <td colSpan={7} className="p-8 text-center text-slate-400 text-xs">

@@ -29,6 +29,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [timeStr, setTimeStr] = useState<string>("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setTimeStr(
+        now.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+          timeZone: "Asia/Kolkata",
+        })
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (pathname === "/admin/login") {
@@ -119,6 +138,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           },
         ]),
   ];
+
+  const sectionMeta: Record<string, { section: string; title: string }> = {
+    "/admin": { section: "LIVE OPERATIONS", title: "Operations Telemetry" },
+    "/admin/bookings": { section: "LIVE OPERATIONS", title: "Bookings Ledger" },
+    "/admin/walkins": { section: "LIVE OPERATIONS", title: "Walk-ins & Deck Occupancy" },
+    "/admin/cancellations": { section: "FINANCE & AUDITS", title: "Cancellations & Refunds Queue" },
+    "/admin/closing": { section: "FINANCE & AUDITS", title: "Daily Cash Closing & Reconciliation" },
+    "/admin/maintenance": { section: "FINANCE & AUDITS", title: "Water Quality & Maintenance Log" },
+    "/admin/reports": { section: "FINANCE & AUDITS", title: "Operational Reports & CSV Export" },
+    "/admin/complaints": { section: "FINANCE & AUDITS", title: "Customer Feedback & Issues" },
+    "/admin/staff": { section: "SYSTEM MANAGEMENT", title: "Staff Accounts & RBAC" },
+    "/admin/settings": { section: "SYSTEM MANAGEMENT", title: "Pool Rules & Rates Configuration" },
+    "/admin/offline": { section: "SYSTEM TOOLS", title: "Offline Sync Engine" },
+  };
+
+  const currentMeta = sectionMeta[pathname] || { section: "ADMINISTRATION", title: "Management Console" };
 
   return (
     <div className="min-h-screen bg-slate-100/70 flex flex-col lg:flex-row text-slate-900">
@@ -241,6 +276,55 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        {/* Desktop Top Bar */}
+        <header className="hidden lg:flex items-center justify-between px-8 py-3.5 bg-white border-b border-slate-200/90 shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+              {currentMeta.section}
+            </span>
+            <span className="text-slate-300">/</span>
+            <span className="text-sm font-black text-slate-900 tracking-tight">
+              {currentMeta.title}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs">
+            {/* Live Facility Clock */}
+            <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-mono text-[11px]">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-semibold text-slate-900">Aluva Facility (IST):</span>
+              <span className="tabular-nums font-bold text-cyan-800">{timeStr || "--:--:--"}</span>
+            </div>
+
+            {/* Public Site Quick Link */}
+            <Link
+              href="/"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 font-semibold text-[11px] transition shadow-2xs bg-white"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-cyan-700" />
+              <span>Customer Website</span>
+            </Link>
+
+            {/* Manager Avatar Badge */}
+            {user && (
+              <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
+                <div className="w-7 h-7 rounded-full bg-[#0B192C] text-cyan-300 flex items-center justify-center font-bold text-[11px] shadow-xs">
+                  {user.name ? user.name.slice(0, 2).toUpperCase() : "OP"}
+                </div>
+                <div className="text-left">
+                  <span className="block text-[11px] font-bold text-slate-800 leading-tight">
+                    {user.name}
+                  </span>
+                  <span className="block text-[9px] font-mono text-cyan-800 font-bold uppercase">
+                    {user.role}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </header>
+
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">{children}</main>
       </div>
     </div>
