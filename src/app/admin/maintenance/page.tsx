@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   Clock,
+  Wrench,
 } from "lucide-react";
 
 export default function AdminMaintenancePage() {
@@ -112,7 +113,7 @@ export default function AdminMaintenancePage() {
     }
   };
 
-  const handleIssueSubmit = async (e: React.FormEvent) => {
+  const handleReportIssue = async (e: React.FormEvent) => {
     e.preventDefault();
     setIssueSubmitting(true);
     try {
@@ -156,66 +157,77 @@ export default function AdminMaintenancePage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-400 text-xs">Loading maintenance & water safety records...</div>;
+    return (
+      <div className="p-12 text-center text-slate-400 text-xs font-mono">
+        <div className="inline-flex items-center gap-2">
+          <div className="w-3.5 h-3.5 border-2 border-cyan-600 border-t-transparent rounded-full animate-spin" />
+          <span>Loading water telemetry & maintenance audit records...</span>
+        </div>
+      </div>
+    );
   }
 
   const { readings = [], checklists = [], issues = [] } = data || {};
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Title */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Maintenance & Water Safety</h1>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Twice-daily chlorine/pH testing, shift cleaning checklists, and equipment inspection logs
+      <div className="border-b border-slate-200/90 pb-4">
+        <div className="inline-flex items-center gap-2 text-xs font-mono text-cyan-800 font-semibold mb-1">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>WATER HYGIENE & PLANT SAFETY GOVERNANCE</span>
+        </div>
+        <h1 className="text-xl font-black text-slate-900 tracking-tight">Maintenance & Water Safety</h1>
+        <p className="text-xs text-slate-500">
+          Twice-daily chlorine/pH testing, shift cleaning checklists, and plant defect inspection logs
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Module 1: Water Reading Form & Logs */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 space-y-4">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-            <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-              <Droplets className="w-4 h-4 text-ocean-600" />
-              Log Water Quality Test
+            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Droplets className="w-4 h-4 text-cyan-700" />
+              <span>Log Water Quality Chemical Test</span>
             </h2>
-            <span className="text-[10px] text-slate-400 font-mono">
-              Ideal: Cl 1.5–3.0 ppm | pH 7.2–7.6
+            <span className="text-[10px] text-slate-500 font-mono">
+              Target: Cl 1.5–3.0 ppm | pH 7.2–7.6
             </span>
           </div>
 
           <form onSubmit={handleWaterReadingSubmit} className="space-y-3 text-xs">
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Chlorine (ppm) *</label>
+                <label className="block font-bold text-slate-700 mb-1 text-[11px]">Chlorine (ppm) *</label>
                 <input
                   type="number"
                   step="0.1"
                   required
                   value={chlorinePpm}
                   onChange={(e) => setChlorinePpm(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono text-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">pH Level *</label>
+                <label className="block font-bold text-slate-700 mb-1 text-[11px]">pH Level *</label>
                 <input
                   type="number"
                   step="0.1"
                   required
                   value={phLevel}
                   onChange={(e) => setPhLevel(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono text-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Water Clarity</label>
+                <label className="block font-bold text-slate-700 mb-1 text-[11px]">Water Clarity</label>
                 <select
                   value={waterClarity}
                   onChange={(e) => setWaterClarity(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
                 >
                   <option value="CLEAR">Crystal Clear</option>
                   <option value="SLIGHTLY_HAZY">Slightly Hazy</option>
@@ -226,39 +238,52 @@ export default function AdminMaintenancePage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Remarks / Chemical Adjustments</label>
+              <label className="block font-bold text-slate-700 mb-1 text-[11px]">
+                Remarks / Chemical Dosing Adjustments
+              </label>
               <input
                 type="text"
                 value={readingRemarks}
                 onChange={(e) => setReadingRemarks(e.target.value)}
-                placeholder="e.g. Added 200g sodium bicarbonate / backwash performed"
-                className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
+                placeholder="e.g. Backwashed sand filters; added 200g sodium bicarbonate"
+                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
               />
             </div>
 
             <button
               type="submit"
               disabled={readingSubmitting}
-              className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-bold py-2 rounded-xl text-xs transition"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-lg text-xs shadow-xs transition"
             >
-              {readingSubmitting ? "Logging..." : "Record Water Reading"}
+              {readingSubmitting ? "Logging Test..." : "Record Water Quality Test"}
             </button>
           </form>
 
           {/* Recent Readings List */}
           <div className="pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-700 mb-2">Recent Readings History</h3>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
+              Recent Water Audits
+            </h3>
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
               {readings.map((r: any) => (
-                <div key={r.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
+                <div
+                  key={r.id}
+                  className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg flex justify-between items-center text-xs"
+                >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        r.status === "OPTIMAL" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-                      }`}>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${
+                          r.status === "OPTIMAL"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                        }`}
+                      >
                         {r.status}
                       </span>
-                      <strong className="text-slate-900 font-mono">Cl: {r.chlorinePpm} ppm | pH: {r.phLevel}</strong>
+                      <strong className="text-slate-900 font-mono text-xs tabular-nums">
+                        Cl: {r.chlorinePpm} ppm • pH: {r.phLevel}
+                      </strong>
                     </div>
                     <span className="text-[10px] text-slate-400 block mt-0.5">
                       {r.date} at {r.time} by {r.staffUser?.name || "Staff"} ({r.waterClarity})
@@ -271,16 +296,16 @@ export default function AdminMaintenancePage() {
         </div>
 
         {/* Module 2: Shift Cleaning Checklist */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 space-y-4">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-            <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
               <CheckSquare className="w-4 h-4 text-emerald-600" />
-              Daily Shift Cleaning Checklist
+              <span>Shift Cleaning Checklist Signoff</span>
             </h2>
             <select
               value={shift}
               onChange={(e) => setShift(e.target.value as any)}
-              className="px-2 py-1 border border-slate-300 rounded text-xs font-semibold"
+              className="px-2 py-1 border border-slate-300 rounded text-xs font-bold"
             >
               <option value="MORNING">Morning Shift</option>
               <option value="EVENING">Evening Shift</option>
@@ -288,25 +313,17 @@ export default function AdminMaintenancePage() {
           </div>
 
           <form onSubmit={handleChecklistSubmit} className="space-y-3 text-xs">
-            <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="space-y-2 bg-slate-50 p-3.5 rounded-lg border border-slate-200/80">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={poolCleaned}
                   onChange={(e) => setPoolCleaned(e.target.checked)}
-                  className="rounded text-ocean-600 focus:ring-ocean-500"
+                  className="rounded text-cyan-600 focus:ring-cyan-500"
                 />
-                <span className="font-medium text-slate-800">Pool surface vacuumed & skimmer nets cleaned</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={surroundingsCleaned}
-                  onChange={(e) => setSurroundingsCleaned(e.target.checked)}
-                  className="rounded text-ocean-600 focus:ring-ocean-500"
-                />
-                <span className="font-medium text-slate-800">Deck tile floor scrubbed & disinfected</span>
+                <span className="font-semibold text-slate-800">
+                  Pool surface vacuumed & skimmer baskets cleared
+                </span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -314,9 +331,23 @@ export default function AdminMaintenancePage() {
                   type="checkbox"
                   checked={deckSanitized}
                   onChange={(e) => setDeckSanitized(e.target.checked)}
-                  className="rounded text-ocean-600 focus:ring-ocean-500"
+                  className="rounded text-cyan-600 focus:ring-cyan-500"
                 />
-                <span className="font-medium text-slate-800">Changing rooms & shower stalls sanitized</span>
+                <span className="font-semibold text-slate-800">
+                  Pool deck tiles washed and scrubbed with disinfectant
+                </span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={surroundingsCleaned}
+                  onChange={(e) => setSurroundingsCleaned(e.target.checked)}
+                  className="rounded text-cyan-600 focus:ring-cyan-500"
+                />
+                <span className="font-semibold text-slate-800">
+                  Changing rooms, hot showers & toilets sanitized
+                </span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -324,9 +355,11 @@ export default function AdminMaintenancePage() {
                   type="checkbox"
                   checked={filtersChecked}
                   onChange={(e) => setFiltersChecked(e.target.checked)}
-                  className="rounded text-ocean-600 focus:ring-ocean-500"
+                  className="rounded text-cyan-600 focus:ring-cyan-500"
                 />
-                <span className="font-medium text-slate-800">Sand filter pressure gauge inspected</span>
+                <span className="font-semibold text-slate-800">
+                  Sand filter pressure gauges checked & UV lamps inspected
+                </span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -334,44 +367,56 @@ export default function AdminMaintenancePage() {
                   type="checkbox"
                   checked={safetyGearChecked}
                   onChange={(e) => setSafetyGearChecked(e.target.checked)}
-                  className="rounded text-ocean-600 focus:ring-ocean-500"
+                  className="rounded text-cyan-600 focus:ring-cyan-500"
                 />
-                <span className="font-medium text-slate-800">Life rings, ropes & kids vests in position</span>
+                <span className="font-semibold text-slate-800">
+                  Lifebuoys, reach poles & first-aid kits verified on deck
+                </span>
               </label>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Checklist Notes</label>
+              <label className="block font-bold text-slate-700 mb-1 text-[11px]">
+                Shift Notes & Handover Remarks
+              </label>
               <input
                 type="text"
                 value={checklistNotes}
                 onChange={(e) => setChecklistNotes(e.target.value)}
-                placeholder="Optional shift notes"
-                className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
+                placeholder="All items verified; facility ready for swimmers"
+                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
               />
             </div>
 
             <button
               type="submit"
               disabled={checklistSubmitting}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs shadow-xs transition"
             >
-              {checklistSubmitting ? "Signing Off..." : `Sign Off ${shift} Checklist`}
+              {checklistSubmitting ? "Signing Off..." : `Sign Off ${shift} Cleaning Checklist`}
             </button>
           </form>
 
           {/* Recent Checklists History */}
           <div className="pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-700 mb-2">Signed Checklists</h3>
-            <div className="space-y-1.5 max-h-40 overflow-y-auto text-xs">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
+              Recent Shift Signoffs
+            </h3>
+            <div className="space-y-1.5 max-h-36 overflow-y-auto">
               {checklists.map((c: any) => (
-                <div key={c.id} className="p-2 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center">
-                  <span className="font-semibold text-slate-800">
-                    {c.date} ({c.shift}) — Completed
-                  </span>
-                  <span className="text-[10px] text-slate-500">
-                    {c.staffUser?.name || "Staff"}
-                  </span>
+                <div
+                  key={c.id}
+                  className="p-2 bg-slate-50 border border-slate-200/80 rounded-lg flex justify-between items-center text-xs"
+                >
+                  <div>
+                    <span className="font-bold text-slate-900">
+                      {c.date} • {c.shift} Shift
+                    </span>
+                    <span className="text-[10px] text-slate-500 block">
+                      Signed off by {c.staffUser?.name || "Staff"}
+                    </span>
+                  </div>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 </div>
               ))}
             </div>
@@ -379,98 +424,96 @@ export default function AdminMaintenancePage() {
         </div>
       </div>
 
-      {/* Module 3: Maintenance Issues Log */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+      {/* Module 3: Maintenance Issues & Equipment Defect Tracker */}
+      <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 space-y-4">
         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-          <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-            Report Maintenance Issue / Equipment Defect
-          </h2>
+          <div>
+            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Wrench className="w-4 h-4 text-amber-600" />
+              <span>Plant & Equipment Defect Tracker ({issues.length})</span>
+            </h2>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Report pumps, filtration valves, geysers, or deck fixtures needing service
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleIssueSubmit} className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-          <div className="sm:col-span-2">
+        <form onSubmit={handleReportIssue} className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs items-end">
+          <div className="sm:col-span-4">
+            <label className="block font-bold text-slate-700 mb-1 text-[11px]">Issue Title *</label>
             <input
               type="text"
               required
               value={issueTitle}
               onChange={(e) => setIssueTitle(e.target.value)}
-              placeholder="Issue title e.g. Pool light bulb replaced / pump pressure high"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              placeholder="e.g. Pump #2 pressure drop"
+              className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
             />
           </div>
-          <div>
+
+          <div className="sm:col-span-4">
+            <label className="block font-bold text-slate-700 mb-1 text-[11px]">Severity Level</label>
             <select
               value={issueSeverity}
               onChange={(e) => setIssueSeverity(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-medium"
             >
-              <option value="LOW">Low Severity</option>
-              <option value="MEDIUM">Medium Severity</option>
-              <option value="HIGH">High Severity</option>
-              <option value="CRITICAL">Critical (Pool Closure)</option>
+              <option value="LOW">Low (Cosmetic / Deck fixture)</option>
+              <option value="MEDIUM">Medium (Filter or valve maintenance)</option>
+              <option value="HIGH">High (Immediate intervention required)</option>
             </select>
           </div>
-          <div>
+
+          <div className="sm:col-span-4">
             <button
               type="submit"
               disabled={issueSubmitting}
-              className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-lg text-xs shadow-xs transition"
             >
-              Log Issue
+              {issueSubmitting ? "Logging..." : "+ Log Defect Ticket"}
             </button>
-          </div>
-          <div className="sm:col-span-4">
-            <textarea
-              rows={2}
-              required
-              value={issueDesc}
-              onChange={(e) => setIssueDesc(e.target.value)}
-              placeholder="Detailed description of defect, affected equipment, and corrective action required..."
-              className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
-            />
           </div>
         </form>
 
-        {/* Issues List */}
-        <div className="pt-4 border-t border-slate-100 space-y-2">
-          {issues.map((i: any) => (
-            <div key={i.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-start text-xs">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                    i.status === "RESOLVED"
-                      ? "bg-emerald-100 text-emerald-800"
-                      : i.severity === "CRITICAL"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-amber-100 text-amber-800"
-                  }`}>
-                    {i.status} ({i.severity})
+        {issues.length > 0 && (
+          <div className="divide-y divide-slate-100 border-t border-slate-100 pt-3 text-xs">
+            {issues.map((iss: any) => (
+              <div key={iss.id} className="py-2.5 flex justify-between items-center">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${
+                        iss.severity === "HIGH"
+                          ? "bg-rose-50 text-rose-700 border border-rose-200"
+                          : iss.severity === "MEDIUM"
+                          ? "bg-amber-50 text-amber-700 border border-amber-200"
+                          : "bg-slate-100 text-slate-700 border border-slate-200"
+                      }`}
+                    >
+                      {iss.severity}
+                    </span>
+                    <strong className="text-slate-900">{iss.title}</strong>
+                  </div>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                    Reported on {new Date(iss.createdAt).toLocaleDateString()} • Status: {iss.status}
                   </span>
-                  <strong className="text-slate-900">{i.title}</strong>
                 </div>
-                <p className="text-slate-600 mt-1">{i.description}</p>
-                {i.resolutionNotes && (
-                  <p className="text-emerald-700 text-[11px] mt-1 font-semibold">
-                    Resolution: {i.resolutionNotes}
-                  </p>
-                )}
-              </div>
-              <div>
-                {i.status !== "RESOLVED" && (
+
+                {iss.status !== "RESOLVED" ? (
                   <button
-                    onClick={() => handleResolveIssue(i.id)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded text-[11px]"
+                    onClick={() => handleResolveIssue(iss.id)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] px-2.5 py-1 rounded transition"
                   >
                     Mark Resolved
                   </button>
+                ) : (
+                  <span className="text-emerald-700 text-[11px] font-semibold">Resolved</span>
                 )}
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
-

@@ -8,6 +8,9 @@ import {
   CheckCircle2,
   TrendingDown,
   TrendingUp,
+  Receipt,
+  Calendar,
+  Lock,
 } from "lucide-react";
 
 export default function AdminClosingPage() {
@@ -66,6 +69,15 @@ export default function AdminClosingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (totalVariance !== 0 && !varianceReason.trim()) {
+      setFeedback({
+        type: "error",
+        msg: "A mandatory discrepancy reason is required when actual collections do not match expected records.",
+      });
+      return;
+    }
+
     setSubmitting(true);
     setFeedback(null);
     try {
@@ -84,7 +96,10 @@ export default function AdminClosingPage() {
       if (!res.ok) {
         throw new Error(resJson.error || "Failed to submit closing.");
       }
-      setFeedback({ type: "success", msg: "Daily closing reconciliation submitted and recorded!" });
+      setFeedback({
+        type: "success",
+        msg: "End-of-day register reconciliation successfully submitted and recorded into authoritative audit trail!",
+      });
       fetchClosingData(targetDate);
     } catch (err: any) {
       setFeedback({ type: "error", msg: err.message || "Failed to submit closing." });
@@ -96,199 +111,227 @@ export default function AdminClosingPage() {
   return (
     <div className="space-y-6">
       {/* Title & Date Selector */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200/90 pb-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">End-of-Day Closing & Audit</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Reconcile physical cash drawer and UPI statements against authoritative system bookings
+          <div className="inline-flex items-center gap-2 text-xs font-mono text-cyan-800 font-semibold mb-1">
+            <FileCheck2 className="w-3.5 h-3.5" />
+            <span>DAILY RECONCILIATION & REGISTER AUDIT</span>
+          </div>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">End-of-Day Closing Sheet</h1>
+          <p className="text-xs text-slate-500">
+            Reconcile physical cash drawer and counter UPI receipts against authoritative system records
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
-          <label className="font-semibold text-slate-600">Reconciliation Date:</label>
-          <input
-            type="date"
-            value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
-            className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <input
+              type="date"
+              value={targetDate}
+              onChange={(e) => setTargetDate(e.target.value)}
+              className="text-xs font-mono text-slate-900 focus:outline-none"
+            />
+          </div>
         </div>
       </div>
 
       {feedback && (
-        <div className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${
-          feedback.type === "success"
-            ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-            : "bg-red-50 border border-red-200 text-red-700"
-        }`}>
-          {feedback.type === "success" ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
+        <div
+          className={`p-3.5 rounded-lg text-xs flex items-center gap-2.5 ${
+            feedback.type === "success"
+              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+              : "bg-red-50 border border-red-200 text-red-700"
+          }`}
+        >
+          {feedback.type === "success" ? (
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          ) : (
+            <AlertTriangle className="w-4 h-4 shrink-0 text-red-500" />
+          )}
           <span>{feedback.msg}</span>
         </div>
       )}
 
-      {loading ? (
-        <div className="p-8 text-center text-slate-400 text-xs">Calculating daily financial totals...</div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Main Reconciliation Sheet */}
-          <div className="lg:col-span-8 bg-white rounded-xl border border-slate-200/80 shadow-xs p-6 space-y-6">
-            <div className="border-b border-slate-100 pb-3 flex justify-between items-center text-xs">
-              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <FileCheck2 className="w-4 h-4 text-cyan-700" />
-                Collection Reconciliation Form ({targetDate})
-              </h2>
-              {data?.closingRecord && (
-                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase px-2 py-0.5 rounded">
-                  {data.closingRecord.status} by {data.closingRecord.closedByUser?.name || "Staff"}
-                </span>
-              )}
-            </div>
-
-            {/* Expected Summary Matrix */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-                <span className="text-slate-500 block text-[11px]">System Expected Cash</span>
-                <strong className="text-base text-slate-900 block mt-0.5 tabular-nums">₹{expectedCash}</strong>
-              </div>
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-                <span className="text-slate-500 block text-[11px]">System Expected UPI</span>
-                <strong className="text-base text-slate-900 block mt-0.5 tabular-nums">₹{expectedUpi}</strong>
-              </div>
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-                <span className="text-slate-500 block text-[11px]">Online Gateway</span>
-                <strong className="text-base text-cyan-700 block mt-0.5 tabular-nums">₹{expectedGateway}</strong>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Physical Cash Counted in Drawer (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    required
-                    value={actualCash}
-                    onChange={(e) => setActualCash(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                  />
-                  <div className="mt-1 flex items-center gap-1 text-[11px]">
-                    <span className="text-slate-500">Cash Variance:</span>
-                    <strong className={cashVariance === 0 ? "text-emerald-700" : "text-rose-600"}>
-                      ₹{cashVariance}
-                    </strong>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Actual UPI Bank Statement Total (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    required
-                    value={actualUpi}
-                    onChange={(e) => setActualUpi(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                  />
-                  <div className="mt-1 flex items-center gap-1 text-[11px]">
-                    <span className="text-slate-500">UPI Variance:</span>
-                    <strong className={upiVariance === 0 ? "text-emerald-700" : "text-rose-600"}>
-                      ₹{upiVariance}
-                    </strong>
-                  </div>
-                </div>
-              </div>
-
-              {totalVariance !== 0 && (
-                <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-lg space-y-1">
-                  <label className="block font-bold text-amber-900 text-xs">
-                    Mandatory Discrepancy Explanation (Net Variance: ₹{totalVariance}) *
-                  </label>
-                  <p className="text-[11px] text-amber-800">
-                    Rule: When physical cash or bank UPI does not match system collections, a documented reason is required for auditing.
-                  </p>
-                  <textarea
-                    required
-                    rows={2}
-                    value={varianceReason}
-                    onChange={(e) => setVarianceReason(e.target.value)}
-                    placeholder="e.g. Returned ₹150 change from previous shift / delayed bank settlement"
-                    className="w-full px-3 py-1.5 border border-amber-300 bg-white rounded-lg text-xs"
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Closing Notes</label>
-                <textarea
-                  rows={2}
-                  value={closingNotes}
-                  onChange={(e) => setClosingNotes(e.target.value)}
-                  placeholder="General remarks on shift operations, pool footfall, or weather..."
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-xs"
-              >
-                {submitting ? "Submitting..." : "Submit & Sign Off Daily Closing"}
-              </button>
-            </form>
+      {/* Comparison Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Expected Card */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-mono uppercase font-bold text-slate-500 tracking-wider">
+              1. System Expected Record
+            </span>
+            <Receipt className="w-4 h-4 text-slate-400" />
           </div>
-
-          {/* Operational Day Summary */}
-          <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200/80 shadow-xs p-5 space-y-4 text-xs">
-            <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">
-              Operational Statistics ({targetDate})
-            </h3>
-
-            <div className="space-y-2.5 text-slate-600">
-              <div className="flex justify-between">
-                <span>Bookings Count:</span>
-                <strong className="text-slate-900">{data.bookingsCount} Sessions</strong>
-              </div>
-              <div className="flex justify-between">
-                <span>Walk-in Swimmers:</span>
-                <strong className="text-slate-900">{data.walkInsCount} Groups</strong>
-              </div>
-              <div className="flex justify-between">
-                <span>Total Swimmers Today:</span>
-                <strong className="text-emerald-700 font-bold">{data.totalGuests} Swimmers</strong>
-              </div>
-              <div className="pt-2 border-t border-slate-100 flex justify-between text-sm font-bold text-slate-900">
-                <span>Total Collections:</span>
-                <span className="text-cyan-700 tabular-nums">
-                  ₹{expectedCash + expectedUpi + expectedGateway}
-                </span>
-              </div>
+          <div className="text-2xl font-black text-slate-900 tabular-nums">
+            ₹{expectedCash + expectedUpi}
+          </div>
+          <div className="space-y-1 text-xs text-slate-600 pt-2 border-t border-slate-100 tabular-nums">
+            <div className="flex justify-between">
+              <span>Expected Cash Drawer:</span>
+              <span className="font-bold text-slate-900">₹{expectedCash}</span>
             </div>
-
-            {/* Recent Closings */}
-            <div className="pt-3 border-t border-slate-100 space-y-2">
-              <span className="font-bold text-slate-700 block text-[11px]">Recent Daily Closings</span>
-              <div className="space-y-1">
-                {data.recentClosings?.map((rc: any) => (
-                  <button
-                    key={rc.id}
-                    onClick={() => setTargetDate(rc.date)}
-                    className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-slate-100 flex justify-between items-center text-[11px] transition"
-                  >
-                    <span className="font-semibold text-slate-800">{rc.date}</span>
-                    <span className="text-emerald-700 font-bold tabular-nums">₹{rc.totalCollections}</span>
-                  </button>
-                ))}
-              </div>
+            <div className="flex justify-between">
+              <span>Expected Counter UPI:</span>
+              <span className="font-bold text-slate-900">₹{expectedUpi}</span>
+            </div>
+            <div className="flex justify-between text-[11px] text-slate-400">
+              <span>Direct Online Gateway:</span>
+              <span>₹{expectedGateway}</span>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Counted Card */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-mono uppercase font-bold text-cyan-700 tracking-wider">
+              2. Physical Register Count
+            </span>
+            <IndianRupee className="w-4 h-4 text-cyan-600" />
+          </div>
+          <div className="text-2xl font-black text-cyan-900 tabular-nums">
+            ₹{actCashNum + actUpiNum}
+          </div>
+          <div className="space-y-1 text-xs text-slate-600 pt-2 border-t border-slate-100 tabular-nums">
+            <div className="flex justify-between">
+              <span>Actual Physical Cash:</span>
+              <span className="font-bold text-slate-900">₹{actCashNum}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Actual UPI Bank Settlement:</span>
+              <span className="font-bold text-slate-900">₹{actUpiNum}</span>
+            </div>
+            <div className="flex justify-between text-[11px] text-slate-400">
+              <span>Staff Signoff:</span>
+              <span>{data?.closingRecord?.closedByUser?.name || "Pending"}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Variance Card */}
+        <div
+          className={`p-5 rounded-xl border shadow-xs space-y-3 ${
+            totalVariance === 0
+              ? "bg-emerald-50/50 border-emerald-200 text-emerald-950"
+              : totalVariance < 0
+              ? "bg-rose-50/50 border-rose-200 text-rose-950"
+              : "bg-amber-50/50 border-amber-200 text-amber-950"
+          }`}
+        >
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-mono uppercase font-bold tracking-wider">
+              3. Calculated Variance
+            </span>
+            {totalVariance >= 0 ? (
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
+            ) : (
+              <TrendingDown className="w-4 h-4 text-rose-600" />
+            )}
+          </div>
+          <div className="text-2xl font-black tabular-nums">
+            {totalVariance > 0 ? `+₹${totalVariance}` : `₹${totalVariance}`}
+          </div>
+          <div className="space-y-1 text-xs pt-2 border-t border-slate-200/60 tabular-nums">
+            <div className="flex justify-between">
+              <span>Cash Discrepancy:</span>
+              <span className="font-bold">
+                {cashVariance > 0 ? `+₹${cashVariance}` : `₹${cashVariance}`}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>UPI Discrepancy:</span>
+              <span className="font-bold">
+                {upiVariance > 0 ? `+₹${upiVariance}` : `₹${upiVariance}`}
+              </span>
+            </div>
+            <div className="text-[11px]">
+              {totalVariance === 0 ? "Perfect zero-variance balance." : "Explanation mandatory below."}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Submission Form */}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 space-y-4"
+      >
+        <div className="border-b border-slate-100 pb-3">
+          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            Reconciliation Form Inputs for {targetDate}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label className="block font-bold text-slate-700 mb-1 text-[11px]">
+              Actual Physical Cash in Till (₹) *
+            </label>
+            <input
+              type="number"
+              step="any"
+              required
+              value={actualCash}
+              onChange={(e) => setActualCash(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono text-slate-900"
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1 text-[11px]">
+              Actual Verified UPI Receipts (₹) *
+            </label>
+            <input
+              type="number"
+              step="any"
+              required
+              value={actualUpi}
+              onChange={(e) => setActualUpi(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono text-slate-900"
+            />
+          </div>
+        </div>
+
+        {totalVariance !== 0 && (
+          <div>
+            <label className="block font-bold text-rose-700 mb-1 text-[11px]">
+              Mandatory Explanation Reason for Variance (₹{totalVariance}) *
+            </label>
+            <input
+              type="text"
+              required
+              value={varianceReason}
+              onChange={(e) => setVarianceReason(e.target.value)}
+              placeholder="e.g. ₹50 change shortage given to customer / delayed UPI bank credit"
+              className="w-full px-3 py-2 border border-rose-300 rounded-lg text-xs text-slate-900 bg-rose-50/30"
+            />
+          </div>
+        )}
+
+        <div>
+          <label className="block font-bold text-slate-700 mb-1 text-[11px]">
+            General Closing Notes & Shift Handover Remarks
+          </label>
+          <textarea
+            rows={2}
+            value={closingNotes}
+            onChange={(e) => setClosingNotes(e.target.value)}
+            placeholder="e.g. Night shift chemical levels balanced; skimmers cleared."
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs text-slate-900"
+          />
+        </div>
+
+        <div className="pt-2 flex justify-end">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-lg text-xs shadow-xs transition"
+          >
+            {submitting ? "Submitting Register..." : "Submit Daily Closing Reconciliation"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

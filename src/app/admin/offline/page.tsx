@@ -10,6 +10,7 @@ import {
   UploadCloud,
   FileClock,
   ShieldCheck,
+  Plus,
 } from "lucide-react";
 
 export default function AdminOfflineSyncPage() {
@@ -85,7 +86,9 @@ export default function AdminOfflineSyncPage() {
           body: JSON.stringify(item),
         });
         if (res.ok) {
-          logs.push(`Successfully synced record ${item.id} (${item.customerName}, ₹${item.collectedAmount}) to authoritative database.`);
+          logs.push(
+            `Successfully synced record ${item.id} (${item.customerName}, ₹${item.collectedAmount}) to authoritative database.`
+          );
         } else {
           logs.push(`Failed to sync record ${item.id}: Conflict detected or server rejected.`);
         }
@@ -99,151 +102,163 @@ export default function AdminOfflineSyncPage() {
     setSyncing(false);
   };
 
-  const toggleSimulateOffline = () => {
-    setIsOnline(!isOnline);
-  };
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Title & Network Status Banner */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200/90 pb-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Offline Support & Queue Sync</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Operational continuity during internet outages. Local queueing for walk-ins and conflict detection.
+          <div className="inline-flex items-center gap-2 text-xs font-mono text-cyan-800 font-semibold mb-1">
+            <WifiOff className="w-3.5 h-3.5" />
+            <span>CONNECTIVITY DISRUPTION RESILIENCE</span>
+          </div>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">Offline Queue & Synchronization</h1>
+          <p className="text-xs text-slate-500">
+            Queue walk-ins locally when internet connectivity fails, then synchronize with conflict checks
           </p>
         </div>
 
-        <button
-          onClick={toggleSimulateOffline}
-          className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+        <div
+          className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-2 ${
             isOnline
-              ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-              : "bg-amber-100 border-amber-300 text-amber-900"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : "bg-rose-50 border-rose-200 text-rose-800 animate-pulse"
           }`}
         >
-          {isOnline ? <Wifi className="w-4 h-4 text-emerald-600" /> : <WifiOff className="w-4 h-4 text-amber-600" />}
-          <span>{isOnline ? "Network: Online (Click to toggle)" : "Network: Offline (Simulated)"}</span>
-        </button>
+          {isOnline ? <Wifi className="w-4 h-4 text-emerald-600" /> : <WifiOff className="w-4 h-4 text-rose-600" />}
+          <span>{isOnline ? "Network Connected (Online)" : "Connection Offline (Local Mode)"}</span>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Offline Queue Form */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 text-xs">
-          <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-            <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-              <FileClock className="w-4 h-4 text-amber-600" />
-              Queue Operational Entry (Local Only)
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Form: Queue Offline Swimmer Entry */}
+        <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 space-y-4">
+          <div className="border-b border-slate-100 pb-3">
+            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Plus className="w-4 h-4 text-cyan-700" />
+              <span>Queue Offline Walk-in Admission</span>
             </h2>
-            <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">
-              Local Storage
-            </span>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Entries are safely stored in browser encrypted local storage until reconnected.
+            </p>
           </div>
 
-          <p className="text-slate-600">
-            Records saved here are marked as <strong>Locally Saved and Not Server-Confirmed</strong>. They will be held in safe browser storage until you synchronize.
-          </p>
-
-          <form onSubmit={handleQueueOfflineWalkin} className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Swimmer Count</label>
-                <input
-                  type="number"
-                  min={1}
-                  required
-                  value={offlineVisitorCount}
-                  onChange={(e) => setOfflineVisitorCount(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Duration (Hours)</label>
-                <select
-                  value={offlineDuration}
-                  onChange={(e) => setOfflineDuration(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
-                >
-                  <option value={1}>1 Hour</option>
-                  <option value={2}>2 Hours</option>
-                </select>
-              </div>
+          <form onSubmit={handleQueueOfflineWalkin} className="space-y-3 text-xs">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1 text-[11px]">Swimmer Count *</label>
+              <input
+                type="number"
+                min={1}
+                required
+                value={offlineVisitorCount}
+                onChange={(e) => setOfflineVisitorCount(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono"
+              />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Customer / Group Name</label>
+              <label className="block font-bold text-slate-700 mb-1 text-[11px]">Duration (Hours) *</label>
+              <select
+                value={offlineDuration}
+                onChange={(e) => setOfflineDuration(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
+              >
+                <option value={1}>1 Hour (₹150 / person)</option>
+                <option value={2}>2 Hours (₹300 / person)</option>
+                <option value={3}>3 Hours (₹450 / person)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1 text-[11px]">Customer Identifier</label>
               <input
                 type="text"
                 value={offlineCustName}
                 onChange={(e) => setOfflineCustName(e.target.value)}
-                placeholder="Walk-in Swimmer"
-                className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
+                placeholder="Walk-in Swimmer / Group"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
               />
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs flex justify-between items-center">
+              <span className="text-slate-600">Calculated Cash to Collect:</span>
+              <strong className="text-slate-900 tabular-nums font-mono text-sm">
+                ₹{offlineVisitorCount * offlineDuration * 150}
+              </strong>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-lg text-xs shadow-xs transition"
             >
-              Queue Entry (Local Storage)
+              + Store in Local Offline Queue
             </button>
           </form>
         </div>
 
-        {/* Pending Sync Queue */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 text-xs flex flex-col justify-between">
-          <div>
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <UploadCloud className="w-4 h-4 text-ocean-600" />
-                Pending Synchronization Queue ({offlineQueue.length})
-              </h2>
-            </div>
+        {/* Right Pane: Pending Queue & Sync Trigger */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div>
+                <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <FileClock className="w-4 h-4 text-cyan-700" />
+                  <span>Pending Offline Sync Queue ({offlineQueue.length})</span>
+                </h2>
+              </div>
 
-            <div className="mt-3 space-y-2 max-h-56 overflow-y-auto">
-              {offlineQueue.length > 0 ? (
-                offlineQueue.map((item) => (
-                  <div key={item.id} className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-slate-900">{item.customerName} ({item.visitorCount} Swimmers)</span>
-                      <span className="text-[10px] bg-amber-100 text-amber-900 font-extrabold px-1.5 py-0.5 rounded">
-                        NOT SERVER CONFIRMED
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-slate-500 flex justify-between">
-                      <span>Amount: ₹{item.collectedAmount} ({item.paymentMethod})</span>
-                      <span>Queued: {new Date(item.queuedAt).toLocaleTimeString()}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-6 text-center text-slate-400">Queue is empty. All records synchronized.</div>
+              {offlineQueue.length > 0 && (
+                <button
+                  onClick={handleProcessSync}
+                  disabled={syncing || !isOnline}
+                  className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-xs transition flex items-center gap-1.5"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>{syncing ? "Synchronizing Records..." : "Sync All to Database"}</span>
+                </button>
               )}
             </div>
+
+            {offlineQueue.length > 0 ? (
+              <div className="divide-y divide-slate-100 text-xs">
+                {offlineQueue.map((item) => (
+                  <div key={item.id} className="p-3.5 flex justify-between items-center hover:bg-slate-50/60">
+                    <div>
+                      <div className="font-bold text-slate-900">{item.customerName}</div>
+                      <div className="text-[11px] text-slate-500 font-mono">
+                        {item.visitorCount} Swimmers • {item.durationHours} Hr • Cash: ₹{item.collectedAmount}
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-bold">
+                      LOCAL QUEUED
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-slate-400 text-xs">
+                Offline queue is empty. All local entries have been synchronized!
+              </div>
+            )}
           </div>
 
-          <div className="pt-4 border-t border-slate-100">
-            <button
-              onClick={handleProcessSync}
-              disabled={offlineQueue.length === 0 || syncing}
-              className="w-full bg-ocean-600 hover:bg-ocean-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl shadow flex items-center justify-center gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
-              {syncing ? "Synchronizing to Database..." : `Synchronize ${offlineQueue.length} Record(s)`}
-            </button>
-          </div>
+          {/* Sync Log Audit */}
+          {syncLog.length > 0 && (
+            <div className="bg-slate-900 text-white rounded-xl p-5 border border-slate-800 text-xs space-y-2">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-cyan-400 font-mono block">
+                SYNCHRONIZATION AUDIT LOG
+              </span>
+              <div className="space-y-1 font-mono text-[11px] text-slate-300">
+                {syncLog.map((log, lIdx) => (
+                  <div key={lIdx} className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>{log}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {syncLog.length > 0 && (
-        <div className="bg-slate-900 text-slate-200 p-4 rounded-2xl text-xs font-mono space-y-1">
-          <span className="font-bold text-lagoon-400 block mb-1">Synchronization Audit Log:</span>
-          {syncLog.map((log, i) => (
-            <div key={i}>&gt; {log}</div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
-

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   Search,
   CheckCircle2,
@@ -13,6 +14,9 @@ import {
   XCircle,
   ShieldCheck,
   CreditCard,
+  Users,
+  ArrowRight,
+  Info,
 } from "lucide-react";
 
 function BookingStatusContent() {
@@ -51,12 +55,19 @@ function BookingStatusContent() {
     setRescheduleMsg(null);
     setCancelMsg(null);
     try {
-      const res = await fetch(`/api/bookings/lookup?bookingId=${encodeURIComponent(id)}&phone=${encodeURIComponent(ph)}`);
+      const res = await fetch(
+        `/api/bookings/lookup?bookingId=${encodeURIComponent(id)}&phone=${encodeURIComponent(ph)}`
+      );
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "Failed to find booking.");
       }
       setBookingData(data);
+      if (data.booking) {
+        setNewDate(data.booking.bookingDate);
+        setNewStartTime(data.booking.startTime);
+        setNewEndTime(data.booking.endTime);
+      }
     } catch (err: any) {
       setError(err.message || "Failed to find booking.");
       setBookingData(null);
@@ -68,7 +79,7 @@ function BookingStatusContent() {
   const handleLookupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!bookingId.trim() || !phone.trim()) {
-      setError("Please enter both Booking ID and Phone number.");
+      setError("Please enter both your Booking Reference ID and registered phone number.");
       return;
     }
     performLookup(bookingId.trim(), phone.trim());
@@ -94,11 +105,11 @@ function BookingStatusContent() {
       if (!res.ok) {
         throw new Error(data.error || "Failed to reschedule booking.");
       }
-      setRescheduleMsg("Booking successfully rescheduled!");
+      setRescheduleMsg("Booking successfully rescheduled to the new date and time!");
       setShowReschedule(false);
       performLookup(bookingData.booking.id, phone);
     } catch (err: any) {
-      setRescheduleMsg(`Error: ${err.message}`);
+      setRescheduleMsg(`Reschedule Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -122,49 +133,67 @@ function BookingStatusContent() {
       if (!res.ok) {
         throw new Error(data.error || "Failed to submit cancellation request.");
       }
-      setCancelMsg(data.message || "Cancellation request submitted.");
+      setCancelMsg(
+        data.message ||
+          "Cancellation request registered. An authorized manager will review and approve release of the slot."
+      );
       setShowCancel(false);
       performLookup(bookingData.booking.id, phone);
     } catch (err: any) {
-      setCancelMsg(`Error: ${err.message}`);
+      setCancelMsg(`Cancellation Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-extrabold text-slate-900">Manage Your Booking</h1>
-        <p className="text-sm text-slate-600">
-          Enter your Booking Reference ID and registered phone number to check status, balances, or reschedule.
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-8">
+      {/* Editorial Header */}
+      <div className="border-b border-slate-200 pb-5 max-w-2xl">
+        <div className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 px-2.5 py-1 rounded text-xs font-semibold mb-2">
+          <span>Self-Service Portal</span>
+          <span className="text-slate-400">•</span>
+          <span>Security IDOR Protected</span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Lookup & Manage Your Reservation
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+          Verify your booking details, track counter balance due, reprint digital receipts, or submit rescheduling and cancellation requests.
         </p>
       </div>
 
       {/* Lookup Form */}
-      <form onSubmit={handleLookupSubmit} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <form
+        onSubmit={handleLookupSubmit}
+        className="bg-white p-6 rounded-xl border border-slate-200/90 shadow-xs space-y-4"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Booking Reference ID *</label>
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Booking Reference ID *
+            </label>
             <input
               type="text"
               required
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
               placeholder="e.g. MAK-20261029-001"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 font-mono"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono focus:ring-1 focus:ring-cyan-500 text-slate-900 uppercase"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Registered Phone Number *</label>
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Registered Mobile Number *
+            </label>
             <input
               type="tel"
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g. 9847012345"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 text-slate-900 font-mono"
             />
           </div>
         </div>
@@ -172,203 +201,306 @@ function BookingStatusContent() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-bold py-2.5 rounded-lg text-sm shadow transition flex items-center justify-center gap-2"
+          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-2"
         >
-          <Search className="w-4 h-4" />
-          {loading ? "Searching..." : "Find My Booking"}
+          <Search className="w-3.5 h-3.5" />
+          <span>{loading ? "Verifying with Authoritative Records..." : "Lookup Booking Details"}</span>
         </button>
       </form>
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
-          <div>{error}</div>
+        <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+          <div className="leading-relaxed">{error}</div>
         </div>
       )}
 
       {rescheduleMsg && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-start gap-2">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 mt-0.5" />
-          <div>{rescheduleMsg}</div>
+        <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+          <div className="leading-relaxed">{rescheduleMsg}</div>
         </div>
       )}
 
       {cancelMsg && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 mt-0.5" />
-          <div>{cancelMsg}</div>
+        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+          <div className="leading-relaxed">{cancelMsg}</div>
         </div>
       )}
 
-      {/* Booking Details Card */}
-      {bookingData && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-4">
+      {/* Booking Record Display */}
+      {bookingData && bookingData.booking && (
+        <div
+          id="booking-receipt"
+          className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6"
+        >
+          {/* Header Card */}
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-5">
             <div>
-              <span className="text-xs uppercase font-extrabold text-ocean-600 tracking-wider">
-                {bookingData.booking.type === "FAMILY" ? "Exclusive Family Booking" : "Public Swimming Session"}
+              <span className="text-[10px] uppercase font-bold tracking-widest text-cyan-700 block">
+                {bookingData.booking.type === "FAMILY"
+                  ? "EXCLUSIVE FAMILY SESSION (100% PRIVATE)"
+                  : "PUBLIC SWIMMING SESSION"}
               </span>
-              <h2 className="text-2xl font-black text-slate-900 font-mono mt-0.5">{bookingData.booking.id}</h2>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-mono mt-0.5">
+                {bookingData.booking.id}
+              </h2>
             </div>
-            <div className="flex items-center gap-2">
-              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
-                bookingData.booking.status === "CONFIRMED"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : bookingData.booking.status === "CANCELLED"
-                  ? "bg-red-100 text-red-800"
-                  : "bg-slate-100 text-slate-800"
-              }`}>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                  bookingData.booking.status === "CONFIRMED"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : bookingData.booking.status === "CANCELLED"
+                    ? "bg-rose-50 text-rose-700 border border-rose-200"
+                    : "bg-slate-100 text-slate-700 border border-slate-200"
+                }`}
+              >
                 {bookingData.booking.status}
               </span>
-              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
-                bookingData.booking.paymentStatus === "PAID"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : "bg-amber-100 text-amber-800"
-              }`}>
+
+              <span
+                className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                  bookingData.booking.paymentStatus === "PAID"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-amber-50 text-amber-700 border border-amber-200"
+                }`}
+              >
                 PAYMENT: {bookingData.booking.paymentStatus}
               </span>
+
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="px-2.5 py-1 rounded text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition flex items-center gap-1"
+              >
+                <Printer className="w-3 h-3" />
+                <span>Print Receipt</span>
+              </button>
             </div>
           </div>
 
           {bookingData.booking.cancellationReason && (
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
+            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
               <strong>Cancellation Status:</strong> {bookingData.booking.cancellationReason}
             </div>
           )}
 
           {/* Details Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-              <span className="text-slate-500 block">Customer</span>
-              <strong className="text-slate-900 text-sm block mt-0.5">{bookingData.booking.customerName}</strong>
-              <span className="text-slate-500">{bookingData.booking.customerPhone}</span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200/80">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Customer Name
+              </span>
+              <strong className="text-slate-900 text-xs block mt-0.5 truncate">
+                {bookingData.booking.customerName}
+              </strong>
+              <span className="text-slate-500 font-mono text-[11px]">
+                {bookingData.booking.customerPhone}
+              </span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-              <span className="text-slate-500 block">Date & Time</span>
-              <strong className="text-slate-900 text-sm block mt-0.5">{bookingData.booking.bookingDate}</strong>
-              <span className="text-slate-500">{bookingData.booking.startTime} – {bookingData.booking.endTime}</span>
+            <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200/80">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Session Date & Time
+              </span>
+              <strong className="text-slate-900 text-xs block mt-0.5 tabular-nums">
+                {bookingData.booking.bookingDate}
+              </strong>
+              <span className="text-slate-500 font-medium tabular-nums text-[11px]">
+                {bookingData.booking.startTime} – {bookingData.booking.endTime}
+              </span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-              <span className="text-slate-500 block">Guests</span>
-              <strong className="text-slate-900 text-sm block mt-0.5">{bookingData.booking.guestCount} Persons</strong>
-              <span className="text-slate-500">{bookingData.booking.durationHours} Hours</span>
+            <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200/80">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Party Size
+              </span>
+              <strong className="text-slate-900 text-xs block mt-0.5">
+                {bookingData.booking.guestCount} Persons
+              </strong>
+              <span className="text-slate-500 text-[11px]">
+                {bookingData.booking.type === "FAMILY" && bookingData.booking.guestCount > 12
+                  ? `${bookingData.booking.guestCount - 12} extra guests included`
+                  : "Base party allowance"}
+              </span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-              <span className="text-slate-500 block">Counter Balance</span>
-              <strong className="text-emerald-700 text-sm block mt-0.5">₹{bookingData.booking.balanceAmount}</strong>
-              <span className="text-slate-500">Paid: ₹{bookingData.booking.totalPaid}</span>
+            <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200/80">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Remaining Balance Due
+              </span>
+              <strong className="text-amber-700 text-base font-black block mt-0.5 tabular-nums">
+                ₹{bookingData.booking.balanceAmount}
+              </strong>
+              <span className="text-slate-500 text-[11px]">Pay Cash/UPI at counter</span>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              Print Receipt
-            </button>
-
-            {bookingData.policy.canReschedule && (
-              <button
-                type="button"
-                onClick={() => setShowReschedule(!showReschedule)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-ocean-50 hover:bg-ocean-100 text-ocean-700 text-xs font-semibold"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Reschedule Booking
-              </button>
-            )}
-
-            {bookingData.policy.canCancel && (
-              <button
-                type="button"
-                onClick={() => setShowCancel(!showCancel)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold"
-              >
-                <XCircle className="w-3.5 h-3.5" />
-                Request Cancellation
-              </button>
-            )}
+          {/* Authoritative Financial Breakdown Box */}
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 block">
+              Billing Ledger & Advance Payments
+            </span>
+            <div className="flex justify-between text-slate-600">
+              <span>Total Calculated Booking Amount:</span>
+              <span className="font-bold text-slate-900 tabular-nums">
+                ₹{bookingData.booking.totalAmount}
+              </span>
+            </div>
+            <div className="flex justify-between text-emerald-700 font-semibold">
+              <span>Verified Advance Paid Online:</span>
+              <span className="tabular-nums">-₹{bookingData.booking.totalPaid}</span>
+            </div>
+            <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-sm">
+              <span>Remaining Balance to Collect at Counter:</span>
+              <span className="text-amber-700 tabular-nums">
+                ₹{bookingData.booking.balanceAmount}
+              </span>
+            </div>
           </div>
 
-          {/* Reschedule Drawer Form */}
+          {/* Interactive Self-Service Controls */}
+          {bookingData.booking.status === "CONFIRMED" && (
+            <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowReschedule(!showReschedule);
+                  setShowCancel(false);
+                }}
+                className="bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold px-4 py-2 rounded-lg text-xs transition flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-cyan-700" />
+                <span>Reschedule Booking (Cutoff: 6h)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCancel(!showCancel);
+                  setShowReschedule(false);
+                }}
+                className="bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 font-bold px-4 py-2 rounded-lg text-xs transition flex items-center gap-1.5"
+              >
+                <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                <span>Request Cancellation (Cutoff: 12h)</span>
+              </button>
+            </div>
+          )}
+
+          {/* Reschedule Form Panel */}
           {showReschedule && (
-            <form onSubmit={handleRescheduleSubmit} className="p-4 bg-ocean-50 border border-ocean-200 rounded-xl space-y-4">
-              <h4 className="font-bold text-ocean-950 text-sm">Select New Date & Slot</h4>
+            <form
+              onSubmit={handleRescheduleSubmit}
+              className="p-5 bg-cyan-50/40 border border-cyan-200 rounded-lg space-y-4 text-xs"
+            >
+              <h3 className="font-bold text-cyan-950 flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-cyan-700" />
+                Select New Rescheduled Session Date & Time
+              </h3>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                You may reschedule online without fee as long as the new slot is available and requested at least 6 hours prior to your scheduled start.
+              </p>
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-ocean-900 mb-1">New Date</label>
+                  <label className="block font-bold text-slate-700 mb-1 text-[11px]">New Date</label>
                   <input
                     type="date"
                     required
                     value={newDate}
-                    min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full px-2.5 py-1.5 bg-white border border-ocean-200 rounded text-xs"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-900 bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-ocean-900 mb-1">Start Time</label>
+                  <label className="block font-bold text-slate-700 mb-1 text-[11px]">New Start Time</label>
                   <input
                     type="time"
                     required
                     value={newStartTime}
                     onChange={(e) => setNewStartTime(e.target.value)}
-                    className="w-full px-2.5 py-1.5 bg-white border border-ocean-200 rounded text-xs"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-900 bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-ocean-900 mb-1">End Time</label>
+                  <label className="block font-bold text-slate-700 mb-1 text-[11px]">New End Time</label>
                   <input
                     type="time"
                     required
                     value={newEndTime}
                     onChange={(e) => setNewEndTime(e.target.value)}
-                    className="w-full px-2.5 py-1.5 bg-white border border-ocean-200 rounded text-xs"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-900 bg-white"
                   />
                 </div>
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-ocean-600 hover:bg-ocean-700 text-white font-bold px-4 py-2 rounded text-xs transition"
-              >
-                {loading ? "Checking & Updating..." : "Confirm Reschedule"}
-              </button>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-cyan-700 hover:bg-cyan-600 text-white font-bold px-4 py-2 rounded text-xs transition"
+                >
+                  {loading ? "Checking Conflicts..." : "Confirm Reschedule"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowReschedule(false)}
+                  className="text-slate-500 hover:text-slate-700 text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           )}
 
-          {/* Cancel Request Drawer Form */}
+          {/* Cancellation Form Panel */}
           {showCancel && (
-            <form onSubmit={handleCancelSubmit} className="p-4 bg-red-50 border border-red-200 rounded-xl space-y-3">
-              <h4 className="font-bold text-red-950 text-sm">Submit Cancellation Request</h4>
-              <p className="text-xs text-red-700">
-                According to pool policy, cancellations submitted more than 12 hours before start time will be reviewed by the owner for refund processing.
+            <form
+              onSubmit={handleCancelSubmit}
+              className="p-5 bg-rose-50/50 border border-rose-200 rounded-lg space-y-4 text-xs"
+            >
+              <h3 className="font-bold text-rose-950 flex items-center gap-2">
+                <XCircle className="w-4 h-4 text-rose-600" />
+                Submit Cancellation Request
+              </h3>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                <strong>Policy Notice:</strong> Cancellation requests must be submitted at least 12 hours before slot start time. Refunds are decided and approved exclusively by the Pool Owner and are returned to the original payment source in 3 to 5 banking days. Submitting this form alerts the manager to review and release the slot.
               </p>
+
               <div>
-                <label className="block text-[11px] font-semibold text-red-900 mb-1">Reason for cancellation *</label>
+                <label className="block font-bold text-slate-700 mb-1 text-[11px]">
+                  Reason for Cancellation *
+                </label>
                 <textarea
-                  required
                   rows={2}
+                  required
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
-                  placeholder="e.g. Family medical emergency / travel change"
-                  className="w-full px-2.5 py-1.5 border border-red-200 rounded text-xs"
+                  placeholder="e.g. Family emergency, travel plans changed..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded text-xs text-slate-900 bg-white"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded text-xs transition"
-              >
-                {loading ? "Submitting..." : "Submit Cancellation Request"}
-              </button>
+
+              <div className="flex items-center gap-3 pt-1">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-rose-700 hover:bg-rose-600 text-white font-bold px-4 py-2 rounded text-xs transition"
+                >
+                  {loading ? "Submitting Request..." : "Submit Cancellation Request"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCancel(false)}
+                  className="text-slate-500 hover:text-slate-700 text-xs font-semibold"
+                >
+                  Back
+                </button>
+              </div>
             </form>
           )}
         </div>
@@ -379,7 +511,13 @@ function BookingStatusContent() {
 
 export default function BookingStatusPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-slate-400 text-xs">Loading booking lookup...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-[50vh] flex items-center justify-center text-xs text-slate-400">
+          Loading booking status portal...
+        </div>
+      }
+    >
       <BookingStatusContent />
     </Suspense>
   );

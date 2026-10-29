@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Waves, Lock, Phone, AlertCircle, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { Waves, Lock, Phone, AlertCircle, ShieldCheck, ArrowRight, User } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function AdminLoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Login failed.");
+        throw new Error(data.error || "Login failed. Check your mobile/email and password.");
       }
       router.push("/admin");
       router.refresh();
@@ -34,37 +35,40 @@ export default function AdminLoginPage() {
     }
   };
 
-  const fillDemoAccount = (phone: string, pass: string) => {
-    setIdentifier(phone);
+  const fillDemoAccount = (id: string, pass: string) => {
+    setIdentifier(id);
     setPassword(pass);
     setError(null);
   };
 
   return (
     <div className="min-h-screen bg-[#071322] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* Brand Header */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
-        <div className="w-12 h-12 rounded-xl bg-cyan-600 flex items-center justify-center mx-auto text-white shadow-sm">
-          <Waves className="w-6 h-6" />
+        <div className="w-11 h-11 rounded-lg bg-cyan-600 flex items-center justify-center mx-auto text-white shadow-sm">
+          <Waves className="w-5 h-5" />
         </div>
-        <h2 className="text-2xl font-black text-white tracking-tight">Staff & Ops Portal</h2>
-        <p className="text-xs text-slate-400">
-          M.A.K Indoor Pool Operational Access Control
+        <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          M.A.K Operations Manager
+        </h1>
+        <p className="text-xs text-slate-400 font-mono">
+          Authorized Pool Staff & Owner Control Portal
         </p>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 shadow-xl rounded-xl sm:px-8 border border-slate-200">
+        <div className="bg-white py-8 px-6 shadow-xl rounded-xl sm:px-8 border border-slate-200 space-y-5">
           {error && (
-            <div className="mb-4 p-3.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2">
+            <div className="p-3.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
-              <span>{error}</span>
+              <span className="leading-relaxed">{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div>
               <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[11px]">
-                Registered Phone or Email
+                Registered Mobile or Email *
               </label>
               <div className="relative">
                 <input
@@ -73,15 +77,15 @@ export default function AdminLoginPage() {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   placeholder="+919999900002 or owner@makpool.com"
-                  className="w-full px-3 py-2.5 pl-9 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 text-slate-900"
+                  className="w-full px-3 py-2 pl-9 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 text-slate-900 font-mono"
                 />
-                <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
               </div>
             </div>
 
             <div>
               <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[11px]">
-                Password
+                Password *
               </label>
               <div className="relative">
                 <input
@@ -90,52 +94,65 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full px-3 py-2.5 pl-9 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 text-slate-900"
+                  className="w-full px-3 py-2 pl-9 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 text-slate-900 font-mono"
                 />
-                <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs shadow-xs transition"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs shadow-xs transition flex items-center justify-center gap-2"
             >
-              {loading ? "Authenticating..." : "Sign In to Operations"}
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>{loading ? "Verifying Credentials..." : "Sign In to Operations"}</span>
             </button>
           </form>
 
-          {/* Demonstration Accounts Shortcut */}
-          <div className="mt-6 pt-5 border-t border-slate-100 space-y-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">
-              Quick Demonstration Accounts
+          {/* 1-Click Demo Accounts Selector */}
+          <div className="pt-4 border-t border-slate-100 space-y-2">
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block text-center font-mono">
+              Demo Credentials (1-Click Fill)
             </span>
-            <div className="grid grid-cols-3 gap-2 text-[11px]">
+
+            <div className="grid grid-cols-3 gap-1.5 text-[10px]">
               <button
                 type="button"
                 onClick={() => fillDemoAccount("+919999900002", "Password@123")}
-                className="p-2 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold rounded-lg text-center transition"
+                className="p-2 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-center font-medium transition"
               >
-                Pool Owner
+                <strong className="block text-slate-900 font-bold">Pool Owner</strong>
+                <span className="text-[9px] text-slate-500">Full Scope</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => fillDemoAccount("+919999900003", "Password@123")}
-                className="p-2 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold rounded-lg text-center transition"
+                className="p-2 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-center font-medium transition"
               >
-                Duty Staff
+                <strong className="block text-slate-900 font-bold">Duty Staff</strong>
+                <span className="text-[9px] text-slate-500">No Refunds</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => fillDemoAccount("+919999900001", "Password@123")}
-                className="p-2 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold rounded-lg text-center transition"
+                className="p-2 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-center font-medium transition"
               >
-                Super Admin
+                <strong className="block text-slate-900 font-bold">Super Admin</strong>
+                <span className="text-[9px] text-slate-500">Platform</span>
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 text-center mt-1">
-              (Pre-configured with demo password: <code>Password@123</code>)
-            </p>
+          </div>
+
+          <div className="text-center pt-1">
+            <Link
+              href="/"
+              className="text-[11px] text-cyan-700 hover:text-cyan-800 font-semibold inline-flex items-center gap-1"
+            >
+              <span>&larr; Back to Public Website</span>
+            </Link>
           </div>
         </div>
       </div>

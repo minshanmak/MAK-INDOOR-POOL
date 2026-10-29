@@ -9,38 +9,62 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ocean: {
-          50: "#f0f7ff",
-          100: "#e0effe",
-          200: "#bae0fd",
-          300: "#7cc8fb",
-          400: "#36abf7",
-          500: "#0c8ee9",
-          600: "#0270c7",
-          700: "#0359a1",
-          800: "#074c85",
-          900: "#0b406e",
-          950: "#07294a",
+        navy: {
+          950: "#071322",
+          900: "#0B192C",
+          850: "#0F2137",
+          800: "#10243E",
+          700: "#1A365D",
+          600: "#2A4365",
         },
-        lagoon: {
-          50: "#f0fdfa",
-          100: "#ccfbf1",
-          200: "#99f6e4",
-          300: "#5eead4",
-          400: "#2dd4bf",
-          500: "#14b8a6",
-          600: "#0d9488",
-          700: "#0f766e",
-          800: "#115e59",
-          900: "#134e48",
+        aqua: {
+          50: "#ECFEFF",
+          100: "#CFFAFE",
+          200: "#A5F3FC",
+          300: "#67E8F9",
+          400: "#22D3EE",
+          500: "#06B6D4",
+          600: "#0891B2",
+          700: "#0E7490",
+          800: "#155E75",
+          900: "#164E63",
         },
       },
       fontFamily: {
-        sans: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"Segoe UI"',
+          "Roboto",
+          '"Helvetica Neue"',
+          "Arial",
+          "sans-serif",
+        ],
+        mono: [
+          '"SFMono-Regular"',
+          "Consolas",
+          '"Liberation Mono"',
+          "Menlo",
+          "Courier",
+          "monospace",
+        ],
+      },
+      boxShadow: {
+        xs: "0 1px 2px 0 rgba(15, 23, 42, 0.05)",
+        card: "0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.06)",
+        dropdown: "0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04)",
+      },
+      borderRadius: {
+        xs: "4px",
+        sm: "6px",
+        md: "8px",
+        lg: "10px",
+        xl: "12px",
       },
     },
   },
   plugins: [],
 };
 export default config;
+
 
