@@ -20,8 +20,11 @@ import {
   Menu,
   X,
   WifiOff,
-  Shield,
+  Bell,
+  ChevronDown,
+  User,
 } from "lucide-react";
+import MakLogo from "@/components/MakLogo";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -29,24 +32,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [timeStr, setTimeStr] = useState<string>("");
+  const [dateStr, setDateStr] = useState<string>("");
 
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTimeStr(
-        now.toLocaleTimeString("en-IN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
-          timeZone: "Asia/Kolkata",
-        })
-      );
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
+    const now = new Date();
+    setDateStr(
+      now.toLocaleDateString("en-IN", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "Asia/Kolkata",
+      })
+    );
   }, []);
 
   useEffect(() => {
@@ -101,73 +99,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const isOwnerOrAdmin = user?.role === "POOL_OWNER" || user?.role === "SUPER_ADMIN";
 
-  const navigationSections = [
-    {
-      label: "LIVE OPERATIONS",
-      items: [
-        { name: "Overview", href: "/admin", icon: LayoutDashboard },
-        { name: "Bookings Ledger", href: "/admin/bookings", icon: CalendarDays },
-        { name: "Walk-ins & Deck", href: "/admin/walkins", icon: UserCheck },
-      ],
-    },
-    {
-      label: "FINANCE & AUDITS",
-      items: [
-        { name: "Cancellations & Refunds", href: "/admin/cancellations", icon: XCircle },
-        { name: "Daily Closing Sheet", href: "/admin/closing", icon: FileCheck2 },
-        { name: "Water Quality & Logs", href: "/admin/maintenance", icon: Droplets },
-        { name: "Reports & CSV Export", href: "/admin/reports", icon: BarChart3 },
-        { name: "Customer Feedback", href: "/admin/complaints", icon: MessageSquareWarning },
-      ],
-    },
-    ...(isOwnerOrAdmin
-      ? [
-          {
-            label: "SYSTEM MANAGEMENT",
-            items: [
-              { name: "Staff & Permissions", href: "/admin/staff", icon: Users2 },
-              { name: "Pool Rules & Rates", href: "/admin/settings", icon: Settings },
-              { name: "Offline Sync Engine", href: "/admin/offline", icon: WifiOff },
-            ],
-          },
-        ]
-      : [
-          {
-            label: "SYSTEM TOOLS",
-            items: [{ name: "Offline Sync Engine", href: "/admin/offline", icon: WifiOff }],
-          },
-        ]),
+  // Navigation Items exactly matching reference image sidebar
+  const navItems = [
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Bookings", href: "/admin/bookings", icon: CalendarDays },
+    { name: "Customers", href: "/admin/walkins", icon: UserCheck },
+    { name: "Payments", href: "/admin/closing", icon: FileCheck2 },
+    { name: "Cancellations", href: "/admin/cancellations", icon: XCircle },
+    { name: "Maintenance", href: "/admin/maintenance", icon: Droplets },
+    { name: "Staff", href: "/admin/staff", icon: Users2 },
+    { name: "Reports", href: "/admin/reports", icon: BarChart3 },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
+    { name: "Offline Sync", href: "/admin/offline", icon: WifiOff },
   ];
 
-  const sectionMeta: Record<string, { section: string; title: string }> = {
-    "/admin": { section: "LIVE OPERATIONS", title: "Operations Telemetry" },
-    "/admin/bookings": { section: "LIVE OPERATIONS", title: "Bookings Ledger" },
-    "/admin/walkins": { section: "LIVE OPERATIONS", title: "Walk-ins & Deck Occupancy" },
-    "/admin/cancellations": { section: "FINANCE & AUDITS", title: "Cancellations & Refunds Queue" },
-    "/admin/closing": { section: "FINANCE & AUDITS", title: "Daily Cash Closing & Reconciliation" },
-    "/admin/maintenance": { section: "FINANCE & AUDITS", title: "Water Quality & Maintenance Log" },
-    "/admin/reports": { section: "FINANCE & AUDITS", title: "Operational Reports & CSV Export" },
-    "/admin/complaints": { section: "FINANCE & AUDITS", title: "Customer Feedback & Issues" },
-    "/admin/staff": { section: "SYSTEM MANAGEMENT", title: "Staff Accounts & RBAC" },
-    "/admin/settings": { section: "SYSTEM MANAGEMENT", title: "Pool Rules & Rates Configuration" },
-    "/admin/offline": { section: "SYSTEM TOOLS", title: "Offline Sync Engine" },
-  };
-
-  const currentMeta = sectionMeta[pathname] || { section: "ADMINISTRATION", title: "Management Console" };
-
   return (
-    <div className="min-h-screen bg-slate-100/70 flex flex-col lg:flex-row text-slate-900">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col lg:flex-row text-slate-900">
       {/* Mobile Top Header */}
-      <div className="lg:hidden bg-[#0B192C] text-white p-3.5 flex justify-between items-center border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded bg-cyan-600 flex items-center justify-center text-white">
-            <Waves className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="font-bold text-xs tracking-tight block">M.A.K Operations</span>
-            <span className="text-[9px] text-cyan-400 font-mono block">Aluva Ops Portal</span>
-          </div>
-        </div>
+      <div className="lg:hidden bg-[#0A192F] text-white p-3.5 flex justify-between items-center border-b border-slate-800">
+        <MakLogo light={true} />
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-1.5 rounded bg-slate-800 text-slate-300 hover:text-white"
@@ -177,66 +127,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </div>
 
-      {/* Persistent Operations Sidebar */}
+      {/* Persistent Deep Navy Sidebar Matching Reference Image */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#0B192C] text-slate-300 flex flex-col justify-between border-r border-slate-800 transform lg:static lg:translate-x-0 transition-transform duration-150 ${
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-[#0A192F] text-slate-300 flex flex-col justify-between border-r border-slate-800 transform lg:static lg:translate-x-0 transition-transform duration-150 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="overflow-y-auto">
-          {/* Header */}
-          <div className="p-4 border-b border-slate-800 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center text-white shrink-0">
-              <Waves className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="font-black text-xs text-white block tracking-tight">
-                M.A.K INDOOR POOL
-              </span>
-              <span className="text-[10px] text-cyan-400 font-mono font-semibold tracking-wider uppercase block">
-                Manager Control
-              </span>
-            </div>
+          {/* Logo Header */}
+          <div className="p-4 border-b border-slate-800/80">
+            <MakLogo light={true} />
           </div>
 
-          {/* Navigation Links with Group Headers */}
-          <div className="p-3 space-y-4">
-            {navigationSections.map((section, sIdx) => (
-              <div key={sIdx} className="space-y-1">
-                <span className="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 block">
-                  {section.label}
-                </span>
-                <nav className="space-y-0.5">
-                  {section.items.map((item) => {
-                    const isActive = pathname === item.href;
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                          isActive
-                            ? "bg-cyan-600 text-white font-semibold shadow-xs"
-                            : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
-                        }`}
-                      >
-                        <Icon
-                          className={`w-4 h-4 shrink-0 ${
-                            isActive ? "text-white" : "text-slate-400"
-                          }`}
-                        />
-                        <span>{item.name}</span>
-                      </Link>
-                    );
-                  })}
-                </nav>
-              </div>
-            ))}
-          </div>
+          {/* Navigation Links */}
+          <nav className="p-3 space-y-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition duration-150 ${
+                    isActive
+                      ? "bg-[#00838F] text-white font-bold shadow-xs"
+                      : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
+                  }`}
+                >
+                  <Icon
+                    className={`w-4 h-4 shrink-0 ${
+                      isActive ? "text-white" : "text-slate-400"
+                    }`}
+                  />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* User Card & Logout Footer */}
+        {/* User Badge & Sign Out in Sidebar Footer */}
         <div className="p-3 border-t border-slate-800 space-y-2 bg-[#071322]">
           {user && (
             <div className="bg-slate-800/70 p-2.5 rounded-lg border border-slate-700/60">
@@ -276,56 +207,51 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Desktop Top Bar */}
-        <header className="hidden lg:flex items-center justify-between px-8 py-3.5 bg-white border-b border-slate-200/90 shadow-2xs">
-          <div className="flex items-center gap-2.5">
-            <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-              {currentMeta.section}
-            </span>
-            <span className="text-slate-300">/</span>
-            <span className="text-sm font-black text-slate-900 tracking-tight">
-              {currentMeta.title}
-            </span>
+        {/* Desktop Top Bar Matching Reference Image */}
+        <header className="hidden lg:flex items-center justify-between px-8 py-4 bg-white border-b border-slate-200/90 shadow-2xs">
+          {/* Current Date on Left */}
+          <div className="text-xs font-medium text-slate-500 font-sans">
+            {dateStr || "Saturday, 15 March 2025"}
           </div>
 
+          {/* Right: Notification Bell & Admin Profile Dropdown */}
           <div className="flex items-center gap-4 text-xs">
-            {/* Live Facility Clock */}
-            <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-mono text-[11px]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-semibold text-slate-900">Aluva Facility (IST):</span>
-              <span className="tabular-nums font-bold text-cyan-800">{timeStr || "--:--:--"}</span>
-            </div>
-
-            {/* Public Site Quick Link */}
-            <Link
-              href="/"
-              target="_blank"
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 font-semibold text-[11px] transition shadow-2xs bg-white"
+            {/* Notification Bell */}
+            <button
+              type="button"
+              className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition relative"
+              title="Notifications"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-cyan-700" />
-              <span>Customer Website</span>
-            </Link>
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#00838F] rounded-full" />
+            </button>
 
-            {/* Manager Avatar Badge */}
-            {user && (
-              <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
-                <div className="w-7 h-7 rounded-full bg-[#0B192C] text-cyan-300 flex items-center justify-center font-bold text-[11px] shadow-xs">
-                  {user.name ? user.name.slice(0, 2).toUpperCase() : "OP"}
+            {/* Admin Profile Dropdown Pill Matching Reference */}
+            {user ? (
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+                <div className="w-7 h-7 rounded-full bg-[#0A192F] text-cyan-300 flex items-center justify-center font-bold text-xs">
+                  {user.name ? user.name.slice(0, 1).toUpperCase() : "A"}
                 </div>
-                <div className="text-left">
-                  <span className="block text-[11px] font-bold text-slate-800 leading-tight">
-                    {user.name}
-                  </span>
-                  <span className="block text-[9px] font-mono text-cyan-800 font-bold uppercase">
-                    {user.role}
-                  </span>
+                <div className="flex items-center gap-1">
+                  <span className="font-bold text-slate-800 text-xs">Admin</span>
+                  <ChevronDown className="w-3 h-3 text-slate-400" />
                 </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-[#0A192F] text-white flex items-center justify-center font-bold text-xs">
+                  A
+                </div>
+                <span className="font-bold text-slate-800 text-xs">Admin</span>
               </div>
             )}
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">{children}</main>
+        {/* Page Content */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+          {children}
+        </main>
       </div>
     </div>
   );

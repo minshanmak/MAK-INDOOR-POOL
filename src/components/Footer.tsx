@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Waves, MapPin, Phone, Mail, Clock, ShieldCheck } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, ShieldCheck } from "lucide-react";
+import MakLogo from "@/components/MakLogo";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -19,12 +20,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Column 1: Brand & Facility */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-md bg-cyan-600 flex items-center justify-center text-white">
-                <Waves className="w-4 h-4" />
-              </div>
-              <span className="font-bold text-sm text-white tracking-tight">M.A.K Indoor Pool</span>
-            </div>
+            <MakLogo light={true} />
             <p className="text-slate-400 leading-relaxed text-[11px]">
               Kerala’s purpose-built temperature-controlled indoor swimming facility. Dual-filtration sand sanitizers, daily water testing, and 100% private family evening sessions.
             </p>
