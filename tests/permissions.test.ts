@@ -36,3 +36,4 @@ describe("Access Control & Authorization Rules", () => {
     expect(hasPermission("STAFF", approvedStaff, PERMISSIONS.BOOKINGS_CANCEL_APPROVE)).toBe(true);
   });
 });
+

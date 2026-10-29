@@ -96,3 +96,4 @@ export function calculateRemainingBalance(totalPrice: number, payments: { amount
   const balance = Math.round((totalPrice - successfulPaid) * 100) / 100;
   return Math.max(0, balance);
 }
+

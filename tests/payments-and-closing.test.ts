@@ -100,3 +100,4 @@ describe("Payments, Financial Integrity & End-of-Day Reconciliation", () => {
     expect(unchangedBooking?.balanceAmount).toBe(300);
   });
 });
+

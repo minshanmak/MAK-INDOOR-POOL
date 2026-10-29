@@ -2,90 +2,103 @@
 
 import React from "react";
 import Link from "next/link";
-import { Waves, MapPin, Phone, Mail, Clock, Shield } from "lucide-react";
+import { Waves, MapPin, Phone, Mail, Clock, ShieldCheck } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-ocean-950 text-ocean-200 border-t border-ocean-800">
+    <footer className="bg-[#071322] text-slate-400 border-t border-slate-800 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Info */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-lagoon-500 flex items-center justify-center text-ocean-950">
-                <Waves className="w-5 h-5" />
+          {/* Column 1: Brand & Facility */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-md bg-cyan-600 flex items-center justify-center text-white">
+                <Waves className="w-4 h-4" />
               </div>
-              <span className="font-extrabold text-lg text-white">M.A.K Indoor Pool</span>
+              <span className="font-bold text-sm text-white tracking-tight">M.A.K Indoor Pool</span>
             </div>
-            <p className="text-sm text-ocean-300 leading-relaxed">
-              Kerala's premium, temperature-controlled indoor pool. Daily public swimming and exclusive, 100% private family booking sessions.
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              Kerala’s purpose-built temperature-controlled indoor swimming facility. Dual-filtration sand sanitizers, daily water testing, and 100% private family evening sessions.
             </p>
-            <div className="flex items-center gap-2 text-xs text-lagoon-400">
-              <Shield className="w-4 h-4" />
-              <span>Certified Dual-Cycle Sand & UV Water Treatment</span>
+            <div className="inline-flex items-center gap-1.5 text-cyan-400 font-medium text-[11px]">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Certified Water Quality Standards</span>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-bold text-sm tracking-wider uppercase mb-4">Quick Navigation</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/book" className="hover:text-lagoon-400 transition-colors">Book Online</Link></li>
-              <li><Link href="/pricing" className="hover:text-lagoon-400 transition-colors">Pricing & Packages</Link></li>
-              <li><Link href="/gallery" className="hover:text-lagoon-400 transition-colors">Facility Gallery</Link></li>
-              <li><Link href="/booking-status" className="hover:text-lagoon-400 transition-colors">Check Booking Status</Link></li>
-              <li><Link href="/policies" className="hover:text-lagoon-400 transition-colors">Pool Rules & Policies</Link></li>
-            </ul>
-          </div>
-
-          {/* Operating Schedule */}
-          <div>
-            <h4 className="text-white font-bold text-sm tracking-wider uppercase mb-4">Daily Schedule</h4>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-lagoon-400 shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-white block">Public Swimming</strong>
-                  <span className="text-ocean-300">9:00 AM – 4:00 PM (₹150/hr/person)</span>
-                </div>
+          {/* Column 2: Hours & Sessions */}
+          <div className="space-y-3">
+            <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px]">
+              Operating Sessions
+            </h4>
+            <ul className="space-y-2 text-[11px]">
+              <li className="border-l-2 border-cyan-500 pl-2">
+                <strong className="text-white block">Public Swimming</strong>
+                <span>9:00 AM – 4:00 PM</span>
+                <span className="block text-slate-500">₹150 / hr / person (Max 25 cap)</span>
               </li>
-              <li className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-lagoon-400 shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-white block">Exclusive Family Booking</strong>
-                  <span className="text-ocean-300">4:00 PM – 11:00 PM (₹1,500/hr, max 12)</span>
-                </div>
+              <li className="border-l-2 border-emerald-500 pl-2">
+                <strong className="text-white block">Exclusive Family Booking</strong>
+                <span>4:00 PM – 11:00 PM</span>
+                <span className="block text-slate-500">₹1,500 / hr up to 12 persons (+₹100/extra)</span>
               </li>
             </ul>
           </div>
 
-          {/* Contact Details */}
-          <div>
-            <h4 className="text-white font-bold text-sm tracking-wider uppercase mb-4">Contact & Location</h4>
-            <ul className="space-y-2.5 text-sm">
+          {/* Column 3: Quick Navigation */}
+          <div className="space-y-3">
+            <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px]">
+              Information & Policies
+            </h4>
+            <ul className="space-y-1.5 text-[11px]">
+              <li><Link href="/book" className="hover:text-cyan-400 transition-colors">Book Online</Link></li>
+              <li><Link href="/pricing" className="hover:text-cyan-400 transition-colors">Pricing & Formulas</Link></li>
+              <li><Link href="/gallery" className="hover:text-cyan-400 transition-colors">Facility Tour</Link></li>
+              <li><Link href="/booking-status" className="hover:text-cyan-400 transition-colors">Lookup / Manage Booking</Link></li>
+              <li><Link href="/policies" className="hover:text-cyan-400 transition-colors">Cancellation & Refund Rules</Link></li>
+              <li><Link href="/policies" className="hover:text-cyan-400 transition-colors">Swimwear & Hygiene Rules</Link></li>
+              <li><Link href="/faq" className="hover:text-cyan-400 transition-colors">FAQ</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 4: Location & Contact */}
+          <div className="space-y-3">
+            <h4 className="font-bold text-slate-200 uppercase tracking-wider text-[11px]">
+              Location & Contact
+            </h4>
+            <ul className="space-y-2 text-[11px]">
               <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-lagoon-400 shrink-0 mt-0.5" />
-                <span>Near Metro Junction, Aluva, Ernakulam, Kerala - 683101</span>
+                <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                <span>Near Metro Junction, Aluva, Ernakulam, Kerala – 683101</span>
               </li>
               <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-lagoon-400 shrink-0" />
-                <span>+91 94470 12345 / +91 484 2621000</span>
+                <Phone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <a href="tel:+919447012345" className="hover:text-white transition">
+                  +91 94470 12345
+                </a>
               </li>
               <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-lagoon-400 shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                 <span>bookings@makindoorpool.com</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>Open 7 Days a Week</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-ocean-800 text-xs text-ocean-400 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-10 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center gap-3 text-[11px] text-slate-500">
           <p>© {new Date().getFullYear()} M.A.K Indoor Pool. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/policies" className="hover:text-ocean-200">Cancellation Policy</Link>
-            <Link href="/policies" className="hover:text-ocean-200">Refund Policy</Link>
-            <Link href="/policies" className="hover:text-ocean-200">Pool Safety Rules</Link>
-            <Link href="/admin/login" className="text-lagoon-400 hover:underline">Staff Portal</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/policies" className="hover:text-slate-400">Policies</Link>
+            <span className="text-slate-700">•</span>
+            <Link href="/booking-status" className="hover:text-slate-400">Self Service</Link>
+            <span className="text-slate-700">•</span>
+            <Link href="/admin/login" className="text-cyan-400 hover:underline">
+              Staff Portal
+            </Link>
           </div>
         </div>
       </div>

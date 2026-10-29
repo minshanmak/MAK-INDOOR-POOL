@@ -7,3 +7,4 @@ export async function getCurrentUser(): Promise<SessionPayload | null> {
   if (!token) return null;
   return verifySessionToken(token);
 }
+

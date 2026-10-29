@@ -439,3 +439,4 @@ export async function confirmBooking(input: ConfirmBookingInput) {
     return booking;
   });
 }
+

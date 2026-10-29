@@ -142,3 +142,4 @@ The system includes safe abstractions and test adapters for development:
    - In `prisma/schema.prisma`, update `datasource db { provider = "postgresql" url = env("DATABASE_URL") }`.
    - Set `DATABASE_URL="postgresql://user:password@host:5432/dbname?schema=public"` in `.env`.
    - Run `npx prisma migrate deploy`.
+

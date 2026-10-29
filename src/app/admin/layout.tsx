@@ -30,7 +30,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // If on /admin/login, don't check session or render sidebar
     if (pathname === "/admin/login") {
       setLoading(false);
       return;
@@ -71,10 +70,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-sm">
+      <div className="min-h-screen bg-[#071322] flex items-center justify-center text-slate-300 text-xs">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 border-2 border-lagoon-400 border-t-transparent rounded-full animate-spin" />
-          <span>Loading management session...</span>
+          <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+          <span>Authenticating operations session...</span>
         </div>
       </div>
     );
@@ -101,12 +100,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row text-slate-900">
       {/* Mobile Top Header */}
-      <div className="lg:hidden bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+      <div className="lg:hidden bg-[#0B192C] text-white p-3.5 flex justify-between items-center border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <Waves className="w-5 h-5 text-lagoon-400" />
-          <span className="font-extrabold text-sm">M.A.K Pool Admin</span>
+          <div className="w-7 h-7 rounded bg-cyan-600 flex items-center justify-center text-white">
+            <Waves className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-sm tracking-tight">M.A.K Operations</span>
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -116,26 +117,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </div>
 
-      {/* Persistent Sidebar */}
+      {/* Persistent Operations Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 flex flex-col justify-between border-r border-slate-800 transform lg:static lg:translate-x-0 transition-transform duration-200 ${
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-[#0B192C] text-slate-300 flex flex-col justify-between border-r border-slate-800/80 transform lg:static lg:translate-x-0 transition-transform duration-150 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div>
-          {/* Brand header */}
-          <div className="p-6 border-b border-slate-800/80 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-lagoon-500 to-ocean-500 flex items-center justify-center text-white shadow-lg shadow-ocean-950/60">
-              <Waves className="w-5 h-5" />
+          {/* Header */}
+          <div className="p-4 border-b border-slate-800/80 flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center text-white">
+              <Waves className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-extrabold text-sm text-white block leading-tight">M.A.K Indoor Pool</span>
-              <span className="text-[10px] text-lagoon-400 uppercase tracking-widest font-bold">Ops Dashboard</span>
+              <span className="font-extrabold text-xs text-white block tracking-tight">
+                M.A.K INDOOR POOL
+              </span>
+              <span className="text-[10px] text-cyan-400 font-semibold tracking-wider uppercase block">
+                Ops Manager
+              </span>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-3 space-y-1">
+          <nav className="p-2 space-y-0.5">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
@@ -144,13 +149,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
                     isActive
-                      ? "bg-ocean-600 text-white shadow-md shadow-ocean-900/40"
-                      : "hover:bg-slate-800 text-slate-300 hover:text-white"
+                      ? "bg-cyan-600 text-white font-semibold"
+                      : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-slate-400"}`} />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -158,37 +163,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
         </div>
 
-        {/* User Card & Logout Footer */}
-        <div className="p-4 border-t border-slate-800/80 space-y-3">
+        {/* User Card & Logout */}
+        <div className="p-3 border-t border-slate-800/80 space-y-2">
           {user && (
-            <div className="flex items-center gap-2.5 px-2 py-1">
-              <div className="w-8 h-8 rounded-full bg-ocean-800 border border-ocean-700 flex items-center justify-center text-white font-bold text-xs uppercase">
-                {user.name.charAt(0)}
-              </div>
-              <div className="overflow-hidden">
-                <span className="font-bold text-xs text-white block truncate">{user.name}</span>
-                <span className="text-[10px] bg-slate-800 text-lagoon-300 font-extrabold uppercase px-1.5 py-0.2 rounded">
+            <div className="bg-slate-850 px-2.5 py-2 rounded-lg border border-slate-800/60">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-white truncate">{user.name}</span>
+                <span className="text-[9px] bg-slate-800 text-cyan-300 font-bold uppercase px-1.5 py-0.5 rounded">
                   {user.role}
                 </span>
               </div>
+              <span className="text-[10px] text-slate-400 block mt-0.5">{user.phone}</span>
             </div>
           )}
 
-          <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+          <div className="flex justify-between items-center text-[11px] px-1 pt-1">
             <Link
               href="/"
               target="_blank"
-              className="text-slate-400 hover:text-slate-200 flex items-center gap-1 text-[11px]"
+              className="text-slate-400 hover:text-slate-200 flex items-center gap-1"
             >
               <ExternalLink className="w-3 h-3" />
               Website
             </Link>
             <button
               onClick={handleLogout}
-              className="text-red-400 hover:text-red-300 flex items-center gap-1 font-semibold text-[11px]"
+              className="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1"
             >
               <LogOut className="w-3 h-3" />
-              Sign Out
+              Logout
             </button>
           </div>
         </div>

@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   IndianRupee,
-  ShieldCheck,
   ShieldAlert,
   ArrowRight,
 } from "lucide-react";
@@ -96,53 +95,53 @@ export default function AdminCancellationsPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-400 text-xs">Loading cancellations & refunds...</div>;
+    return <div className="p-8 text-center text-slate-400 text-xs">Loading cancellations & refunds ledger...</div>;
   }
 
-  const { cancellationRequests, refunds } = data || { cancellationRequests: [], refunds: [] };
+  const { cancellationRequests = [], refunds = [] } = data || {};
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Title */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Cancellations & Refunds</h1>
+        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Cancellations & Refunds</h1>
         <p className="text-xs text-slate-500 mt-0.5">
-          Process customer cancellation requests, safely release reserved pool slots, and manage Owner-approved refunds.
+          Process customer cancellation requests, safely release reserved pool slots, and manage Owner-approved refunds
         </p>
       </div>
 
       {actionSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-2">
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{actionSuccess}</span>
         </div>
       )}
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs flex items-center gap-2">
+        <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Section 1: Pending Cancellation Requests */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
-        <div className="p-5 border-b border-slate-100 flex justify-between items-center">
+      {/* Section 1: Customer Cancellation Requests */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex justify-between items-center text-xs">
           <div>
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-amber-600" />
+            <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-amber-600" />
               Customer Cancellation Requests ({cancellationRequests.length})
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <span className="text-[11px] text-slate-500">
               Rule: A cancellation request does NOT release the slot until an authorized manager approves it.
-            </p>
+            </span>
           </div>
         </div>
 
         {cancellationRequests.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase">
+              <thead className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3">Booking ID</th>
                   <th className="px-4 py-3">Scheduled Slot</th>
@@ -155,23 +154,25 @@ export default function AdminCancellationsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {cancellationRequests.map((b: any) => (
-                  <tr key={b.id} className="hover:bg-slate-50/80">
-                    <td className="px-4 py-3 font-mono font-bold text-ocean-700">{b.id}</td>
+                  <tr key={b.id} className="hover:bg-slate-50/60">
+                    <td className="px-4 py-3 font-mono font-bold text-cyan-800">{b.id}</td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{b.bookingDate}</div>
-                      <div className="text-[11px] text-slate-500">{b.startTime} – {b.endTime}</div>
+                      <div className="text-[11px] text-slate-500 tabular-nums">{b.startTime} – {b.endTime}</div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{b.customerName}</div>
-                      <div className="text-[11px] text-slate-500">{b.customerPhone}</div>
+                      <div className="text-[10px] text-slate-500">{b.customerPhone}</div>
                     </td>
                     <td className="px-4 py-3 max-w-xs truncate text-amber-900 font-medium">
                       {b.cancellationReason}
                     </td>
-                    <td className="px-4 py-3 font-bold text-emerald-700">₹{b.totalPaid}</td>
+                    <td className="px-4 py-3 font-bold text-emerald-700 tabular-nums">₹{b.totalPaid}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        b.status === "CONFIRMED" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"
+                        b.status === "CONFIRMED"
+                          ? "bg-amber-50 text-amber-800 border border-amber-200"
+                          : "bg-rose-50 text-rose-800 border border-rose-200"
                       }`}>
                         {b.status === "CONFIRMED" ? "LOCKED (PENDING)" : "CANCELLED"}
                       </span>
@@ -180,7 +181,7 @@ export default function AdminCancellationsPage() {
                       {b.status === "CONFIRMED" && (
                         <button
                           onClick={() => handleApproveCancellation(b.id)}
-                          className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-sm"
+                          className="bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-xs"
                         >
                           Approve & Release Slot
                         </button>
@@ -193,29 +194,29 @@ export default function AdminCancellationsPage() {
           </div>
         ) : (
           <div className="p-8 text-center text-slate-400 text-xs">
-            No pending cancellation requests at this time.
+            No pending cancellation requests in queue.
           </div>
         )}
       </div>
 
       {/* Section 2: Owner-Controlled Refunds Ledger */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
-        <div className="p-5 border-b border-slate-100 flex justify-between items-center">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex justify-between items-center text-xs">
           <div>
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <IndianRupee className="w-5 h-5 text-emerald-600" />
+            <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <IndianRupee className="w-4 h-4 text-emerald-600" />
               Refund Requests Ledger ({refunds.length})
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <span className="text-[11px] text-slate-500">
               Rule: Refund decisions and amounts are strictly Pool Owner only.
-            </p>
+            </span>
           </div>
         </div>
 
         {refunds.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase">
+              <thead className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3">Booking ID</th>
                   <th className="px-4 py-3">Requested Amount</th>
@@ -228,19 +229,19 @@ export default function AdminCancellationsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {refunds.map((r: any) => (
-                  <tr key={r.id} className="hover:bg-slate-50/80">
-                    <td className="px-4 py-3 font-mono font-bold text-ocean-700">{r.bookingId}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-900">₹{r.requestedAmount}</td>
-                    <td className="px-4 py-3 font-bold text-emerald-700">₹{r.approvedAmount}</td>
+                  <tr key={r.id} className="hover:bg-slate-50/60">
+                    <td className="px-4 py-3 font-mono font-bold text-cyan-800">{r.bookingId}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-900 tabular-nums">₹{r.requestedAmount}</td>
+                    <td className="px-4 py-3 font-bold text-emerald-700 tabular-nums">₹{r.approvedAmount}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                         r.status === "APPROVED"
-                          ? "bg-emerald-100 text-emerald-800"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                           : r.status === "PROCESSED"
-                          ? "bg-blue-100 text-blue-800"
+                          ? "bg-blue-50 text-blue-700 border border-blue-200"
                           : r.status === "REJECTED"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-amber-100 text-amber-800"
+                          ? "bg-rose-50 text-rose-700 border border-rose-200"
+                          : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}>
                         {r.status}
                       </span>
@@ -254,7 +255,7 @@ export default function AdminCancellationsPage() {
                             setSelectedRefund(r);
                             setApprovedAmount(r.requestedAmount);
                           }}
-                          className="bg-ocean-600 hover:bg-ocean-700 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-sm"
+                          className="bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-xs"
                         >
                           Decide Refund
                         </button>
@@ -265,7 +266,7 @@ export default function AdminCancellationsPage() {
                             setSelectedRefund(r);
                             handleDecideRefund("MARK_PROCESSED");
                           }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-sm"
+                          className="bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-xs"
                         >
                           Mark Processed
                         </button>
@@ -286,9 +287,9 @@ export default function AdminCancellationsPage() {
       {/* Owner Refund Decision Modal */}
       {selectedRefund && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-            <h3 className="font-bold text-slate-900 text-base">Owner Refund Decision</h3>
-            <p className="text-xs text-slate-500">Booking: {selectedRefund.bookingId}</p>
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <h3 className="font-bold text-slate-900 text-sm">Owner Refund Decision</h3>
+            <p className="text-xs text-slate-500 font-mono">Booking Ref: {selectedRefund.bookingId}</p>
 
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1">
               <div className="flex justify-between">
@@ -326,7 +327,7 @@ export default function AdminCancellationsPage() {
                   type="button"
                   disabled={processing}
                   onClick={() => handleDecideRefund("REJECT")}
-                  className="px-3 py-2 rounded-lg bg-red-100 text-red-800 font-bold hover:bg-red-200"
+                  className="px-3 py-2 rounded-lg bg-rose-50 text-rose-800 font-bold hover:bg-rose-100 border border-rose-200"
                 >
                   Reject Refund
                 </button>
@@ -334,7 +335,7 @@ export default function AdminCancellationsPage() {
                   type="button"
                   disabled={processing}
                   onClick={() => handleDecideRefund("APPROVE")}
-                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
                 >
                   {processing ? "Processing..." : `Approve ₹${approvedAmount}`}
                 </button>

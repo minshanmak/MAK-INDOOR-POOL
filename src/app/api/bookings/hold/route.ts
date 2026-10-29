@@ -30,3 +30,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message || "Could not reserve temporary slot hold." }, { status: 400 });
   }
 }
+

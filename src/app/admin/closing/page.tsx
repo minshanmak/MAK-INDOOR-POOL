@@ -84,7 +84,7 @@ export default function AdminClosingPage() {
       if (!res.ok) {
         throw new Error(resJson.error || "Failed to submit closing.");
       }
-      setFeedback({ type: "success", msg: "Daily closing reconciliation submitted and saved!" });
+      setFeedback({ type: "success", msg: "Daily closing reconciliation submitted and recorded!" });
       fetchClosingData(targetDate);
     } catch (err: any) {
       setFeedback({ type: "error", msg: err.message || "Failed to submit closing." });
@@ -95,16 +95,17 @@ export default function AdminClosingPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Title & Date Selector */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">End-of-Day Closing</h1>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">End-of-Day Closing & Audit</h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Cash, UPI, and online gateway collections reconciliation, variance auditing, and shift sign-off
+            Reconcile physical cash drawer and UPI statements against authoritative system bookings
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-slate-600">Select Date:</label>
+        <div className="flex items-center gap-2 text-xs">
+          <label className="font-semibold text-slate-600">Reconciliation Date:</label>
           <input
             type="date"
             value={targetDate}
@@ -115,7 +116,7 @@ export default function AdminClosingPage() {
       </div>
 
       {feedback && (
-        <div className={`p-4 rounded-xl text-xs flex items-center gap-2 ${
+        <div className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${
           feedback.type === "success"
             ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
             : "bg-red-50 border border-red-200 text-red-700"
@@ -126,36 +127,36 @@ export default function AdminClosingPage() {
       )}
 
       {loading ? (
-        <div className="p-8 text-center text-slate-400 text-xs">Loading closing figures...</div>
+        <div className="p-8 text-center text-slate-400 text-xs">Calculating daily financial totals...</div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Form Pane */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
-            <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <FileCheck2 className="w-5 h-5 text-ocean-600" />
-                Closing Reconciliation Sheet ({targetDate})
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Main Reconciliation Sheet */}
+          <div className="lg:col-span-8 bg-white rounded-xl border border-slate-200/80 shadow-xs p-6 space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex justify-between items-center text-xs">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <FileCheck2 className="w-4 h-4 text-cyan-700" />
+                Collection Reconciliation Form ({targetDate})
               </h2>
               {data?.closingRecord && (
-                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase px-2 py-0.5 rounded">
+                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase px-2 py-0.5 rounded">
                   {data.closingRecord.status} by {data.closingRecord.closedByUser?.name || "Staff"}
                 </span>
               )}
             </div>
 
-            {/* Expected Summary Grid */}
+            {/* Expected Summary Matrix */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-                <span className="text-slate-500 block">System Expected Cash</span>
-                <strong className="text-base text-slate-900 block mt-0.5">₹{expectedCash}</strong>
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
+                <span className="text-slate-500 block text-[11px]">System Expected Cash</span>
+                <strong className="text-base text-slate-900 block mt-0.5 tabular-nums">₹{expectedCash}</strong>
               </div>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-                <span className="text-slate-500 block">System Expected UPI</span>
-                <strong className="text-base text-slate-900 block mt-0.5">₹{expectedUpi}</strong>
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
+                <span className="text-slate-500 block text-[11px]">System Expected UPI</span>
+                <strong className="text-base text-slate-900 block mt-0.5 tabular-nums">₹{expectedUpi}</strong>
               </div>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-                <span className="text-slate-500 block">Online Gateway</span>
-                <strong className="text-base text-ocean-700 block mt-0.5">₹{expectedGateway}</strong>
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
+                <span className="text-slate-500 block text-[11px]">Online Gateway</span>
+                <strong className="text-base text-cyan-700 block mt-0.5 tabular-nums">₹{expectedGateway}</strong>
               </div>
             </div>
 
@@ -163,7 +164,7 @@ export default function AdminClosingPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Actual Physical Cash Counted (₹) *
+                    Physical Cash Counted in Drawer (₹) *
                   </label>
                   <input
                     type="number"
@@ -174,8 +175,8 @@ export default function AdminClosingPage() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
                   />
                   <div className="mt-1 flex items-center gap-1 text-[11px]">
-                    <span className="text-slate-500">Variance:</span>
-                    <strong className={cashVariance === 0 ? "text-emerald-600" : "text-red-600"}>
+                    <span className="text-slate-500">Cash Variance:</span>
+                    <strong className={cashVariance === 0 ? "text-emerald-700" : "text-rose-600"}>
                       ₹{cashVariance}
                     </strong>
                   </div>
@@ -194,8 +195,8 @@ export default function AdminClosingPage() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
                   />
                   <div className="mt-1 flex items-center gap-1 text-[11px]">
-                    <span className="text-slate-500">Variance:</span>
-                    <strong className={upiVariance === 0 ? "text-emerald-600" : "text-red-600"}>
+                    <span className="text-slate-500">UPI Variance:</span>
+                    <strong className={upiVariance === 0 ? "text-emerald-700" : "text-rose-600"}>
                       ₹{upiVariance}
                     </strong>
                   </div>
@@ -203,19 +204,19 @@ export default function AdminClosingPage() {
               </div>
 
               {totalVariance !== 0 && (
-                <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl space-y-1.5">
-                  <label className="block font-bold text-amber-900">
-                    Mandatory Discrepancy Note (Net Variance: ₹{totalVariance}) *
+                <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-lg space-y-1">
+                  <label className="block font-bold text-amber-900 text-xs">
+                    Mandatory Discrepancy Explanation (Net Variance: ₹{totalVariance}) *
                   </label>
                   <p className="text-[11px] text-amber-800">
-                    Rule: Whenever physical cash or UPI differs from expected system collections, an audit explanation must be provided.
+                    Rule: When physical cash or bank UPI does not match system collections, a documented reason is required for auditing.
                   </p>
                   <textarea
                     required
                     rows={2}
                     value={varianceReason}
                     onChange={(e) => setVarianceReason(e.target.value)}
-                    placeholder="e.g. Returned ₹150 change from previous day / bank UPI settlement delayed by 1 hour"
+                    placeholder="e.g. Returned ₹150 change from previous shift / delayed bank settlement"
                     className="w-full px-3 py-1.5 border border-amber-300 bg-white rounded-lg text-xs"
                   />
                 </div>
@@ -227,7 +228,7 @@ export default function AdminClosingPage() {
                   rows={2}
                   value={closingNotes}
                   onChange={(e) => setClosingNotes(e.target.value)}
-                  placeholder="General remarks on pool attendance, weather, or operational incidents..."
+                  placeholder="General remarks on shift operations, pool footfall, or weather..."
                   className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
                 />
               </div>
@@ -235,20 +236,20 @@ export default function AdminClosingPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-xs"
               >
                 {submitting ? "Submitting..." : "Submit & Sign Off Daily Closing"}
               </button>
             </form>
           </div>
 
-          {/* Operational Day Summary Pane */}
-          <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 text-xs">
+          {/* Operational Day Summary */}
+          <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200/80 shadow-xs p-5 space-y-4 text-xs">
             <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">
               Operational Statistics ({targetDate})
             </h3>
 
-            <div className="space-y-3 text-slate-600">
+            <div className="space-y-2.5 text-slate-600">
               <div className="flex justify-between">
                 <span>Bookings Count:</span>
                 <strong className="text-slate-900">{data.bookingsCount} Sessions</strong>
@@ -263,22 +264,24 @@ export default function AdminClosingPage() {
               </div>
               <div className="pt-2 border-t border-slate-100 flex justify-between text-sm font-bold text-slate-900">
                 <span>Total Collections:</span>
-                <span className="text-ocean-700">₹{expectedCash + expectedUpi + expectedGateway}</span>
+                <span className="text-cyan-700 tabular-nums">
+                  ₹{expectedCash + expectedUpi + expectedGateway}
+                </span>
               </div>
             </div>
 
             {/* Recent Closings */}
-            <div className="pt-4 border-t border-slate-100 space-y-2">
-              <span className="font-bold text-slate-700 block">Recent Daily Closings</span>
-              <div className="space-y-1.5">
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              <span className="font-bold text-slate-700 block text-[11px]">Recent Daily Closings</span>
+              <div className="space-y-1">
                 {data.recentClosings?.map((rc: any) => (
                   <button
                     key={rc.id}
                     onClick={() => setTargetDate(rc.date)}
-                    className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-slate-100 flex justify-between items-center text-[11px]"
+                    className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-slate-100 flex justify-between items-center text-[11px] transition"
                   >
                     <span className="font-semibold text-slate-800">{rc.date}</span>
-                    <span className="text-emerald-700 font-bold">₹{rc.totalCollections}</span>
+                    <span className="text-emerald-700 font-bold tabular-nums">₹{rc.totalCollections}</span>
                   </button>
                 ))}
               </div>

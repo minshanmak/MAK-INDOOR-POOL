@@ -154,3 +154,4 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ error: "Invalid maintenance type." }, { status: 400 });
 }
+

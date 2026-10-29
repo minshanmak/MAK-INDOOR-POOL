@@ -12,6 +12,7 @@ import {
   X,
   Printer,
   ChevronRight,
+  Clock,
 } from "lucide-react";
 
 export default function AdminBookingsPage() {
@@ -68,7 +69,6 @@ export default function AdminBookingsPage() {
     fetchBookings();
   };
 
-  // Helper to compute end time
   const getEndTime = (start: string, duration: number) => {
     const [h, m] = start.split(":").map(Number);
     const totalMinutes = h * 60 + (m || 0) + duration * 60;
@@ -143,12 +143,12 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Title & Actions */}
+      {/* Title & Primary Action */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Booking Management</h1>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Booking Operations</h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Public & Family booking records, calendar view, counter collections, and staff entry
+            Manage reservation schedules, record phone/WhatsApp bookings, and collect counter balances
           </p>
         </div>
 
@@ -157,27 +157,27 @@ export default function AdminBookingsPage() {
             setModalError(null);
             setShowCreateModal(true);
           }}
-          className="bg-ocean-600 hover:bg-ocean-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow transition flex items-center gap-1.5"
+          className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-3.5 py-2 rounded-lg text-xs shadow-xs transition flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
-          Create Staff Booking
+          + Create Staff Booking
         </button>
       </div>
 
-      {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* High-density Filter Toolbar */}
+      <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
         <form onSubmit={handleSearchSubmit} className="flex-1 w-full flex items-center gap-2">
           <div className="relative flex-1">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by Booking ID, customer name or phone..."
-              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-ocean-500"
+              placeholder="Filter by Booking ID, customer name or phone..."
+              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
             />
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
           </div>
-          <button type="submit" className="bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-semibold">
+          <button type="submit" className="bg-slate-900 text-white px-3 py-1.5 rounded-lg font-semibold">
             Search
           </button>
         </form>
@@ -187,23 +187,23 @@ export default function AdminBookingsPage() {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
+            className="px-2 py-1.5 border border-slate-300 rounded-lg text-xs"
           />
 
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
+            className="px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-medium"
           >
-            <option value="ALL">All Types</option>
-            <option value="FAMILY">Exclusive Family</option>
+            <option value="ALL">All Sessions</option>
+            <option value="FAMILY">Family (Exclusive)</option>
             <option value="PUBLIC">Public Swimming</option>
           </select>
 
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
+            className="px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-medium"
           >
             <option value="ALL">All Status</option>
             <option value="CONFIRMED">Confirmed</option>
@@ -219,7 +219,7 @@ export default function AdminBookingsPage() {
                 setFilterStatus("ALL");
                 setSearch("");
               }}
-              className="text-xs text-red-600 font-bold hover:underline px-2"
+              className="text-[11px] text-rose-600 font-bold hover:underline px-1"
             >
               Reset
             </button>
@@ -228,16 +228,16 @@ export default function AdminBookingsPage() {
       </div>
 
       {/* Bookings Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-slate-400 text-xs">Loading bookings...</div>
+          <div className="p-8 text-center text-slate-400 text-xs">Loading bookings ledger...</div>
         ) : bookings.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase">
+              <thead className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3">Booking ID</th>
-                  <th className="px-4 py-3">Date & Time</th>
+                  <th className="px-4 py-3">Session Date & Time</th>
                   <th className="px-4 py-3">Type</th>
                   <th className="px-4 py-3">Customer</th>
                   <th className="px-4 py-3">Guests</th>
@@ -250,50 +250,52 @@ export default function AdminBookingsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {bookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-slate-50/80 transition">
-                    <td className="px-4 py-3 font-mono font-bold text-ocean-700">{b.id}</td>
+                  <tr key={b.id} className="hover:bg-slate-50/60 transition">
+                    <td className="px-4 py-3 font-mono font-bold text-cyan-800">{b.id}</td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{b.bookingDate}</div>
-                      <div className="text-[11px] text-slate-500">{b.startTime} – {b.endTime}</div>
+                      <div className="text-[11px] text-slate-500 tabular-nums">{b.startTime} – {b.endTime}</div>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        b.type === "FAMILY" ? "bg-purple-100 text-purple-800" : "bg-sky-100 text-sky-800"
+                        b.type === "FAMILY"
+                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                          : "bg-sky-50 text-sky-700 border border-sky-200"
                       }`}>
-                        {b.type}
+                        {b.type === "FAMILY" ? "Family" : "Public"}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{b.customerName}</div>
-                      <div className="text-[11px] text-slate-500">{b.customerPhone}</div>
+                      <div className="text-[10px] text-slate-500">{b.customerPhone}</div>
                     </td>
                     <td className="px-4 py-3">{b.guestCount}</td>
-                    <td className="px-4 py-3 font-bold">₹{b.totalAmount}</td>
-                    <td className="px-4 py-3 font-semibold text-emerald-700">₹{b.totalPaid}</td>
-                    <td className="px-4 py-3 font-bold text-amber-700">₹{b.balanceAmount}</td>
+                    <td className="px-4 py-3 font-bold text-slate-900 tabular-nums">₹{b.totalAmount}</td>
+                    <td className="px-4 py-3 font-semibold text-emerald-700 tabular-nums">₹{b.totalPaid}</td>
+                    <td className="px-4 py-3 font-bold text-amber-700 tabular-nums">₹{b.balanceAmount}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                         b.status === "CONFIRMED"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : b.status === "CANCELLED"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-slate-100 text-slate-800"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-rose-50 text-rose-700 border border-rose-200"
                       }`}>
                         {b.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right space-x-1">
-                      {b.balanceAmount > 0 && b.status === "CONFIRMED" && (
+                    <td className="px-4 py-3 text-right">
+                      {b.balanceAmount > 0 && b.status === "CONFIRMED" ? (
                         <button
                           onClick={() => {
                             setCollectingBooking(b);
                             setCollectAmount(b.balanceAmount);
                             setCollectError(null);
                           }}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-sm"
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-xs"
                         >
-                          Collect Balance
+                          Collect ₹{b.balanceAmount}
                         </button>
+                      ) : (
+                        <span className="text-slate-400 text-[11px]">Paid</span>
                       )}
                     </td>
                   </tr>
@@ -303,7 +305,7 @@ export default function AdminBookingsPage() {
           </div>
         ) : (
           <div className="p-8 text-center text-slate-400 text-xs">
-            No bookings found matching the current filters.
+            No bookings found matching the current search parameters.
           </div>
         )}
       </div>
@@ -311,14 +313,14 @@ export default function AdminBookingsPage() {
       {/* Collect Balance Modal */}
       {collectingBooking && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
             <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div>
-                <h3 className="font-bold text-slate-900 text-base">Collect Counter Balance</h3>
-                <p className="text-xs text-slate-500">Booking: {collectingBooking.id}</p>
+                <h3 className="font-bold text-slate-900 text-sm">Collect Counter Balance</h3>
+                <p className="text-xs text-slate-500 font-mono">Booking Ref: {collectingBooking.id}</p>
               </div>
               <button onClick={() => setCollectingBooking(null)} className="p-1 text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -327,8 +329,8 @@ export default function AdminBookingsPage() {
             )}
 
             <form onSubmit={handleCollectBalance} className="space-y-4 text-xs">
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                <div className="flex justify-between text-slate-600 mb-1">
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                <div className="flex justify-between text-slate-600">
                   <span>Customer:</span>
                   <strong className="text-slate-900">{collectingBooking.customerName}</strong>
                 </div>
@@ -341,7 +343,7 @@ export default function AdminBookingsPage() {
                   <span className="text-emerald-700 font-semibold">₹{collectingBooking.totalPaid}</span>
                 </div>
                 <div className="flex justify-between text-slate-900 font-bold border-t border-slate-200 pt-1 mt-1 text-sm">
-                  <span>Outstanding Balance:</span>
+                  <span>Remaining Balance:</span>
                   <span className="text-amber-700">₹{collectingBooking.balanceAmount}</span>
                 </div>
               </div>
@@ -360,13 +362,13 @@ export default function AdminBookingsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Payment Method *</label>
+                <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setCollectMethod("CASH")}
-                    className={`p-2 rounded-lg border text-center font-bold ${
-                      collectMethod === "CASH" ? "border-ocean-600 bg-ocean-50 text-ocean-950" : "border-slate-200"
+                    className={`p-2 rounded-lg border text-center font-bold text-xs ${
+                      collectMethod === "CASH" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 text-slate-700"
                     }`}
                   >
                     Cash
@@ -374,8 +376,8 @@ export default function AdminBookingsPage() {
                   <button
                     type="button"
                     onClick={() => setCollectMethod("UPI")}
-                    className={`p-2 rounded-lg border text-center font-bold ${
-                      collectMethod === "UPI" ? "border-lagoon-600 bg-lagoon-50 text-lagoon-950" : "border-slate-200"
+                    className={`p-2 rounded-lg border text-center font-bold text-xs ${
+                      collectMethod === "UPI" ? "border-cyan-600 bg-cyan-50 text-cyan-900" : "border-slate-200 text-slate-700"
                     }`}
                   >
                     UPI QR Code
@@ -394,7 +396,7 @@ export default function AdminBookingsPage() {
                 <button
                   type="submit"
                   disabled={collecting}
-                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
                 >
                   {collecting ? "Recording..." : `Confirm ₹${collectAmount} Collected`}
                 </button>
@@ -407,14 +409,14 @@ export default function AdminBookingsPage() {
       {/* Staff Manual Booking Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div>
-                <h3 className="font-bold text-slate-900 text-base">New Staff-Created Booking</h3>
-                <p className="text-xs text-slate-500">Record phone, WhatsApp or in-person walk-in bookings</p>
+                <h3 className="font-bold text-slate-900 text-sm">New Staff-Created Booking</h3>
+                <p className="text-xs text-slate-500">Record phone, WhatsApp or walk-in bookings</p>
               </div>
               <button onClick={() => setShowCreateModal(false)} className="p-1 text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -424,7 +426,7 @@ export default function AdminBookingsPage() {
 
             <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Booking Type</label>
+                <label className="block font-semibold text-slate-700 mb-1">Session Type</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -433,8 +435,8 @@ export default function AdminBookingsPage() {
                       setNewStartTime("17:00");
                       setNewAdvancePaid(750);
                     }}
-                    className={`p-2 rounded-lg border text-center font-bold ${
-                      newBookingType === "FAMILY" ? "border-lagoon-600 bg-lagoon-50 text-lagoon-950" : "border-slate-200"
+                    className={`p-2 rounded-lg border text-center font-bold text-xs ${
+                      newBookingType === "FAMILY" ? "border-cyan-600 bg-cyan-50 text-cyan-900" : "border-slate-200"
                     }`}
                   >
                     Family (4 PM – 11 PM)
@@ -446,8 +448,8 @@ export default function AdminBookingsPage() {
                       setNewStartTime("10:00");
                       setNewAdvancePaid(300);
                     }}
-                    className={`p-2 rounded-lg border text-center font-bold ${
-                      newBookingType === "PUBLIC" ? "border-ocean-600 bg-ocean-50 text-ocean-950" : "border-slate-200"
+                    className={`p-2 rounded-lg border text-center font-bold text-xs ${
+                      newBookingType === "PUBLIC" ? "border-cyan-600 bg-cyan-50 text-cyan-900" : "border-slate-200"
                     }`}
                   >
                     Public (9 AM – 4 PM)
@@ -477,7 +479,7 @@ export default function AdminBookingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Duration (Hrs)</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Duration</label>
                   <select
                     value={newDuration}
                     onChange={(e) => setNewDuration(Number(e.target.value))}
@@ -492,7 +494,7 @@ export default function AdminBookingsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Number of Guests</label>
+                <label className="block font-semibold text-slate-700 mb-1">Total Guests</label>
                 <input
                   type="number"
                   min={1}
@@ -511,7 +513,7 @@ export default function AdminBookingsPage() {
                     required
                     value={newCustomerName}
                     onChange={(e) => setNewCustomerName(e.target.value)}
-                    placeholder="Faizal K"
+                    placeholder="e.g. Sreejith V"
                     className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
                   />
                 </div>
@@ -540,7 +542,7 @@ export default function AdminBookingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Method</label>
                   <select
                     value={newPaymentMethod}
                     onChange={(e) => setNewPaymentMethod(e.target.value as any)}
@@ -563,7 +565,7 @@ export default function AdminBookingsPage() {
                 <button
                   type="submit"
                   disabled={creating}
-                  className="px-4 py-2 rounded-lg bg-ocean-600 hover:bg-ocean-700 text-white font-bold"
+                  className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold"
                 >
                   {creating ? "Confirming..." : "Confirm Staff Booking"}
                 </button>

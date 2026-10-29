@@ -56,3 +56,4 @@ export const translations = {
     footerNotice: "എം.എ.കെ ഇൻഡോർ പൂൾ — സർവ്വ അവകാശങ്ങളും നിക്ഷിപ്തം.",
   },
 };
+

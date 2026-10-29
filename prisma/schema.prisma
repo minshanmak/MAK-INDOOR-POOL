@@ -348,3 +348,4 @@ model SystemAlert {
   acknowledgedByUserId String?
   createdAt          DateTime  @default(now())
 }
+

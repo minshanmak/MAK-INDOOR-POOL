@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
-  Waves,
   Calendar,
   Clock,
   Users,
   CheckCircle2,
   AlertCircle,
   CreditCard,
-  ShieldCheck,
   Printer,
   ChevronRight,
   Lock,
-  Sparkles,
+  ArrowLeft,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function BookNowPage() {
@@ -23,30 +23,28 @@ export default function BookNowPage() {
   const [durationHours, setDurationHours] = useState<number>(2);
   const [guestCount, setGuestCount] = useState<number>(10);
 
-  // Customer Details
+  // Customer Contact Info
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [notes, setNotes] = useState("");
 
-  // Booking Flow State
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1); // 1: Slot & Pricing, 2: Details & Hold, 3: Payment, 4: Confirmed
+  // Step Tracker
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Server-validated pricing & availability
+  // Server-Authoritative State
   const [availResult, setAvailResult] = useState<any>(null);
   const [holdToken, setHoldToken] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
 
-  // Set default date to today
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     setDate(today);
   }, []);
 
-  // Update default start time when booking type changes
   useEffect(() => {
     if (bookingType === "PUBLIC") {
       setStartTime("10:00");
@@ -55,7 +53,6 @@ export default function BookNowPage() {
     }
   }, [bookingType]);
 
-  // Compute end time based on start time + duration
   const getEndTime = (start: string, duration: number): string => {
     const [h, m] = start.split(":").map(Number);
     const totalMinutes = h * 60 + (m || 0) + duration * 60;
@@ -66,7 +63,7 @@ export default function BookNowPage() {
 
   const endTime = getEndTime(startTime, durationHours);
 
-  // Check availability and fetch authoritative pricing from server
+  // Authoritative availability & pricing query
   useEffect(() => {
     if (!date || !startTime || !endTime) return;
     let isCancelled = false;
@@ -86,7 +83,7 @@ export default function BookNowPage() {
             setAvailResult(data);
           }
         }
-      } catch (err: any) {
+      } catch (err) {
         if (!isCancelled) setError("Network error checking availability");
       }
     };
@@ -97,7 +94,6 @@ export default function BookNowPage() {
     };
   }, [bookingType, date, startTime, durationHours, guestCount]);
 
-  // Step 1 -> Step 2: Proceed to Customer Details
   const handleProceedToDetails = () => {
     if (!availResult?.available) {
       setError(availResult?.reason || "This slot is not available. Please choose another time.");
@@ -107,7 +103,6 @@ export default function BookNowPage() {
     setStep(2);
   };
 
-  // Step 2 -> Step 3: Create Temporary Hold and Proceed to Payment
   const handleCreateHold = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -150,10 +145,9 @@ export default function BookNowPage() {
     }
   };
 
-  // Step 3 -> Step 4: Complete Payment & Confirm Booking
   const handleSimulatePayment = async (shouldSucceed: boolean) => {
     if (!shouldSucceed) {
-      setError("Payment failed or cancelled. Slot is still held for you to retry.");
+      setError("Simulated payment declined. Your slot hold remains active so you can retry.");
       return;
     }
 
@@ -179,7 +173,7 @@ export default function BookNowPage() {
           isStaffCreated: false,
           paymentMethod: "GATEWAY",
           initialAmount: paymentAmount,
-          transactionRef: `SIM-TRX-${Date.now()}`,
+          transactionRef: `TEST-TRX-${Date.now()}`,
         }),
       });
 
@@ -198,96 +192,88 @@ export default function BookNowPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Title & Progress Tracker */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-900">Book Your Swimming Slot</h1>
-        <p className="text-slate-600 text-sm mt-1">
-          Instant real-time availability confirmation and secure online reservation
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Editorial Header */}
+      <div className="border-b border-slate-200 pb-5 mb-8">
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Reserve a Swimming Session</h1>
+        <p className="text-xs text-slate-500 mt-0.5">
+          Authoritative real-time availability check, 15-minute temporary hold, and instant receipt confirmation
         </p>
 
-        {/* Steps indicator */}
-        <div className="flex items-center justify-center gap-2 sm:gap-4 mt-6">
-          <span className={`px-3 py-1 rounded-full text-xs font-bold ${step === 1 ? "bg-ocean-600 text-white" : "bg-slate-200 text-slate-700"}`}>
-            1. Select Slot
-          </span>
-          <ChevronRight className="w-4 h-4 text-slate-400" />
-          <span className={`px-3 py-1 rounded-full text-xs font-bold ${step === 2 ? "bg-ocean-600 text-white" : "bg-slate-200 text-slate-700"}`}>
-            2. Customer Details
-          </span>
-          <ChevronRight className="w-4 h-4 text-slate-400" />
-          <span className={`px-3 py-1 rounded-full text-xs font-bold ${step === 3 ? "bg-ocean-600 text-white" : "bg-slate-200 text-slate-700"}`}>
-            3. Payment
-          </span>
-          <ChevronRight className="w-4 h-4 text-slate-400" />
-          <span className={`px-3 py-1 rounded-full text-xs font-bold ${step === 4 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-700"}`}>
-            4. Confirmed
-          </span>
+        {/* Clean Segmented Progress Bar */}
+        <div className="grid grid-cols-4 gap-2 mt-6">
+          <div className={`h-1.5 rounded-full transition-colors ${step >= 1 ? "bg-cyan-600" : "bg-slate-200"}`} />
+          <div className={`h-1.5 rounded-full transition-colors ${step >= 2 ? "bg-cyan-600" : "bg-slate-200"}`} />
+          <div className={`h-1.5 rounded-full transition-colors ${step >= 3 ? "bg-cyan-600" : "bg-slate-200"}`} />
+          <div className={`h-1.5 rounded-full transition-colors ${step >= 4 ? "bg-emerald-600" : "bg-slate-200"}`} />
+        </div>
+        <div className="flex justify-between text-[11px] font-semibold text-slate-500 mt-2">
+          <span className={step === 1 ? "text-cyan-700 font-bold" : ""}>1. Time & Rate</span>
+          <span className={step === 2 ? "text-cyan-700 font-bold" : ""}>2. Details</span>
+          <span className={step === 3 ? "text-cyan-700 font-bold" : ""}>3. Advance Payment</span>
+          <span className={step === 4 ? "text-emerald-700 font-bold" : ""}>4. Confirmation</span>
         </div>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start gap-3 text-sm">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-500" />
-          <div>{error}</div>
+        <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-start gap-3 text-xs">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+          <div className="leading-relaxed">{error}</div>
         </div>
       )}
 
-      {/* STEP 1: Select Type, Date, Time & Guests */}
+      {/* STEP 1: Select Type, Date, Duration & Guests */}
       {step === 1 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
-          {/* Booking Type Toggle */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
+          {/* Segmented Session Toggle */}
           <div>
-            <label className="block text-sm font-bold text-slate-800 mb-2">Choose Booking Type</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+              Select Booking Session
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setBookingType("FAMILY")}
-                className={`p-4 rounded-xl border text-left transition flex items-start gap-3 ${
+                className={`p-4 rounded-xl border text-left transition ${
                   bookingType === "FAMILY"
-                    ? "border-lagoon-500 bg-lagoon-50/50 ring-2 ring-lagoon-500"
+                    ? "border-cyan-600 bg-cyan-50/40 ring-1 ring-cyan-600"
                     : "border-slate-200 hover:border-slate-300"
                 }`}
               >
-                <div className={`p-2 rounded-lg ${bookingType === "FAMILY" ? "bg-lagoon-600 text-white" : "bg-slate-100 text-slate-600"}`}>
-                  <Lock className="w-5 h-5" />
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-sm text-slate-900">Exclusive Family Booking</span>
+                  <span className="text-[10px] font-bold bg-cyan-100 text-cyan-900 px-1.5 py-0.5 rounded">
+                    4 PM – 11 PM
+                  </span>
                 </div>
-                <div>
-                  <div className="font-bold text-slate-900 flex items-center gap-2">
-                    Exclusive Family Booking
-                    <span className="text-[10px] bg-lagoon-100 text-lagoon-800 font-extrabold px-1.5 py-0.5 rounded">
-                      POPULAR
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    4:00 PM – 11:00 PM | ₹1,500/hr (up to 12 guests). 100% private pool.
-                  </p>
-                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  ₹1,500/hr up to 12 persons. 100% private and locked for your family.
+                </p>
               </button>
 
               <button
                 type="button"
                 onClick={() => setBookingType("PUBLIC")}
-                className={`p-4 rounded-xl border text-left transition flex items-start gap-3 ${
+                className={`p-4 rounded-xl border text-left transition ${
                   bookingType === "PUBLIC"
-                    ? "border-ocean-500 bg-ocean-50/50 ring-2 ring-ocean-500"
+                    ? "border-cyan-600 bg-cyan-50/40 ring-1 ring-cyan-600"
                     : "border-slate-200 hover:border-slate-300"
                 }`}
               >
-                <div className={`p-2 rounded-lg ${bookingType === "PUBLIC" ? "bg-ocean-600 text-white" : "bg-slate-100 text-slate-600"}`}>
-                  <Users className="w-5 h-5" />
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-sm text-slate-900">Daily Public Swimming</span>
+                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">
+                    9 AM – 4 PM
+                  </span>
                 </div>
-                <div>
-                  <div className="font-bold text-slate-900">Daily Public Swimming</div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    9:00 AM – 4:00 PM | ₹150/hr per person. Shared pool sessions.
-                  </p>
-                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  ₹150/hr per swimmer. Shared pool session (strict 25 capacity cap).
+                </p>
               </button>
             </div>
           </div>
 
-          {/* Date & Time Selection */}
+          {/* Date, Time, Duration Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Date</label>
@@ -296,7 +282,7 @@ export default function BookNowPage() {
                 value={date}
                 min={new Date().toISOString().split("T")[0]}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
               />
             </div>
 
@@ -305,7 +291,7 @@ export default function BookNowPage() {
               <select
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
               >
                 {bookingType === "PUBLIC" ? (
                   <>
@@ -331,26 +317,26 @@ export default function BookNowPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Duration (Hours)</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Duration</label>
               <select
                 value={durationHours}
                 onChange={(e) => setDurationHours(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
               >
-                <option value={1}>1 Hour (Ends at {getEndTime(startTime, 1)})</option>
-                <option value={2}>2 Hours (Ends at {getEndTime(startTime, 2)})</option>
-                <option value={3}>3 Hours (Ends at {getEndTime(startTime, 3)})</option>
-                <option value={4}>4 Hours (Ends at {getEndTime(startTime, 4)})</option>
+                <option value={1}>1 Hour (Ends {getEndTime(startTime, 1)})</option>
+                <option value={2}>2 Hours (Ends {getEndTime(startTime, 2)})</option>
+                <option value={3}>3 Hours (Ends {getEndTime(startTime, 3)})</option>
+                <option value={4}>4 Hours (Ends {getEndTime(startTime, 4)})</option>
               </select>
             </div>
           </div>
 
           {/* Guest Count */}
           <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="text-xs font-semibold text-slate-700">Number of Guests / Swimmers</label>
+            <div className="flex justify-between items-center mb-1 text-xs">
+              <label className="font-semibold text-slate-700">Total Swimmers / Attendees</label>
               {bookingType === "FAMILY" && guestCount > 12 && (
-                <span className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-medium">
+                <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-medium text-[11px]">
                   +{guestCount - 12} extra guest(s) @ ₹100/hr
                 </span>
               )}
@@ -361,57 +347,57 @@ export default function BookNowPage() {
               max={bookingType === "PUBLIC" ? 25 : 35}
               value={guestCount}
               onChange={(e) => setGuestCount(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
             />
           </div>
 
-          {/* Server Availability & Price Breakdown Card */}
+          {/* Authoritative Pricing & Availability Breakdown */}
           {availResult && (
-            <div className="border border-ocean-200 bg-ocean-50/60 rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-ocean-950 flex items-center gap-1.5">
+            <div className="border border-slate-200 bg-slate-50 rounded-xl p-5 space-y-3">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-slate-900 flex items-center gap-1.5">
                   {availResult.available ? (
                     <>
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      Slot Available ({date} from {startTime} to {endTime})
+                      Slot Available: {date} ({startTime} – {endTime})
                     </>
                   ) : (
                     <>
                       <AlertCircle className="w-4 h-4 text-red-600" />
-                      {availResult.reason || "Slot Unavailable"}
+                      {availResult.reason}
                     </>
                   )}
                 </span>
-                {bookingType === "PUBLIC" && availResult.maxCapacity && (
-                  <span className="text-xs text-ocean-700">
-                    Capacity: {availResult.currentGuests || 0} / {availResult.maxCapacity} occupied
+                {bookingType === "PUBLIC" && (
+                  <span className="text-[11px] text-slate-500">
+                    Occupancy: {availResult.currentGuests || 0} / {availResult.maxCapacity || 25}
                   </span>
                 )}
               </div>
 
               {availResult.pricing && (
-                <div className="bg-white rounded-lg p-4 border border-ocean-100 text-sm space-y-2">
+                <div className="bg-white rounded-lg p-4 border border-slate-200 text-xs space-y-2">
                   <div className="flex justify-between text-slate-600">
-                    <span>Base Booking Price ({durationHours} hr):</span>
+                    <span>Base Duration Rate ({durationHours} hr):</span>
                     <span className="font-semibold text-slate-900">₹{availResult.pricing.basePrice}</span>
                   </div>
                   {availResult.pricing.extraGuestPrice > 0 && (
                     <div className="flex justify-between text-slate-600">
-                      <span>Extra Guests Charge:</span>
+                      <span>Extra Guests ({guestCount - 12} × ₹100 × {durationHours} hr):</span>
                       <span className="font-semibold text-slate-900">+₹{availResult.pricing.extraGuestPrice}</span>
                     </div>
                   )}
-                  <div className="pt-2 border-t border-slate-100 flex justify-between font-bold text-slate-900 text-base">
+                  <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-sm">
                     <span>Total Calculated Amount:</span>
-                    <span className="text-ocean-700">₹{availResult.pricing.totalPrice}</span>
+                    <span className="text-cyan-700">₹{availResult.pricing.totalPrice}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-lagoon-700 font-semibold bg-lagoon-50 p-2 rounded">
-                    <span>Required Online Advance Payment:</span>
+                  <div className="flex justify-between text-emerald-800 font-semibold bg-emerald-50 p-2 rounded text-[11px]">
+                    <span>Required Online Advance:</span>
                     <span>₹{availResult.pricing.advanceRequired}</span>
                   </div>
                   {availResult.pricing.initialBalance > 0 && (
-                    <div className="flex justify-between text-xs text-slate-500 px-2">
-                      <span>Remaining Balance at Pool Check-in:</span>
+                    <div className="flex justify-between text-slate-500 px-2 text-[11px]">
+                      <span>Payable at Pool Check-in:</span>
                       <span>₹{availResult.pricing.initialBalance}</span>
                     </div>
                   )}
@@ -425,22 +411,22 @@ export default function BookNowPage() {
               type="button"
               disabled={!availResult?.available}
               onClick={handleProceedToDetails}
-              className="bg-gradient-to-r from-ocean-600 to-lagoon-600 hover:from-ocean-500 hover:to-lagoon-500 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all flex items-center gap-2"
+              className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-lg text-xs shadow-xs transition flex items-center gap-2"
             >
-              Continue to Customer Details
+              <span>Continue to Customer Details</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: Customer Contact Information */}
+      {/* STEP 2: Customer Contact Info */}
       {step === 2 && (
-        <form onSubmit={handleCreateHold} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-900">Customer Details & Slot Hold</h2>
+        <form onSubmit={handleCreateHold} className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
+          <div className="border-b border-slate-100 pb-3">
+            <h2 className="text-base font-bold text-slate-900">Customer Contact Details</h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              We reserve a 15-minute temporary hold on your slot so you can securely complete payment without losing it.
+              Proceeding reserves a 15-minute temporary slot hold on our authoritative booking engine.
             </p>
           </div>
 
@@ -453,19 +439,19 @@ export default function BookNowPage() {
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="e.g. Mohammed Faizal"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Mobile Phone Number *</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Mobile Phone (10 Digits) *</label>
               <input
                 type="tel"
                 required
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 placeholder="e.g. 9847012345"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
               />
             </div>
           </div>
@@ -477,7 +463,7 @@ export default function BookNowPage() {
               value={customerEmail}
               onChange={(e) => setCustomerEmail(e.target.value)}
               placeholder="e.g. faizal@example.com"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
             />
           </div>
 
@@ -487,97 +473,95 @@ export default function BookNowPage() {
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Need kids float jackets / birthday gathering"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500"
+              placeholder="Any specific requests e.g. kids life jackets / family birthday"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
             />
           </div>
 
-          <div className="flex justify-between items-center pt-4">
+          <div className="flex justify-between items-center pt-2">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="text-slate-600 hover:text-slate-900 text-sm font-semibold"
+              className="text-slate-600 hover:text-slate-900 text-xs font-semibold flex items-center gap-1"
             >
-              &larr; Back to Slot Selection
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-ocean-600 to-lagoon-600 hover:from-ocean-500 hover:to-lagoon-500 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all flex items-center gap-2"
+              className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-lg text-xs shadow-xs transition flex items-center gap-2"
             >
-              {loading ? "Holding Slot..." : "Reserve Hold & Proceed to Pay"}
+              <span>{loading ? "Holding Slot..." : "Hold Slot & Proceed to Pay"}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </form>
       )}
 
-      {/* STEP 3: Payment & Verification */}
+      {/* STEP 3: Payment & Advance Verification */}
       {step === 3 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
-          <div className="border-b border-slate-100 pb-4 flex justify-between items-start">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
+          <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Secure Online Payment</h2>
+              <h2 className="text-base font-bold text-slate-900">Advance Payment Checkout</h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 {bookingType === "FAMILY"
-                  ? "Pay ₹750 advance online to confirm your exclusive family booking."
-                  : "Pay full amount online to confirm public swimming slot."}
+                  ? "Pay ₹750 flat advance to confirm exclusive family reservation."
+                  : "Pay full amount online to confirm public slot."}
               </p>
             </div>
-            {holdExpiresAt && (
-              <span className="bg-amber-100 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" />
-                Slot Held for 15 mins
-              </span>
-            )}
+            <span className="bg-amber-100 text-amber-900 text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Slot Held for 15m
+            </span>
           </div>
 
-          {/* Payment Summary Box */}
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-2">
+          {/* Booking Summary */}
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
             <div className="flex justify-between text-slate-600">
               <span>Customer:</span>
-              <span className="font-semibold text-slate-900">{customerName} ({customerPhone})</span>
+              <strong className="text-slate-900">{customerName} ({customerPhone})</strong>
             </div>
             <div className="flex justify-between text-slate-600">
-              <span>Booking Type:</span>
-              <span className="font-semibold text-slate-900">{bookingType === "FAMILY" ? "Exclusive Family Booking" : "Public Swimming"}</span>
+              <span>Session:</span>
+              <strong className="text-slate-900">{bookingType === "FAMILY" ? "Exclusive Family Booking" : "Public Swimming"}</strong>
             </div>
             <div className="flex justify-between text-slate-600">
               <span>Scheduled Time:</span>
-              <span className="font-semibold text-slate-900">{date} | {startTime} – {endTime}</span>
+              <strong className="text-slate-900">{date} • {startTime} – {endTime}</strong>
             </div>
-            <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-base text-slate-900">
-              <span>Amount Due Now:</span>
+            <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-sm">
+              <span>Online Payment Due:</span>
               <span className="text-emerald-700">₹{availResult?.pricing?.advanceRequired || 750}</span>
             </div>
           </div>
 
-          {/* Simulated / Sandbox Gateway Banner */}
-          <div className="border-2 border-dashed border-lagoon-400 bg-lagoon-50/50 rounded-xl p-5 space-y-3">
-            <div className="flex items-center gap-2 text-lagoon-900 font-bold text-sm">
-              <CreditCard className="w-5 h-5 text-lagoon-600" />
-              <span>Payment Gateway Simulation (Development Mode)</span>
+          {/* Development Payment Adapter */}
+          <div className="border border-slate-200 bg-slate-50/60 rounded-xl p-5 space-y-3">
+            <div className="flex items-center gap-2 text-slate-800 font-bold text-xs">
+              <CreditCard className="w-4 h-4 text-cyan-600" />
+              <span>Simulated Payment Gateway (Local Sandbox)</span>
             </div>
-            <p className="text-xs text-lagoon-800 leading-relaxed">
-              In development, payments are processed via our verified test adapter. In production, this securely connects with Razorpay / UPI gateway.
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              In production, this integrates with Razorpay / UPI with webhook signature validation. For testing, choose an outcome:
             </p>
 
-            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 pt-1">
               <button
                 type="button"
                 disabled={loading}
                 onClick={() => handleSimulatePayment(true)}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-lg text-sm shadow-md transition flex items-center justify-center gap-2"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-xs shadow-xs transition"
               >
-                <CheckCircle2 className="w-4 h-4" />
-                {loading ? "Verifying..." : `Pay ₹${availResult?.pricing?.advanceRequired || 750} (Simulate Success)`}
+                {loading ? "Processing..." : `Simulate Successful Payment (₹${availResult?.pricing?.advanceRequired || 750})`}
               </button>
 
               <button
                 type="button"
                 disabled={loading}
                 onClick={() => handleSimulatePayment(false)}
-                className="bg-red-50 hover:bg-red-100 text-red-700 font-semibold py-3 px-4 rounded-lg text-xs border border-red-200 transition"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-lg text-xs border border-slate-200 transition"
               >
                 Simulate Payment Failure
               </button>
@@ -588,93 +572,94 @@ export default function BookNowPage() {
 
       {/* STEP 4: Confirmed Receipt */}
       {step === 4 && confirmedBooking && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-8 h-8" />
+        <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
+          <div className="text-center space-y-1.5 border-b border-slate-100 pb-5">
+            <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-extrabold text-slate-900">Booking Confirmed!</h2>
-            <p className="text-sm text-slate-600">
-              Your pool slot is securely reserved. Please show this receipt or booking reference at the pool counter.
+            <h2 className="text-xl font-black text-slate-900">Booking Confirmed</h2>
+            <p className="text-xs text-slate-500">
+              Your pool slot is securely confirmed in our authoritative database.
             </p>
           </div>
 
-          {/* Printable Receipt Card */}
-          <div id="booking-receipt" className="border border-slate-200 rounded-xl p-6 bg-slate-50 space-y-4 text-sm">
-            <div className="flex justify-between items-start border-b border-slate-200 pb-4">
+          {/* Printable Official Receipt */}
+          <div id="booking-receipt" className="border border-slate-200 rounded-xl p-6 bg-slate-50 text-xs space-y-4">
+            <div className="flex justify-between items-start border-b border-slate-200 pb-3">
               <div>
-                <h3 className="font-extrabold text-ocean-950 text-base">M.A.K INDOOR POOL</h3>
-                <p className="text-xs text-slate-500">Aluva, Ernakulam, Kerala | +91 94470 12345</p>
+                <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">M.A.K INDOOR POOL</h3>
+                <p className="text-[11px] text-slate-500">Near Metro Junction, Aluva, Ernakulam, Kerala</p>
+                <p className="text-[11px] text-slate-500">Phone: +91 94470 12345</p>
               </div>
               <div className="text-right">
-                <span className="text-xs uppercase font-bold text-slate-500 block">Booking Reference</span>
-                <span className="font-mono font-bold text-base text-ocean-700">{confirmedBooking.id}</span>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Booking Reference</span>
+                <span className="font-mono font-bold text-sm text-cyan-700">{confirmedBooking.id}</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div>
-                <span className="text-slate-500 block">Customer Name</span>
-                <strong className="text-slate-800 text-sm">{confirmedBooking.customerName}</strong>
+                <span className="text-slate-500 block text-[10px]">Customer Name</span>
+                <strong className="text-slate-900 text-xs">{confirmedBooking.customerName}</strong>
               </div>
               <div>
-                <span className="text-slate-500 block">Customer Phone</span>
-                <strong className="text-slate-800 text-sm">{confirmedBooking.customerPhone}</strong>
+                <span className="text-slate-500 block text-[10px]">Phone Number</span>
+                <strong className="text-slate-900 text-xs">{confirmedBooking.customerPhone}</strong>
               </div>
               <div>
-                <span className="text-slate-500 block">Booking Type</span>
-                <strong className="text-slate-800 text-sm">
-                  {confirmedBooking.type === "FAMILY" ? "Exclusive Family Booking" : "Public Swimming"}
+                <span className="text-slate-500 block text-[10px]">Session Type</span>
+                <strong className="text-slate-900 text-xs">
+                  {confirmedBooking.type === "FAMILY" ? "Exclusive Family" : "Public Swimming"}
                 </strong>
               </div>
               <div>
-                <span className="text-slate-500 block">Scheduled Time</span>
-                <strong className="text-slate-800 text-sm">
+                <span className="text-slate-500 block text-[10px]">Date & Time</span>
+                <strong className="text-slate-900 text-xs">
                   {confirmedBooking.bookingDate} ({confirmedBooking.startTime} – {confirmedBooking.endTime})
                 </strong>
               </div>
               <div>
-                <span className="text-slate-500 block">Guests</span>
-                <strong className="text-slate-800 text-sm">{confirmedBooking.guestCount} Persons</strong>
+                <span className="text-slate-500 block text-[10px]">Total Guests</span>
+                <strong className="text-slate-900 text-xs">{confirmedBooking.guestCount} Persons</strong>
               </div>
               <div>
-                <span className="text-slate-500 block">Payment Status</span>
-                <strong className="text-emerald-700 text-sm uppercase">{confirmedBooking.paymentStatus}</strong>
+                <span className="text-slate-500 block text-[10px]">Payment Status</span>
+                <strong className="text-emerald-700 text-xs uppercase">{confirmedBooking.paymentStatus}</strong>
               </div>
             </div>
 
             <div className="pt-3 border-t border-slate-200 space-y-1 text-xs">
               <div className="flex justify-between">
-                <span>Total Amount:</span>
-                <span className="font-bold">₹{confirmedBooking.totalAmount}</span>
+                <span>Total Session Price:</span>
+                <span className="font-semibold text-slate-900">₹{confirmedBooking.totalAmount}</span>
               </div>
-              <div className="flex justify-between text-emerald-700 font-bold">
-                <span>Amount Paid Online:</span>
+              <div className="flex justify-between text-emerald-700 font-semibold">
+                <span>Online Advance Paid:</span>
                 <span>₹{confirmedBooking.totalPaid}</span>
               </div>
               <div className="flex justify-between text-slate-900 font-bold border-t border-slate-200 pt-1 text-sm">
-                <span>Balance to Pay at Counter:</span>
+                <span>Remaining Counter Balance:</span>
                 <span>₹{confirmedBooking.balanceAmount}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2">
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-4 py-2.5 rounded-lg text-sm transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-3.5 h-3.5" />
               Print Receipt
             </button>
 
-            <a
+            <Link
               href={`/booking-status?id=${confirmedBooking.id}&phone=${confirmedBooking.customerPhone}`}
-              className="bg-ocean-600 hover:bg-ocean-500 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-5 py-2 rounded-lg text-xs shadow-xs"
             >
-              Manage / View Booking Online &rarr;
-            </a>
+              Manage Booking Online &rarr;
+            </Link>
           </div>
         </div>
       )}
