@@ -369,7 +369,7 @@ export default function AdminWalkinsPage() {
                   {walkIns
                     .filter((w) => w.status === "ACTIVE")
                     .map((w) => {
-                      const entryTimestamp = new Date(w.entryTime).getTime();
+                      const entryTimestamp = new Date(w.checkInTime || w.entryTime || w.createdAt).getTime();
                       const elapsedMinutes = Math.max(0, Math.floor((currentTime - entryTimestamp) / 60000));
                       const totalDurationMinutes = Math.round((w.durationHours || 1) * 60);
                       const remainingMinutes = totalDurationMinutes - elapsedMinutes;
@@ -390,7 +390,7 @@ export default function AdminWalkinsPage() {
                             <div className="flex items-center gap-1.5 font-mono text-slate-800 text-[11px] tabular-nums">
                               <Clock className="w-3.5 h-3.5 text-slate-400" />
                               <span className="font-semibold">
-                                {new Date(w.entryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                {new Date(w.checkInTime || w.entryTime || w.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                               </span>
                               <span className="text-slate-400">({w.durationHours || 1}h booked)</span>
                             </div>
@@ -472,15 +472,15 @@ export default function AdminWalkinsPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {walkIns
-                    .filter((w) => w.status === "COMPLETED")
+                    .filter((w) => w.status === "CHECKED_OUT" || w.status === "COMPLETED")
                     .map((w) => (
                       <tr key={w.id} className="hover:bg-slate-50/60 transition">
                         <td className="px-4 py-3 font-mono font-bold text-slate-800">{w.id}</td>
                         <td className="px-4 py-3">{w.visitorCount} Swimmers</td>
                         <td className="px-4 py-3 font-mono text-slate-600 text-[11px] tabular-nums">
-                          {new Date(w.entryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} –{" "}
-                          {w.exitTime
-                            ? new Date(w.exitTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                          {new Date(w.checkInTime || w.entryTime || w.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} –{" "}
+                          {w.checkOutTime || w.exitTime
+                            ? new Date(w.checkOutTime || w.exitTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                             : "Departed"}
                         </td>
                         <td className="px-4 py-3 font-medium text-slate-800">{w.customerName || "Visitor"}</td>
@@ -488,6 +488,13 @@ export default function AdminWalkinsPage() {
                         <td className="px-4 py-3 font-medium text-slate-600">{w.paymentMethod}</td>
                       </tr>
                     ))}
+                  {walkIns.filter((w) => w.status === "CHECKED_OUT" || w.status === "COMPLETED").length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="p-6 text-center text-slate-400 text-xs">
+                        No completed walk-in sessions recorded yet today.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

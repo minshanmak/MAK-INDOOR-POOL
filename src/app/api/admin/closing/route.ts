@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
+import { getPoolDate, getPoolDayBounds } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
@@ -13,11 +14,10 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url);
-  const date = searchParams.get("date") || new Date().toISOString().split("T")[0];
+  const date = searchParams.get("date") || getPoolDate();
 
-  // Fetch all payments recorded today
-  const startOfDay = new Date(`${date}T00:00:00.000Z`);
-  const endOfDay = new Date(`${date}T23:59:59.999Z`);
+  // Fetch all payments recorded today in India Standard Time
+  const { startOfDay, endOfDay } = getPoolDayBounds(date);
 
   const payments = await prisma.payment.findMany({
     where: {
@@ -86,10 +86,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { date, actualCash, actualUpi, notes, varianceReason } = body;
 
-  const targetDate = date || new Date().toISOString().split("T")[0];
+  const targetDate = date || getPoolDate();
 
-  const startOfDay = new Date(`${targetDate}T00:00:00.000Z`);
-  const endOfDay = new Date(`${targetDate}T23:59:59.999Z`);
+  const { startOfDay, endOfDay } = getPoolDayBounds(targetDate);
 
   const payments = await prisma.payment.findMany({
     where: {

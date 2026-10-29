@@ -8,6 +8,8 @@ describe("Payments, Financial Integrity & End-of-Day Reconciliation", () => {
     await prisma.receipt.deleteMany();
     await prisma.payment.deleteMany();
     await prisma.refund.deleteMany();
+    await prisma.scheduledReminder.deleteMany();
+    await prisma.customerFeedback.deleteMany();
     await prisma.auditLog.deleteMany();
     await prisma.booking.deleteMany();
   });

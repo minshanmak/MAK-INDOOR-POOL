@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
+import { notificationService } from "@/lib/notifications";
 
 // GET: List pending cancellation requests & refunds
 export async function GET() {
@@ -26,6 +27,7 @@ export async function GET() {
   });
 
   return NextResponse.json({
+    pendingRequests: cancellationRequests,
     cancellationRequests,
     refunds,
   });
@@ -94,6 +96,9 @@ export async function POST(req: NextRequest) {
 
       return cancelledBooking;
     });
+
+    // Cancel any scheduled future reminders
+    await notificationService.cancelObsoleteReminders(bookingId);
 
     return NextResponse.json({ success: true, booking: updated });
   }

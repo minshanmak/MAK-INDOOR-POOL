@@ -10,10 +10,12 @@ import {
 
 describe("Booking Engine & Concurrency Safety", () => {
   beforeEach(async () => {
-    // Clean up test bookings and holds
+    // Clean up test bookings and holds (respecting relational foreign keys)
     await prisma.receipt.deleteMany();
     await prisma.payment.deleteMany();
     await prisma.refund.deleteMany();
+    await prisma.scheduledReminder.deleteMany();
+    await prisma.customerFeedback.deleteMany();
     await prisma.auditLog.deleteMany();
     await prisma.booking.deleteMany();
     await prisma.slotHold.deleteMany();

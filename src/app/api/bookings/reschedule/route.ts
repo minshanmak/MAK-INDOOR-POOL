@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkAvailability, timeToMinutes } from "@/lib/booking-engine";
 import { calculateBookingPrice } from "@/lib/pricing";
+import { notificationService } from "@/lib/notifications";
 
 export async function POST(req: NextRequest) {
   try {
@@ -107,6 +108,10 @@ export async function POST(req: NextRequest) {
 
       return b;
     });
+
+    // Re-schedule automated notification reminders for the updated date/time
+    await notificationService.cancelObsoleteReminders(booking.id);
+    await notificationService.scheduleBookingReminders(updated.id);
 
     return NextResponse.json({
       success: true,

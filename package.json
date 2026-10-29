@@ -10,7 +10,7 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:seed": "node prisma/seed.js",
-    "test": "vitest run"
+    "test": "vitest run --no-file-parallelism"
   },
   "dependencies": {
     "@prisma/client": "^5.21.1",

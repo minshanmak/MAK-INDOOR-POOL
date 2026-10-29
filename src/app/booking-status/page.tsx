@@ -40,7 +40,7 @@ function BookingStatusContent() {
   const [cancelMsg, setCancelMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    const idParam = searchParams.get("id");
+    const idParam = searchParams.get("id") || searchParams.get("ref");
     const phoneParam = searchParams.get("phone");
     if (idParam && phoneParam) {
       setBookingId(idParam);

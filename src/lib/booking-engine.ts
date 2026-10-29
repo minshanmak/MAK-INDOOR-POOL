@@ -1,6 +1,8 @@
 import { prisma } from "./prisma";
 import { calculateBookingPrice, calculateRemainingBalance, DEFAULT_PRICING, PricingConfig } from "./pricing";
 import { hasPermission, PERMISSIONS } from "./permissions";
+import { getPoolDate } from "./timezone";
+import { notificationService } from "./notifications";
 
 export interface SlotAvailabilityQuery {
   bookingType: "PUBLIC" | "FAMILY";
@@ -87,9 +89,10 @@ export function validateOperatingHours(
  * Queries real-time slot availability respecting holds, confirmed bookings, and capacity.
  */
 export async function checkAvailability(
-  query: SlotAvailabilityQuery
+  query: SlotAvailabilityQuery,
+  db: any = prisma
 ): Promise<AvailabilityResult> {
-  const settings = await prisma.poolSetting.findUnique({
+  const settings = await db.poolSetting.findUnique({
     where: { id: "singleton_settings" },
   });
 
@@ -112,10 +115,19 @@ export async function checkAvailability(
 
   const now = new Date();
 
+  // Clean up any holds that have reached expiration
+  await db.slotHold.updateMany({
+    where: {
+      status: "ACTIVE",
+      expiresAt: { lte: now },
+    },
+    data: { status: "EXPIRED" },
+  });
+
   // 1. FAMILY BOOKINGS: Must be 100% exclusive.
   if (query.bookingType === "FAMILY") {
     // Check overlapping confirmed or in-progress bookings
-    const confirmedBookings = await prisma.booking.findMany({
+    const confirmedBookings = await db.booking.findMany({
       where: {
         bookingDate: query.date,
         type: "FAMILY",
@@ -133,7 +145,7 @@ export async function checkAvailability(
     }
 
     // Check active unexpired slot holds
-    const activeHolds = await prisma.slotHold.findMany({
+    const activeHolds = await db.slotHold.findMany({
       where: {
         date: query.date,
         bookingType: "FAMILY",
@@ -156,7 +168,7 @@ export async function checkAvailability(
 
   // 2. PUBLIC SWIMMING: Shared capacity up to maxCapacity
   const maxCap = settings?.maxCapacity || 25;
-  const publicBookings = await prisma.booking.findMany({
+  const publicBookings = await db.booking.findMany({
     where: {
       bookingDate: query.date,
       type: "PUBLIC",
@@ -171,13 +183,28 @@ export async function checkAvailability(
     }
   }
 
+  // Check active unexpired public slot holds
+  const activePublicHolds = await db.slotHold.findMany({
+    where: {
+      date: query.date,
+      bookingType: "PUBLIC",
+      status: "ACTIVE",
+      expiresAt: { gt: now },
+    },
+  });
+  for (const hold of activePublicHolds) {
+    if (isTimeOverlapping(query.startTime, query.endTime, hold.startTime, hold.endTime)) {
+      currentOverlapGuests += hold.guestCount;
+    }
+  }
+
   // Add active walk-ins for today if query.date is today
-  const todayStr = now.toISOString().split("T")[0];
+  const todayStr = getPoolDate(now);
   if (query.date === todayStr) {
-    const activeWalkIns = await prisma.walkIn.findMany({
+    const activeWalkIns = await db.walkIn.findMany({
       where: { status: "ACTIVE" },
     });
-    const currentActiveWalkInGuests = activeWalkIns.reduce((sum, w) => sum + w.visitorCount, 0);
+    const currentActiveWalkInGuests = activeWalkIns.reduce((sum: number, w: any) => sum + w.visitorCount, 0);
     currentOverlapGuests += currentActiveWalkInGuests;
   }
 
@@ -275,31 +302,35 @@ export interface ConfirmBookingInput {
  * Confirms a booking atomically inside a database transaction.
  */
 export async function confirmBooking(input: ConfirmBookingInput) {
-  return await prisma.$transaction(async (tx) => {
-    // If holdToken provided, validate it
-    if (input.holdToken) {
-      const hold = await tx.slotHold.findUnique({
-        where: { holdToken: input.holdToken },
-      });
-      if (!hold) {
-        throw new Error("Invalid checkout hold session.");
+  const result = await prisma.$transaction(
+    async (tx) => {
+      // If holdToken provided, validate it
+      if (input.holdToken) {
+        const hold = await tx.slotHold.findUnique({
+          where: { holdToken: input.holdToken },
+        });
+        if (!hold) {
+          throw new Error("Invalid checkout hold session.");
+        }
+        if (hold.status !== "ACTIVE" || hold.expiresAt < new Date()) {
+          throw new Error("Hold session has expired. Please select a slot again.");
+        }
+      } else {
+        // Re-verify availability inside transaction for concurrency safety using transaction client
+        const availability = await checkAvailability(
+          {
+            bookingType: input.bookingType,
+            date: input.date,
+            startTime: input.startTime,
+            endTime: input.endTime,
+            guestCount: input.guestCount,
+          },
+          tx
+        );
+        if (!availability.available) {
+          throw new Error(availability.reason || "Slot is no longer available.");
+        }
       }
-      if (hold.status !== "ACTIVE" || hold.expiresAt < new Date()) {
-        throw new Error("Hold session has expired. Please select a slot again.");
-      }
-    } else {
-      // Re-verify availability inside transaction for concurrency safety
-      const availability = await checkAvailability({
-        bookingType: input.bookingType,
-        date: input.date,
-        startTime: input.startTime,
-        endTime: input.endTime,
-        guestCount: input.guestCount,
-      });
-      if (!availability.available) {
-        throw new Error(availability.reason || "Slot is no longer available.");
-      }
-    }
 
     // Fetch dynamic pricing settings
     const settings = await tx.poolSetting.findUnique({
@@ -437,6 +468,15 @@ export async function confirmBooking(input: ConfirmBookingInput) {
     });
 
     return booking;
-  });
+  }, { maxWait: 10000, timeout: 15000 });
+
+  // Automated notification and reminder scheduling outside transaction
+  try {
+    await notificationService.scheduleBookingReminders(result.id);
+  } catch (remErr) {
+    console.error("Failed to schedule booking reminders:", remErr);
+  }
+
+  return result;
 }
 

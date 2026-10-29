@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
+import { getPoolDayBounds } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,16 @@ export async function GET(req: NextRequest) {
   if (startDate) whereDate.gte = startDate;
   if (endDate) whereDate.lte = endDate;
 
+  const paymentDateFilter: any = {};
+  if (startDate) {
+    const { startOfDay } = getPoolDayBounds(startDate);
+    paymentDateFilter.gte = startOfDay;
+  }
+  if (endDate) {
+    const { endOfDay } = getPoolDayBounds(endDate);
+    paymentDateFilter.lte = endOfDay;
+  }
+
   // 1. Bookings in range
   const bookings = await prisma.booking.findMany({
     where: Object.keys(whereDate).length > 0 ? { bookingDate: whereDate } : undefined,
@@ -32,17 +43,22 @@ export async function GET(req: NextRequest) {
 
   // 2. Payments in range
   const payments = await prisma.payment.findMany({
-    where: { status: "SUCCESS" },
+    where: {
+      status: "SUCCESS",
+      ...(Object.keys(paymentDateFilter).length > 0 ? { createdAt: paymentDateFilter } : {}),
+    },
     orderBy: { createdAt: "desc" },
   });
 
   // 3. Walk-ins in range
   const walkIns = await prisma.walkIn.findMany({
+    where: Object.keys(paymentDateFilter).length > 0 ? { createdAt: paymentDateFilter } : undefined,
     orderBy: { createdAt: "desc" },
   });
 
-  // 4. Refunds
+  // 4. Refunds in range
   const refunds = await prisma.refund.findMany({
+    where: Object.keys(paymentDateFilter).length > 0 ? { createdAt: paymentDateFilter } : undefined,
     orderBy: { createdAt: "desc" },
   });
 

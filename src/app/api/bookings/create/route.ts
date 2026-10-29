@@ -9,7 +9,8 @@ export async function POST(req: NextRequest) {
     const {
       holdToken,
       bookingType,
-      date,
+      date: rawDate,
+      bookingDate: rawBookingDate,
       startTime,
       endTime,
       guestCount,
@@ -22,6 +23,8 @@ export async function POST(req: NextRequest) {
       initialAmount,
       transactionRef,
     } = body;
+
+    const date = rawDate || rawBookingDate;
 
     if (!bookingType || !date || !startTime || !endTime || !guestCount || !customerName || !customerPhone) {
       return NextResponse.json(

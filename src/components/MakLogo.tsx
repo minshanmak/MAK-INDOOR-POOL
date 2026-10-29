@@ -20,3 +20,4 @@ export default function MakLogo({ light = false }: { light?: boolean }) {
     </div>
   );
 }
+

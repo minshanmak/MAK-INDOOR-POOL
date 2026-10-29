@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { getPoolDate, getPoolDayBounds } from "@/lib/timezone";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -8,7 +9,8 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getPoolDate();
+  const { startOfDay: todayStart } = getPoolDayBounds(todayStr);
 
   // 1. Today's Bookings
   const todayBookings = await prisma.booking.findMany({
@@ -27,9 +29,6 @@ export async function GET() {
   });
 
   // 3. Today's Payments & Collections
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
   const todayPayments = await prisma.payment.findMany({
     where: {
       createdAt: { gte: todayStart },
@@ -44,8 +43,9 @@ export async function GET() {
     total: todayPayments.reduce((s, p) => s + p.amount, 0),
   };
 
-  // 4. Monthly Revenue
-  const monthStart = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
+  // 4. Monthly Revenue (IST month start)
+  const [yearStr, monthStr] = todayStr.split("-");
+  const monthStart = new Date(`${yearStr}-${monthStr}-01T00:00:00+05:30`);
   const monthlyPayments = await prisma.payment.findMany({
     where: {
       createdAt: { gte: monthStart },
