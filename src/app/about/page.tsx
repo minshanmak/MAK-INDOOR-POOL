@@ -19,13 +19,13 @@ export default function AboutPage() {
         <div className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 px-2.5 py-1 rounded text-xs font-semibold mb-2">
           <span>Facility Profile</span>
           <span className="text-slate-400">•</span>
-          <span>Aluva, Kerala</span>
+          <span>Moonniyur, Malappuram</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          Purpose-Built for Hygiene, Comfort & Complete Family Privacy
+          Purpose-Built for Hygiene, Comfort &amp; Complete Family Privacy
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-          Founded in Aluva to provide families and fitness swimmers in Ernakulam with a clean, fully enclosed, temperature-controlled indoor swimming environment free from monsoon weather and outdoor contamination.
+          Founded in Kalathingalpara, Moonniyur to provide families and fitness swimmers across Malappuram with a clean, fully enclosed, temperature-controlled indoor swimming environment free from monsoon weather and outdoor contamination.
         </p>
       </div>
 
@@ -64,8 +64,8 @@ export default function AboutPage() {
 
           <div className="space-y-3 text-xs divide-y divide-slate-800">
             <div className="pt-2 first:pt-0">
-              <span className="text-slate-400 block text-[11px]">Location</span>
-              <span className="font-semibold text-white">Aluva, Ernakulam, Kerala – 683101</span>
+              <span className="text-slate-400 block text-[11px]">Physical Location</span>
+              <span className="font-semibold text-white">Kalathingalpara, Moonniyur, Malappuram – 676311</span>
             </div>
             <div className="pt-2">
               <span className="text-slate-400 block text-[11px]">Pool Dimensions</span>

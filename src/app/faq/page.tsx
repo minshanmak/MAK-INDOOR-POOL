@@ -183,7 +183,7 @@ export default function FAQPage() {
             STILL HAVE QUESTIONS?
           </span>
           <h3 className="text-base font-bold text-white">
-            Speak directly with our duty supervisor in Aluva
+            Speak directly with our duty supervisor in Moonniyur
           </h3>
           <p className="text-xs text-slate-300">
             Our front desk is open daily from 9:00 AM to 11:00 PM for phone calls and WhatsApp messages.

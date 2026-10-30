@@ -66,7 +66,7 @@ export default function HomePage() {
               </span>
               <span className="text-emerald-400">Open Daily: 9:00 AM – 11:00 PM</span>
               <span className="text-slate-600">•</span>
-              <span className="text-slate-300">Aluva, Kerala</span>
+              <span className="text-slate-300">Moonniyur, Malappuram</span>
             </div>
 
             {/* Main Title */}
@@ -208,7 +208,7 @@ export default function HomePage() {
             Our Facility
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-            Modern indoor aquatic center with pure water, private changing suites, and comfortable amenities for all age groups in Aluva, Kerala.
+            Modern indoor aquatic center with pure water, private changing suites, and comfortable amenities for all age groups in Moonniyur, Malappuram district.
           </p>
         </div>
 

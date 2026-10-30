@@ -135,7 +135,7 @@ export default function Navbar() {
 
             <span className="hidden md:inline-flex items-center gap-1 text-slate-400">
               <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
-              <span>Near Metro Station, Aluva, Kerala</span>
+              <span>Kalathingalpara, Moonniyur, Malappuram</span>
             </span>
           </div>
 
@@ -143,17 +143,17 @@ export default function Navbar() {
           <div className="flex items-center gap-3.5 shrink-0 text-slate-300">
             {/* Click-to-Call */}
             <a
-              href="tel:+919447012345"
+              href="tel:+919947714716"
               className="hidden sm:inline-flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors"
               title="Call Front Desk"
             >
               <Phone className="w-3 h-3 text-cyan-400" />
-              <span className="font-medium tabular-nums">+91 94470 12345</span>
+              <span className="font-medium tabular-nums">+91 99477 14716</span>
             </a>
 
             {/* WhatsApp Direct */}
             <a
-              href="https://wa.me/919447012345?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
+              href="https://wa.me/919947714716?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
@@ -242,14 +242,14 @@ export default function Navbar() {
             {/* Right Action Group: Desk Contact & Teal Book Now CTA */}
             <div className="hidden md:flex items-center gap-4">
               <a
-                href="tel:+919447012345"
+                href="tel:+919947714716"
                 className="hidden lg:flex flex-col text-right leading-tight group"
               >
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                   Quick Enquiries
                 </span>
                 <span className="text-xs font-bold text-slate-800 group-hover:text-[#00838F] transition-colors tabular-nums">
-                  +91 94470 12345
+                  +91 99477 14716
                 </span>
               </a>
 
@@ -365,7 +365,7 @@ export default function Navbar() {
 
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <a
-                  href="tel:+919447012345"
+                  href="tel:+919947714716"
                   className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition"
                 >
                   <Phone className="w-3.5 h-3.5 text-cyan-600" />
@@ -373,7 +373,7 @@ export default function Navbar() {
                 </a>
 
                 <a
-                  href="https://wa.me/919447012345?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
+                  href="https://wa.me/919947714716?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold text-xs hover:bg-emerald-100 transition"

@@ -13,8 +13,8 @@ async function main() {
     create: {
       id: "singleton_settings",
       poolName: "M.A.K Indoor Pool",
-      address: "Near Metro Junction, Aluva, Ernakulam, Kerala - 683101",
-      contactPhone: "+91 94470 12345",
+      address: "Kalathingalpara, Kunnathparambi, Moonniyur, Malappuram district, Kerala - 676311",
+      contactPhone: "+91 99477 14716",
       contactEmail: "bookings@makindoorpool.com",
       openHour: 9,
       closeHour: 23,

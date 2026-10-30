@@ -48,13 +48,13 @@ export default function Footer() {
               <div className="lg:col-span-8 space-y-2">
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/60 text-cyan-400 font-semibold text-[11px]">
                   <Droplets className="w-3.5 h-3.5" />
-                  <span>Aluva’s Cleanest Indoor Heated Swimming Facility</span>
+                  <span>Moonniyur’s Premier Clean Indoor Heated Swimming Facility</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                   Ready to Experience M.A.K Indoor Pool?
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                  Dual-filtration sand purification, strict 25-person daytime capacity, and 100% private family evening sessions. Book online with real-time slot locking.
+                  Dual-filtration sand purification, strict 25-person daytime capacity, and 100% private family evening sessions in Kalathingalpara, Moonniyur. Book online with real-time slot locking.
                 </p>
 
                 {/* Feature Pills */}
@@ -86,7 +86,7 @@ export default function Footer() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <a
-                    href="tel:+919447012345"
+                    href="tel:+919947714716"
                     className="border border-slate-700 bg-slate-900/60 hover:bg-slate-800 text-slate-200 font-semibold py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 text-center"
                   >
                     <Phone className="w-3.5 h-3.5 text-cyan-400" />
@@ -94,7 +94,7 @@ export default function Footer() {
                   </a>
 
                   <a
-                    href="https://wa.me/919447012345?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
+                    href="https://wa.me/919947714716?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
                     target="_blank"
                     rel="noopener noreferrer"
                     className="border border-emerald-900/60 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 font-semibold py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 text-center"
@@ -119,7 +119,7 @@ export default function Footer() {
             </Link>
 
             <p className="text-slate-400 leading-relaxed text-[11px] pr-2">
-              M.A.K Indoor Pool is Kerala’s premier temperature-controlled indoor aquatic center in Aluva, Ernakulam. Built to hospital-grade hygiene standards with continuous dual-filtration sand purifiers and 100% private family evening sessions.
+              M.A.K Indoor Pool is Kerala’s premier temperature-controlled indoor aquatic center in Kalathingalpara, Moonniyur, Malappuram district. Built to hospital-grade hygiene standards with continuous dual-filtration sand purifiers and 100% private family evening sessions.
             </p>
 
             {/* Quality Certifications & Assurance */}
@@ -228,15 +228,15 @@ export default function Footer() {
               <li>
                 <span className="text-slate-300 font-semibold block">M.A.K Indoor Pool</span>
                 <span className="text-slate-400 block leading-relaxed">
-                  Near Metro Station &amp; Periyar Bypass, Aluva, Ernakulam, Kerala – 683101
+                  Kalathingalpara, Kunnathparambi, Moonniyur, Malappuram district, Kerala – 676311
                 </span>
                 <a
-                  href="https://maps.google.com/?q=Aluva,Kerala"
+                  href="https://maps.app.goo.gl/NUGrEFSQRYGn3PNA9"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-medium mt-1 text-[10px]"
                 >
-                  <span>Open in Google Maps</span>
+                  <span>Open in Google Maps (Directions)</span>
                   <ExternalLink className="w-2.5 h-2.5" />
                 </a>
               </li>
@@ -245,10 +245,10 @@ export default function Footer() {
                 <div className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                   <a
-                    href="tel:+919447012345"
+                    href="tel:+919947714716"
                     className="text-slate-200 hover:text-white font-bold transition tabular-nums"
                   >
-                    +91 94470 12345
+                    +91 99477 14716
                   </a>
                 </div>
                 <span className="text-[10px] text-slate-500 block pl-5.5">
@@ -259,7 +259,7 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <MessageCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <a
-                  href="https://wa.me/919447012345?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
+                  href="https://wa.me/919947714716?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-emerald-400 hover:text-emerald-300 font-medium transition"
@@ -281,7 +281,7 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
             <p>© {currentYear} M.A.K Indoor Pool. All rights reserved.</p>
             <span className="hidden sm:inline text-slate-700">•</span>
-            <span className="text-slate-400">Aluva, Kerala, India</span>
+            <span className="text-slate-400">Moonniyur, Malappuram, Kerala, India</span>
           </div>
 
           <div className="flex items-center gap-3.5 flex-wrap justify-center">

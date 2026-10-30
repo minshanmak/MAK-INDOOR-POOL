@@ -4,8 +4,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "M.A.K Indoor Pool | Kerala's Premier Indoor Swimming Pool",
-  description: "Book public swimming sessions and exclusive family indoor pool slots online. Pristine water quality, temperature control, and complete family privacy in Aluva, Kerala.",
+  title: "M.A.K Indoor Pool | Kerala's Premier Indoor Swimming Pool (Moonniyur)",
+  description: "Book public swimming sessions and exclusive family indoor pool slots online. Pristine water quality, temperature control, and complete family privacy in Kalathingalpara, Moonniyur, Malappuram, Kerala.",
 };
 
 export default function RootLayout({
