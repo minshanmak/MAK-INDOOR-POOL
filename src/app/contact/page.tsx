@@ -164,15 +164,6 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
-                href="/booking-status"
-                className="font-bold text-cyan-700 hover:text-cyan-800 flex items-center gap-1"
-              >
-                <span>Access Self-Service Booking Portal</span>
-                <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-        </div>
 
         {/* Right Column: Clean Inquiry Form */}
         <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs">
