@@ -3,7 +3,20 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Globe, Phone, ArrowRight } from "lucide-react";
+import {
+  Menu,
+  X,
+  Globe,
+  Phone,
+  MessageCircle,
+  Calendar,
+  Clock,
+  MapPin,
+  Search,
+  ArrowRight,
+  ShieldCheck,
+  ChevronRight,
+} from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 import MakLogo from "@/components/MakLogo";
 
@@ -11,13 +24,67 @@ export default function Navbar() {
   const pathname = usePathname();
   const [lang, setLang] = useState<Language>("en");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentSessionText, setCurrentSessionText] = useState("Public Swimming (Until 4 PM)");
 
   useEffect(() => {
     const saved = localStorage.getItem("mak_lang") as Language;
     if (saved && (saved === "en" || saved === "ml")) {
       setLang(saved);
     }
-  }, []);
+
+    // Determine current live session based on IST hour (Asia/Kolkata)
+    const updateSessionStatus = () => {
+      try {
+        const now = new Date();
+        const istHour = Number(
+          new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Asia/Kolkata",
+            hour: "2-digit",
+            hour12: false,
+          }).format(now)
+        );
+
+        if (istHour >= 9 && istHour < 16) {
+          setCurrentSessionText(
+            lang === "ml"
+              ? "പൊതു നീന്തൽ സെഷൻ (വൈകിട്ട് 4 വരെ)"
+              : "Public Swimming (Until 4:00 PM)"
+          );
+        } else if (istHour >= 16 && istHour < 23) {
+          setCurrentSessionText(
+            lang === "ml"
+              ? "പ്രത്യേക ഫാമിലി സെഷനുകൾ (രാത്രി 11 വരെ)"
+              : "Family Exclusive Sessions (Until 11:00 PM)"
+          );
+        } else {
+          setCurrentSessionText(
+            lang === "ml"
+              ? "പൂൾ അടച്ചിരിക്കുന്നു (രാവിലെ 9 ന് തുറക്കും)"
+              : "Pool Closed (Opens at 9:00 AM)"
+          );
+        }
+      } catch {
+        // Fallback
+        setCurrentSessionText("Public 9 AM - 4 PM • Family 4 PM - 11 PM");
+      }
+    };
+
+    updateSessionStatus();
+    const interval = setInterval(updateSessionStatus, 60000);
+    return () => clearInterval(interval);
+  }, [lang]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileMenuOpen]);
 
   const toggleLanguage = () => {
     const nextLang: Language = lang === "en" ? "ml" : "en";
@@ -28,7 +95,7 @@ export default function Navbar() {
 
   const t = translations[lang];
 
-  // Do not render public header on admin pages
+  // Do not render public header on admin management routes
   if (pathname.startsWith("/admin")) {
     return null;
   }
@@ -36,155 +103,317 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: t.home || "Home" },
     { href: "/about", label: t.about || "About" },
-    { href: "/pricing", label: "Prices" },
+    { href: "/pricing", label: t.prices || "Prices" },
     { href: "/gallery", label: t.gallery || "Gallery" },
     { href: "/policies", label: t.policies || "Policies" },
     { href: "/contact", label: t.contact || "Contact" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/90 shadow-xs">
-      {/* Top Utility Ribbon */}
-      <div className="bg-[#0B192C] text-slate-300 px-4 py-1 text-[11px] border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-              Open Daily: 9:00 AM – 11:00 PM
+    <header className="sticky top-0 z-50 bg-white shadow-xs">
+      {/* 1. TOP UTILITY RIBBON (Deep Aquatic Midnight Navy) */}
+      <div className="bg-[#06111E] text-slate-300 text-[11px] border-b border-slate-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex justify-between items-center gap-4">
+          {/* Left: Live Facility Status & Location */}
+          <div className="flex items-center gap-3 overflow-hidden text-ellipsis whitespace-nowrap">
+            <div className="flex items-center gap-1.5 font-medium text-emerald-400 shrink-0">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span>Open Daily: 9:00 AM – 11:00 PM</span>
+            </div>
+
+            <span className="hidden lg:inline text-slate-700">|</span>
+
+            <span className="hidden lg:inline-flex items-center gap-1 text-slate-400 truncate">
+              <Clock className="w-3 h-3 text-cyan-400 shrink-0" />
+              <span className="text-cyan-300 font-medium">{currentSessionText}</span>
             </span>
-            <span className="hidden md:inline text-slate-600">|</span>
-            <span className="hidden md:inline text-slate-400">
-              Aluva, Ernakulam, Kerala
+
+            <span className="hidden md:inline text-slate-700">|</span>
+
+            <span className="hidden md:inline-flex items-center gap-1 text-slate-400">
+              <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
+              <span>Near Metro Station, Aluva, Kerala</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Right: Actions, Contact, Language & Staff */}
+          <div className="flex items-center gap-3.5 shrink-0 text-slate-300">
+            {/* Click-to-Call */}
             <a
               href="tel:+919447012345"
-              className="hidden sm:flex items-center gap-1 text-slate-300 hover:text-white transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors"
+              title="Call Front Desk"
             >
-              <Phone className="w-3 h-3 text-[#00BCD4]" />
-              <span>+91 94470 12345</span>
+              <Phone className="w-3 h-3 text-cyan-400" />
+              <span className="font-medium tabular-nums">+91 94470 12345</span>
             </a>
+
+            {/* WhatsApp Direct */}
+            <a
+              href="https://wa.me/919447012345?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
+              title="Chat on WhatsApp"
+            >
+              <MessageCircle className="w-3 h-3" />
+              <span>WhatsApp</span>
+            </a>
+
             <span className="hidden sm:inline text-slate-700">|</span>
+
+            {/* Self-Service Booking Status Lookup */}
             <Link
               href="/booking-status"
-              className="text-slate-300 hover:text-white transition"
+              className="inline-flex items-center gap-1 text-slate-300 hover:text-cyan-400 transition-colors"
             >
-              Check Booking
+              <Search className="w-3 h-3 text-cyan-400" />
+              <span>{t.checkBooking || "Lookup Booking"}</span>
             </Link>
+
             <span className="text-slate-700">|</span>
+
+            {/* Staff Portal Link */}
             <Link
               href="/admin/login"
-              className="text-cyan-400 hover:text-cyan-300 font-medium transition"
+              className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
             >
-              Staff Portal &rarr;
+              {t.staffLogin || "Staff Login"} &rarr;
             </Link>
+
             <span className="text-slate-700">|</span>
+
+            {/* Language Switcher Pill */}
             <button
               onClick={toggleLanguage}
-              className="inline-flex items-center gap-1 font-semibold text-slate-300 hover:text-cyan-400 transition"
-              title="Toggle Language"
+              className="inline-flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white px-2 py-0.5 rounded-full border border-slate-700 transition-all text-[10px] font-semibold"
+              title="Toggle Language (English / മലയാളം)"
             >
-              <Globe className="w-3 h-3 text-[#00BCD4]" />
+              <Globe className="w-3 h-3 text-cyan-400" />
               <span>{lang === "en" ? "മലയാളം" : "English"}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Clean White Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <MakLogo />
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`text-xs font-semibold transition-colors ${
-                    isActive
-                      ? "text-[#00838F] border-b-2 border-[#00838F] pb-1 -mb-1"
-                      : "text-slate-600 hover:text-[#00838F]"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Right Action: Teal Book Now Button */}
-          <div className="hidden md:flex items-center gap-3">
+      {/* 2. MAIN NAVIGATION BAR (Crisp White Surface with Refined Spacing) */}
+      <div className="border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-[72px]">
+            {/* Brand Logo */}
             <Link
-              href="/book"
-              className="bg-[#00838F] hover:bg-[#007079] text-white font-bold px-5 py-2.5 rounded-lg text-xs shadow-xs transition duration-150 ease-in-out flex items-center gap-1.5"
+              href="/"
+              className="flex items-center group py-2"
+              aria-label="M.A.K Indoor Pool - Home"
             >
-              <span>Book Now</span>
+              <MakLogo size="md" />
             </Link>
-          </div>
 
-          {/* Mobile Menu Toggle Button */}
-          <div className="flex items-center gap-2 md:hidden">
-            <Link
-              href="/book"
-              className="bg-[#00838F] text-white font-bold px-3 py-1.5 rounded-md text-xs shadow-xs"
-            >
-              Book Now
-            </Link>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center gap-7 lg:gap-8 h-full">
+              {navLinks.map((link) => {
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== "/" && pathname.startsWith(link.href));
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`relative flex items-center h-full text-[13px] font-semibold transition-colors duration-150 ${
+                      isActive
+                        ? "text-[#00838F]"
+                        : "text-slate-600 hover:text-[#00838F]"
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    {/* Active Bottom Indicator Bar */}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#00838F] rounded-t-full shadow-xs" />
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Right Action Group: Desk Contact & Teal Book Now CTA */}
+            <div className="hidden md:flex items-center gap-4">
+              <a
+                href="tel:+919447012345"
+                className="hidden lg:flex flex-col text-right leading-tight group"
+              >
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Quick Enquiries
+                </span>
+                <span className="text-xs font-bold text-slate-800 group-hover:text-[#00838F] transition-colors tabular-nums">
+                  +91 94470 12345
+                </span>
+              </a>
+
+              <Link
+                href="/book"
+                className="bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold px-5 py-2.5 rounded-lg text-xs shadow-xs hover:shadow transition-all duration-150 flex items-center gap-2 group"
+              >
+                <Calendar className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
+                <span>{t.bookNow || "Book Now"}</span>
+              </Link>
+            </div>
+
+            {/* Mobile Controls: Book CTA + Hamburger Menu Toggle */}
+            <div className="flex items-center gap-2.5 md:hidden">
+              <Link
+                href="/book"
+                className="bg-[#00838F] hover:bg-[#007079] text-white font-bold px-3 py-1.5 rounded-md text-xs shadow-xs flex items-center gap-1"
+              >
+                <Calendar className="w-3 h-3" />
+                <span>Book</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition"
+                aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={mobileMenuOpen}
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5 text-slate-900" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* 3. MOBILE NAVIGATION DRAWER (Slide-Down Surface with Quick Actions) */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-1 shadow-md">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block px-3 py-2 rounded-lg text-sm font-medium ${
-                pathname === link.href
-                  ? "text-[#00838F] bg-teal-50 font-bold"
-                  : "text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="pt-3 border-t border-slate-100 flex justify-between items-center px-3 text-xs">
-            <Link
-              href="/admin/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[#00838F] font-bold"
-            >
-              Staff Login &rarr;
-            </Link>
-            <button
-              onClick={() => {
-                toggleLanguage();
-                setMobileMenuOpen(false);
-              }}
-              className="text-slate-600 flex items-center gap-1"
-            >
-              <Globe className="w-3.5 h-3.5 text-[#00838F]" />
-              {lang === "en" ? "മലയാളം" : "English"}
-            </button>
+        <div className="fixed inset-0 z-50 top-[110px] md:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Drawer Menu Surface */}
+          <div className="relative bg-white border-b border-slate-200 shadow-xl max-h-[calc(100vh-110px)] overflow-y-auto px-4 py-5 space-y-5">
+            {/* Live Operational Status Banner */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-start gap-3 text-xs">
+              <div className="p-1.5 rounded-lg bg-teal-50 text-[#00838F] shrink-0 mt-0.5">
+                <Clock className="w-4 h-4" />
+              </div>
+              <div className="leading-tight">
+                <span className="font-bold text-slate-900 block">
+                  Open Daily: 9:00 AM – 11:00 PM
+                </span>
+                <span className="text-slate-500 text-[11px] block mt-0.5">
+                  {currentSessionText}
+                </span>
+              </div>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-3 block mb-1">
+                Navigation
+              </span>
+              {navLinks.map((link) => {
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== "/" && pathname.startsWith(link.href));
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold transition ${
+                      isActive
+                        ? "text-[#00838F] bg-teal-50/80 font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    <ChevronRight
+                      className={`w-4 h-4 ${
+                        isActive ? "text-[#00838F]" : "text-slate-400"
+                      }`}
+                    />
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Action Group: Direct Call, WhatsApp & Booking */}
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-3 block mb-1">
+                Contact &amp; Reservations
+              </span>
+
+              <Link
+                href="/book"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full bg-[#00838F] hover:bg-[#007079] text-white font-bold py-3 rounded-lg text-xs shadow-xs flex items-center justify-center gap-2"
+              >
+                <Calendar className="w-4 h-4" />
+                <span>{t.bookNow || "Book Swimming Slot Online"}</span>
+              </Link>
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <a
+                  href="tel:+919447012345"
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition"
+                >
+                  <Phone className="w-3.5 h-3.5 text-cyan-600" />
+                  <span>Call Desk</span>
+                </a>
+
+                <a
+                  href="https://wa.me/919447012345?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold text-xs hover:bg-emerald-100 transition"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+
+              <Link
+                href="/booking-status"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition text-center"
+              >
+                <Search className="w-3.5 h-3.5 text-slate-400" />
+                <span>{t.checkBooking || "Lookup Existing Booking"}</span>
+              </Link>
+            </div>
+
+            {/* Bottom Utility: Language Switcher & Staff Access */}
+            <div className="pt-3 border-t border-slate-100 flex justify-between items-center px-2 text-xs">
+              <button
+                onClick={() => {
+                  toggleLanguage();
+                  setMobileMenuOpen(false);
+                }}
+                className="inline-flex items-center gap-1.5 text-slate-700 font-medium py-1 px-2 rounded-md hover:bg-slate-100 transition"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#00838F]" />
+                <span>{lang === "en" ? "ഭാഷ: മലയാളം" : "Language: English"}</span>
+              </button>
+
+              <Link
+                href="/admin/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[#00838F] font-bold py-1 px-2 rounded-md hover:bg-teal-50 transition"
+              >
+                {t.staffLogin || "Staff Portal"} &rarr;
+              </Link>
+            </div>
           </div>
         </div>
       )}

@@ -39,3 +39,4 @@ export function getPoolDayBounds(dateStr: string): { startOfDay: Date; endOfDay:
 export function getPoolDateTime(dateStr: string, timeStr: string): Date {
   return new Date(`${dateStr}T${timeStr}:00+05:30`);
 }
+
