@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Calendar,
@@ -21,10 +22,15 @@ import {
   HelpCircle,
   Info,
   RotateCcw,
+  Sparkles,
 } from "lucide-react";
 
-export default function BookNowPage() {
-  const [bookingType, setBookingType] = useState<"PUBLIC" | "FAMILY">("FAMILY");
+function BookingContent() {
+  const searchParams = useSearchParams();
+  const paramType = searchParams.get("type")?.toUpperCase();
+  const initialType: "PUBLIC" | "FAMILY" = paramType === "PUBLIC" ? "PUBLIC" : "FAMILY";
+
+  const [bookingType, setBookingType] = useState<"PUBLIC" | "FAMILY">(initialType);
   const [date, setDate] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("16:00");
   const [durationHours, setDurationHours] = useState<number>(1);
@@ -49,24 +55,83 @@ export default function BookNowPage() {
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
   const [copiedCode, setCopiedCode] = useState(false);
 
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    setDate(today);
+  // Pool Timezone helper values (Asia/Kolkata)
+  const now = useMemo(() => new Date(), []);
+  const todayIST = useMemo(() => {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now);
+  }, [now]);
+
+  const tomorrowIST = useMemo(() => {
+    const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
   }, []);
 
+  const currentISTHour = useMemo(() => {
+    return parseInt(
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        hour12: false,
+      }).format(now),
+      10
+    );
+  }, [now]);
+
+  // Synchronize with URL search parameter if changed
+  useEffect(() => {
+    if (paramType === "PUBLIC" || paramType === "FAMILY") {
+      setBookingType(paramType);
+    }
+  }, [paramType]);
+
+  // Handle switching between PUBLIC and FAMILY
   useEffect(() => {
     if (bookingType === "PUBLIC") {
-      setStartTime("09:00");
+      // If today and daytime public hours (09:00 - 16:00) have finished, default date to tomorrow
+      if (currentISTHour >= 16) {
+        setDate(tomorrowIST);
+        setStartTime("09:00");
+      } else {
+        setDate(todayIST);
+        // If current hour is between 9 and 15, choose next hour; else start at 09:00
+        if (currentISTHour >= 9 && currentISTHour < 15) {
+          setStartTime(`${String(currentISTHour + 1).padStart(2, "0")}:00`);
+        } else {
+          setStartTime("09:00");
+        }
+      }
       setGuestCount(2);
       setDurationHours(1);
     } else {
-      setStartTime("16:00");
+      // FAMILY
+      // If current hour is >= 23, evening exclusive has finished for today
+      if (currentISTHour >= 23) {
+        setDate(tomorrowIST);
+        setStartTime("16:00");
+      } else {
+        setDate(todayIST);
+        if (currentISTHour >= 16 && currentISTHour < 22) {
+          setStartTime(`${String(currentISTHour + 1).padStart(2, "0")}:00`);
+        } else {
+          setStartTime("16:00");
+        }
+      }
       setGuestCount(8);
       setDurationHours(1);
     }
-  }, [bookingType]);
+  }, [bookingType, todayIST, tomorrowIST, currentISTHour]);
 
-  // Real-time ticking countdown for the 15-minute slot hold
+  // Real-time countdown for the 15-minute slot hold
   useEffect(() => {
     if (!holdExpiresAt || step !== 2) {
       setSecondsRemaining(null);
@@ -74,9 +139,9 @@ export default function BookNowPage() {
     }
 
     const updateTimer = () => {
-      const now = new Date().getTime();
+      const nowTime = new Date().getTime();
       const expiry = new Date(holdExpiresAt).getTime();
-      const diffSecs = Math.max(0, Math.floor((expiry - now) / 1000));
+      const diffSecs = Math.max(0, Math.floor((expiry - nowTime) / 1000));
       setSecondsRemaining(diffSecs);
     };
 
@@ -84,6 +149,18 @@ export default function BookNowPage() {
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [holdExpiresAt, step]);
+
+  // Calculate session bounds & allowed duration
+  const sessionEndHour = bookingType === "PUBLIC" ? 16 : 23;
+  const [startH] = startTime.split(":").map(Number);
+  const maxAllowedHours = Math.max(1, Math.min(4, sessionEndHour - startH));
+
+  // Auto-clamp duration when slot changes
+  useEffect(() => {
+    if (durationHours > maxAllowedHours) {
+      setDurationHours(maxAllowedHours);
+    }
+  }, [startTime, maxAllowedHours, durationHours]);
 
   const getEndTime = (start: string, duration: number): string => {
     const [h, m] = start.split(":").map(Number);
@@ -115,7 +192,7 @@ export default function BookNowPage() {
         if (!isCancelled) {
           if (!res.ok) {
             setError(data.error || "Unable to check availability.");
-            setAvailResult(null);
+            setAvailResult({ available: false, reason: data.error });
           } else {
             setAvailResult(data);
           }
@@ -141,17 +218,24 @@ export default function BookNowPage() {
   };
 
   // Available Slot Choices
-  const publicSlots = [
-    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"
-  ];
-  const familySlots = [
-    "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"
-  ];
+  const publicSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"];
+  const familySlots = ["16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
   const activeSlots = bookingType === "PUBLIC" ? publicSlots : familySlots;
+
+  // Check if slot has already concluded today
+  const isSlotPastToday = (slot: string) => {
+    if (date !== todayIST) return false;
+    const [slotH] = slot.split(":").map(Number);
+    return slotH <= currentISTHour;
+  };
 
   // Step 1 to Step 2: Request 15-Minute Slot Hold
   const handleProceedToPayment = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!availResult?.available) {
+      setError(availResult?.reason || "This slot is not available. Please choose another time.");
+      return;
+    }
     if (!customerName.trim() || !customerPhone.trim()) {
       setError("Please provide your Name and 10-digit Mobile Number.");
       return;
@@ -169,6 +253,7 @@ export default function BookNowPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          date,
           bookingDate: date,
           startTime,
           endTime,
@@ -192,15 +277,32 @@ export default function BookNowPage() {
     }
   };
 
+  // Pricing calculations
+  const isFamily = bookingType === "FAMILY";
+  const extraGuests = isFamily ? Math.max(0, guestCount - 12) : 0;
+  const extraGuestFee = isFamily ? extraGuests * 100 * durationHours : 0;
+  const clientBaseTotal = isFamily ? 1500 * durationHours : 150 * guestCount * durationHours;
+  const clientComputedTotal = clientBaseTotal + extraGuestFee;
+
+  // Authoritative server total or client fallback
+  const computedTotal = availResult?.pricing?.totalPrice ?? clientComputedTotal;
+
+  // Business Rule: Public swimming requires 100% full online payment.
+  // Family booking requires configured advance (default ₹750).
+  const requiredPaymentAmount = isFamily
+    ? (availResult?.pricing?.advanceRequired ?? 750)
+    : computedTotal;
+
+  const remainingArrivalBalance = isFamily
+    ? Math.max(0, computedTotal - requiredPaymentAmount)
+    : 0;
+
   // Step 2: Confirm Sandbox Payment & Book
   const handleCompletePayment = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const paymentAmount =
-        bookingType === "FAMILY" ? 750 : (availResult?.pricing?.totalAmount || 150);
-
       const res = await fetch("/api/bookings/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -210,6 +312,7 @@ export default function BookNowPage() {
           customerPhone,
           customerEmail,
           bookingType,
+          date,
           bookingDate: date,
           startTime,
           endTime,
@@ -217,7 +320,7 @@ export default function BookNowPage() {
           notes,
           isStaffCreated: false,
           paymentMethod: "GATEWAY",
-          initialAmount: paymentAmount,
+          initialAmount: requiredPaymentAmount,
           transactionRef: `TRX-${Date.now()}`,
         }),
       });
@@ -249,20 +352,10 @@ export default function BookNowPage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  // Pricing calculations
-  const isFamily = bookingType === "FAMILY";
-  const baseRate = isFamily ? 1500 : 150;
-  const extraGuests = isFamily ? Math.max(0, guestCount - 12) : 0;
-  const extraGuestFee = extraGuests * 100 * durationHours;
-  const baseTotal = isFamily ? 1500 * durationHours : 150 * guestCount * durationHours;
-  const computedTotal = availResult?.pricing?.totalPrice ?? (baseTotal + extraGuestFee);
-  const requiredAdvance = isFamily ? (availResult?.pricing?.advanceRequired ?? 750) : computedTotal;
-  const remainingArrivalBalance = computedTotal - requiredAdvance;
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-10 sm:py-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Modern Step Progress Indicator */}
+        {/* Step Progress Indicator */}
         <div className="max-w-md mx-auto flex items-center justify-between text-xs font-semibold text-slate-500">
           <div className={`flex items-center gap-2 ${step >= 1 ? "text-[#00838F] font-bold" : "text-slate-400"}`}>
             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 1 ? "bg-[#00838F] text-white" : "bg-slate-200 text-slate-600"}`}>
@@ -286,7 +379,7 @@ export default function BookNowPage() {
           </div>
         </div>
 
-        {/* Title & Subtitle Matching Reference */}
+        {/* Title & Subtitle */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h1 className="text-2xl sm:text-3xl font-black text-[#0A192F] tracking-tight">
             Book Your Swimming Slot
@@ -296,7 +389,7 @@ export default function BookNowPage() {
           </p>
         </div>
 
-        {/* Top Segmented Toggle Matching Reference Image */}
+        {/* Top Segmented Session Toggle */}
         {step === 1 && (
           <div className="flex justify-center">
             <div className="inline-flex p-1.5 bg-slate-100/90 border border-slate-200/90 rounded-2xl shadow-xs">
@@ -309,7 +402,7 @@ export default function BookNowPage() {
                     : "text-slate-600 hover:text-[#00838F]"
                 }`}
               >
-                Public Swimming
+                Public Swimming (9 AM – 4 PM)
               </button>
               <button
                 type="button"
@@ -320,12 +413,13 @@ export default function BookNowPage() {
                     : "text-slate-600 hover:text-[#00838F]"
                 }`}
               >
-                Family Exclusive Booking
+                Family Exclusive (4 PM – 11 PM)
               </button>
             </div>
           </div>
         )}
 
+        {/* Error / Warning Alert */}
         {error && (
           <div className="max-w-3xl mx-auto p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3 text-xs">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
@@ -333,20 +427,52 @@ export default function BookNowPage() {
           </div>
         )}
 
-        {/* STEP 1: Two-Column Form & Summary Matching Reference Image */}
+        {/* Unavailability Alert */}
+        {step === 1 && availResult && !availResult.available && !error && (
+          <div className="max-w-3xl mx-auto p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 text-xs">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+            <div className="leading-relaxed">
+              <strong>Slot Unavailable:</strong> {availResult.reason}
+            </div>
+          </div>
+        )}
+
+        {/* Capacity Warning for Public Swimming */}
+        {step === 1 && bookingType === "PUBLIC" && availResult?.isCapacityWarning && (
+          <div className="max-w-3xl mx-auto p-3.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-sky-700" />
+              <span>
+                Occupancy: <strong>{availResult.currentGuests} / {availResult.maxCapacity}</strong> swimmers booked.
+              </span>
+            </div>
+            <span className="font-semibold text-sky-700">
+              {Math.max(0, availResult.maxCapacity - availResult.currentGuests)} spots remaining
+            </span>
+          </div>
+        )}
+
+        {/* STEP 1: Two-Column Form & Summary */}
         {step === 1 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Form (7 cols) */}
+            {/* Left Column: Form Configuration */}
             <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
               {/* 1. Select Date */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-[#0A192F]">
-                  1. Select Date
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold text-[#0A192F]">
+                    1. Select Date
+                  </label>
+                  {date === tomorrowIST && currentISTHour >= 16 && bookingType === "PUBLIC" && (
+                    <span className="text-[10px] text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded font-medium">
+                      Today&apos;s public hours ended • Showing tomorrow
+                    </span>
+                  )}
+                </div>
                 <div className="relative">
                   <input
                     type="date"
-                    min={new Date().toISOString().split("T")[0]}
+                    min={todayIST}
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00838F]"
@@ -358,7 +484,7 @@ export default function BookNowPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <label className="block text-xs font-bold text-[#0A192F]">
-                    2. Select Time
+                    2. Select Start Time
                   </label>
                   <span className="text-[10px] font-mono text-slate-400">
                     {isFamily ? "Evening Exclusive (16:00 – 23:00)" : "Daytime Public (09:00 – 16:00)"}
@@ -368,13 +494,26 @@ export default function BookNowPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {activeSlots.map((slot) => {
                     const isSelected = startTime === slot;
+                    const isPast = isSlotPastToday(slot);
+
                     return (
                       <button
                         key={slot}
                         type="button"
-                        onClick={() => setStartTime(slot)}
+                        disabled={isPast}
+                        onClick={() => {
+                          setStartTime(slot);
+                          // Auto clamp duration if slot is near closing
+                          const [sH] = slot.split(":").map(Number);
+                          const allowed = Math.max(1, Math.min(4, sessionEndHour - sH));
+                          if (durationHours > allowed) {
+                            setDurationHours(allowed);
+                          }
+                        }}
                         className={`p-2.5 rounded-lg border text-center transition ${
-                          isSelected
+                          isPast
+                            ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-60"
+                            : isSelected
                             ? "border-[#00838F] bg-[#00838F]/5 text-[#00838F] ring-1 ring-[#00838F]"
                             : "border-slate-200 bg-white hover:border-[#00838F]/40 text-slate-800"
                         }`}
@@ -382,12 +521,14 @@ export default function BookNowPage() {
                         <div className="font-bold text-xs font-mono">{formatTimeSlot(slot)}</div>
                         <div
                           className={`text-[10px] font-semibold mt-0.5 ${
-                            isSelected
+                            isPast
+                              ? "text-slate-400"
+                              : isSelected
                               ? "text-[#00838F] font-bold"
                               : "text-emerald-700"
                           }`}
                         >
-                          {isSelected ? "Selected" : "Available"}
+                          {isPast ? "Past" : isSelected ? "Selected" : "Available"}
                         </div>
                       </button>
                     );
@@ -397,9 +538,14 @@ export default function BookNowPage() {
 
               {/* 3. Number of Guests */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-[#0A192F]">
-                  3. Number of Guests
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold text-[#0A192F]">
+                    3. Number of Guests / Swimmers
+                  </label>
+                  <span className="text-[10px] text-slate-400">
+                    {isFamily ? "Max 30 guests" : "Max 25 swimmers (Capacity Cap)"}
+                  </span>
+                </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 p-1">
                     <button
@@ -422,33 +568,41 @@ export default function BookNowPage() {
                   </div>
                   <span className="text-xs text-slate-500">
                     {isFamily
-                      ? "Up to 12 people included in base price"
-                      : "₹150 per person per hour (25 max cap)"}
+                      ? "Up to 12 people included in base rate (₹1,500/hr)"
+                      : "₹150 per person per hour (full online payment required)"}
                   </span>
                 </div>
               </div>
 
               {/* 4. Duration */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-[#0A192F]">
-                  4. Duration
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold text-[#0A192F]">
+                    4. Duration
+                  </label>
+                  <span className="text-[10px] text-slate-400">
+                    {isFamily ? "Closes at 11:00 PM" : "Public sessions end at 4:00 PM"}
+                  </span>
+                </div>
                 <select
                   value={durationHours}
                   onChange={(e) => setDurationHours(Number(e.target.value))}
                   className="w-full sm:w-64 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00838F]"
                 >
-                  <option value={1}>1 Hour</option>
-                  <option value={2}>2 Hours</option>
-                  <option value={3}>3 Hours</option>
-                  <option value={4}>4 Hours</option>
+                  {[1, 2, 3, 4]
+                    .filter((h) => h <= maxAllowedHours)
+                    .map((h) => (
+                      <option key={h} value={h}>
+                        {h} Hour{h > 1 ? "s" : ""} (until {getEndTime(startTime, h)})
+                      </option>
+                    ))}
                 </select>
               </div>
 
               {/* 5. Contact Details */}
               <div className="pt-4 border-t border-slate-100 space-y-3">
                 <label className="block text-xs font-bold text-[#0A192F]">
-                  Contact &amp; Swimmer Details
+                  5. Contact &amp; Swimmer Details
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -474,24 +628,51 @@ export default function BookNowPage() {
                     />
                   </div>
                 </div>
+                <div>
+                  <label className="block text-[11px] text-slate-600 mb-1">Email Address (Optional)</label>
+                  <input
+                    type="email"
+                    placeholder="name@example.com"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800"
+                  />
+                </div>
               </div>
 
-              {/* Booking Information Info Box Matching Reference */}
-              <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-100 space-y-2 text-xs text-slate-700">
-                <div className="flex items-center gap-2 text-[#00838F] font-bold">
-                  <Info className="w-4 h-4" />
-                  <span>Booking Information</span>
+              {/* Context-Aware Session Rules Box */}
+              {isFamily ? (
+                <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-100 space-y-2 text-xs text-slate-700">
+                  <div className="flex items-center gap-2 text-[#00838F] font-bold">
+                    <Info className="w-4 h-4" />
+                    <span>Family Exclusive Booking Rules</span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
+                    <li>Evening private sessions operate between 4:00 PM and 11:00 PM.</li>
+                    <li>Base rate is ₹1,500 per hour for up to 12 guests (100% private pool).</li>
+                    <li>Additional guests above 12 add ₹100 per person per hour across duration.</li>
+                    <li>₹750 online advance required to hold and confirm your exclusive slot.</li>
+                    <li>Remaining balance payable at facility arrival (Cash / UPI).</li>
+                  </ul>
                 </div>
-                <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
-                  <li>Family exclusive booking allows up to 12 people for ₹1,500 per hour.</li>
-                  <li>Additional guests are charged at ₹100 per person per hour above 12.</li>
-                  <li>An advance payment of ₹750 is required to confirm your booking.</li>
-                  <li>The remaining amount is to be paid at the facility on arrival.</li>
-                </ul>
-              </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-cyan-50/70 border border-cyan-100 space-y-2 text-xs text-slate-700">
+                  <div className="flex items-center gap-2 text-[#00838F] font-bold">
+                    <Info className="w-4 h-4" />
+                    <span>Public Swimming Session Rules</span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
+                    <li>Daytime public swimming operates between 9:00 AM and 4:00 PM.</li>
+                    <li>Rate is ₹150 per person per hour with access to main heated pool.</li>
+                    <li>Shared pool session strictly capped at 25 swimmers max capacity.</li>
+                    <li>Full online payment is required at checkout to confirm admission.</li>
+                    <li>Zero balance due on arrival — show your confirmation at reception.</li>
+                  </ul>
+                </div>
+              )}
             </div>
 
-            {/* Right Column: Booking Summary Card (5 cols) Matching Reference */}
+            {/* Right Column: Authoritative Booking Summary Card */}
             <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200/90 p-6 sm:p-7 shadow-xs space-y-5 sticky top-24">
               <h2 className="text-sm font-bold text-[#0A192F] tracking-tight pb-3 border-b border-slate-100">
                 Booking Summary
@@ -501,7 +682,7 @@ export default function BookNowPage() {
                 <div className="flex justify-between text-slate-600">
                   <span>Booking Type</span>
                   <span className="font-bold text-slate-900">
-                    {isFamily ? "Family Exclusive" : "Public Swimming"}
+                    {isFamily ? "Family Exclusive (Private)" : "Daily Public Swimming (Shared)"}
                   </span>
                 </div>
 
@@ -513,7 +694,7 @@ export default function BookNowPage() {
                 </div>
 
                 <div className="flex justify-between text-slate-600">
-                  <span>Time</span>
+                  <span>Time Slot</span>
                   <span className="font-semibold text-slate-900 font-mono">
                     {formatTimeSlot(startTime)} – {formatTimeSlot(endTime)}
                   </span>
@@ -521,11 +702,13 @@ export default function BookNowPage() {
 
                 <div className="flex justify-between text-slate-600">
                   <span>Duration</span>
-                  <span className="font-semibold text-slate-900">{durationHours} Hour{durationHours > 1 ? "s" : ""}</span>
+                  <span className="font-semibold text-slate-900">
+                    {durationHours} Hour{durationHours > 1 ? "s" : ""}
+                  </span>
                 </div>
 
                 <div className="flex justify-between text-slate-600">
-                  <span>Number of Guests</span>
+                  <span>Swimmers / Guests</span>
                   <span className="font-semibold text-slate-900">
                     {guestCount} {isFamily && guestCount <= 12 ? "(up to 12 included)" : ""}
                   </span>
@@ -535,18 +718,29 @@ export default function BookNowPage() {
               {/* Price Details Divider */}
               <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
                 <span className="block font-bold text-slate-900 text-xs uppercase tracking-wider">
-                  Price Details
+                  Price Calculation
                 </span>
 
-                <div className="flex justify-between text-slate-600">
-                  <span>Base Price ({durationHours} hour{durationHours > 1 ? "s" : ""})</span>
-                  <span className="font-mono text-slate-900">₹{baseTotal}</span>
-                </div>
+                {isFamily ? (
+                  <>
+                    <div className="flex justify-between text-slate-600">
+                      <span>Base Rate ({durationHours} hr{durationHours > 1 ? "s" : ""}, up to 12)</span>
+                      <span className="font-mono text-slate-900">₹{1500 * durationHours}</span>
+                    </div>
 
-                {isFamily && (
+                    {extraGuests > 0 && (
+                      <div className="flex justify-between text-slate-600">
+                        <span>Extra Guests ({extraGuests} &times; ₹100/hr)</span>
+                        <span className="font-mono text-slate-900">₹{extraGuestFee}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
                   <div className="flex justify-between text-slate-600">
-                    <span>Additional Guests ({extraGuests})</span>
-                    <span className="font-mono text-slate-900">₹{extraGuestFee}</span>
+                    <span>
+                      Public Swimming ({guestCount} guest{guestCount > 1 ? "s" : ""} &times; {durationHours} hr{durationHours > 1 ? "s" : ""})
+                    </span>
+                    <span className="font-mono text-slate-900">₹{computedTotal}</span>
                   </div>
                 )}
 
@@ -556,29 +750,49 @@ export default function BookNowPage() {
                 </div>
               </div>
 
-              {/* Soft Amber Card: Advance Payment Highlight Matching Reference */}
-              <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-1.5 text-xs text-amber-950">
-                <div className="font-bold flex items-center justify-between">
-                  <span>Advance Payment (Required)</span>
-                  <span className="text-base font-black font-mono">₹{requiredAdvance}</span>
+              {/* Payment Highlight Box */}
+              {isFamily ? (
+                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-1.5 text-xs text-amber-950">
+                  <div className="font-bold flex items-center justify-between">
+                    <span>Advance Payment (Required Online)</span>
+                    <span className="text-base font-black font-mono">₹{requiredPaymentAmount}</span>
+                  </div>
+                  <p className="text-[11px] text-amber-800 leading-tight">
+                    Pay ₹{requiredPaymentAmount} now to reserve slot. Remaining ₹{remainingArrivalBalance} to be paid on arrival (Cash / UPI).
+                  </p>
                 </div>
-                <p className="text-[11px] text-amber-800 leading-tight">
-                  Pay ₹{requiredAdvance} now to confirm your booking. Remaining ₹{remainingArrivalBalance} to be paid on arrival.
-                </p>
-              </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 space-y-1.5 text-xs text-emerald-950">
+                  <div className="font-bold flex items-center justify-between">
+                    <span>Online Admission Fee (100% Full Payment)</span>
+                    <span className="text-base font-black font-mono">₹{requiredPaymentAmount}</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-800 leading-tight">
+                    Website public bookings require full advance payment. Zero balance due on arrival.
+                  </p>
+                </div>
+              )}
 
-              {/* CTA Button Matching Reference */}
+              {/* CTA Button */}
               <button
                 type="button"
-                disabled={loading}
+                disabled={loading || (availResult && !availResult.available)}
                 onClick={handleProceedToPayment}
-                className="w-full bg-[#00838F] hover:bg-[#007079] text-white font-bold py-3 rounded-lg text-xs shadow-xs transition duration-150 flex items-center justify-center gap-2"
+                className={`w-full font-bold py-3.5 rounded-lg text-xs shadow-xs transition duration-150 flex items-center justify-center gap-2 ${
+                  availResult && !availResult.available
+                    ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                    : "bg-[#00838F] hover:bg-[#007079] text-white"
+                }`}
               >
-                {loading ? "Holding Slot..." : "Proceed to Payment"}
+                {loading
+                  ? "Holding Slot..."
+                  : availResult && !availResult.available
+                  ? "Slot Unavailable — Choose Another Time"
+                  : `Proceed to Payment (₹${requiredPaymentAmount})`}
               </button>
 
               <p className="text-[11px] text-slate-400 text-center leading-tight">
-                You will be redirected to a secure payment page.
+                Locks slot for 15 minutes while completing secure checkout.
               </p>
             </div>
           </div>
@@ -591,9 +805,11 @@ export default function BookNowPage() {
               <span className="text-[10px] uppercase font-bold tracking-wider text-[#00838F] bg-teal-50 px-2.5 py-1 rounded">
                 SLOT TEMPORARILY LOCKED
               </span>
-              <h2 className="text-xl font-black text-[#0A192F]">Complete Advance Payment</h2>
+              <h2 className="text-xl font-black text-[#0A192F]">
+                {isFamily ? "Complete Advance Payment" : "Complete Online Admission Payment"}
+              </h2>
               <p className="text-xs text-slate-500">
-                Your selected slot is reserved for 15 minutes while you complete checkout.
+                Your selected slot is reserved for 15 minutes while you complete payment verification.
               </p>
             </div>
 
@@ -621,12 +837,18 @@ export default function BookNowPage() {
                 <span className="font-mono text-slate-900">{date} • {formatTimeSlot(startTime)} – {formatTimeSlot(endTime)}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Required Advance:</span>
-                <span className="font-bold text-emerald-700 text-sm font-mono">₹{requiredAdvance}</span>
+                <span>Booking Type:</span>
+                <span className="font-bold text-slate-900">{isFamily ? "Family Exclusive" : "Public Swimming"}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>{isFamily ? "Required Advance Online:" : "Admission Total Due Now:"}</span>
+                <span className="font-bold text-emerald-700 text-sm font-mono">₹{requiredPaymentAmount}</span>
               </div>
               <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
                 <span>Counter Balance Due on Arrival:</span>
-                <span className="font-mono text-slate-900">₹{remainingArrivalBalance}</span>
+                <span className="font-mono text-slate-900">
+                  {remainingArrivalBalance > 0 ? `₹${remainingArrivalBalance}` : "₹0 (Paid in Full)"}
+                </span>
               </div>
             </div>
 
@@ -637,7 +859,9 @@ export default function BookNowPage() {
                 onClick={handleCompletePayment}
                 className="w-full bg-[#00838F] hover:bg-[#007079] text-white font-bold py-3.5 rounded-lg text-xs shadow-xs transition"
               >
-                {loading ? "Confirming Gateway Transaction..." : `Pay ₹${requiredAdvance} & Confirm Booking`}
+                {loading
+                  ? "Confirming Gateway Transaction..."
+                  : `Pay ₹${requiredPaymentAmount} & Confirm Booking`}
               </button>
 
               <button
@@ -645,7 +869,7 @@ export default function BookNowPage() {
                 onClick={() => setStep(1)}
                 className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
               >
-                &larr; Back to Slot Selection
+                &larr; Back to Slot Configuration
               </button>
             </div>
           </div>
@@ -688,16 +912,30 @@ export default function BookNowPage() {
                 <span className="font-bold text-slate-900">{confirmedBooking.customerName}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Session Date &amp; Time:</span>
-                <span className="font-mono text-slate-900">{confirmedBooking.bookingDate} ({formatTimeSlot(confirmedBooking.startTime)} – {formatTimeSlot(confirmedBooking.endTime)})</span>
+                <span>Booking Type:</span>
+                <span className="font-bold text-slate-900">
+                  {confirmedBooking.type === "FAMILY" ? "Exclusive Family Booking" : "Public Swimming"}
+                </span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Paid Online Advance:</span>
+                <span>Session Date &amp; Time:</span>
+                <span className="font-mono text-slate-900">
+                  {confirmedBooking.bookingDate} ({formatTimeSlot(confirmedBooking.startTime)} – {formatTimeSlot(confirmedBooking.endTime)})
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Swimmers / Guests:</span>
+                <span className="font-bold text-slate-900">{confirmedBooking.guestCount}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Paid Online:</span>
                 <span className="font-bold text-emerald-700 font-mono">₹{confirmedBooking.totalPaid}</span>
               </div>
               <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
                 <span>Balance Due at Counter:</span>
-                <span className="font-bold text-slate-900 font-mono">₹{confirmedBooking.balanceAmount}</span>
+                <span className="font-bold text-slate-900 font-mono">
+                  {confirmedBooking.balanceAmount > 0 ? `₹${confirmedBooking.balanceAmount}` : "₹0 (Fully Paid)"}
+                </span>
               </div>
             </div>
 
@@ -720,5 +958,13 @@ export default function BookNowPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function BookNowPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500 font-mono text-xs">Loading booking engine...</div>}>
+      <BookingContent />
+    </Suspense>
   );
 }

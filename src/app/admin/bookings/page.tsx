@@ -4,17 +4,15 @@ import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Search,
+  Filter,
   Plus,
   IndianRupee,
   CheckCircle2,
   AlertCircle,
   X,
   Printer,
-  ChevronLeft,
   ChevronRight,
-  MoreHorizontal,
   Clock,
-  RotateCcw,
 } from "lucide-react";
 
 export default function AdminBookingsPage() {
@@ -23,17 +21,15 @@ export default function AdminBookingsPage() {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("ALL");
-  const [activeTab, setActiveTab] = useState<"ALL" | "UPCOMING" | "COMPLETED" | "CANCELLED">("ALL");
   const [selectedDate, setSelectedDate] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
 
   // Create Staff Booking Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newBookingType, setNewBookingType] = useState<"PUBLIC" | "FAMILY">("FAMILY");
   const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0]);
-  const [newStartTime, setNewStartTime] = useState("16:00");
-  const [newDuration, setNewDuration] = useState(1);
-  const [newGuestCount, setNewGuestCount] = useState(8);
+  const [newStartTime, setNewStartTime] = useState("17:00");
+  const [newDuration, setNewDuration] = useState(2);
+  const [newGuestCount, setNewGuestCount] = useState(10);
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
   const [newPaymentMethod, setNewPaymentMethod] = useState<"CASH" | "UPI">("CASH");
@@ -48,18 +44,10 @@ export default function AdminBookingsPage() {
   const [collecting, setCollecting] = useState(false);
   const [collectError, setCollectError] = useState<string | null>(null);
 
-  // View Receipt Modal State
-  const [receiptBooking, setReceiptBooking] = useState<any | null>(null);
-
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      let statusQuery = filterStatus;
-      if (activeTab === "UPCOMING") statusQuery = "CONFIRMED";
-      if (activeTab === "COMPLETED") statusQuery = "COMPLETED";
-      if (activeTab === "CANCELLED") statusQuery = "CANCELLED";
-
-      let url = `/api/admin/bookings?type=${filterType}&status=${statusQuery}`;
+      let url = `/api/admin/bookings?type=${filterType}&status=${filterStatus}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (selectedDate) url += `&date=${selectedDate}`;
       const res = await fetch(url);
@@ -74,14 +62,11 @@ export default function AdminBookingsPage() {
 
   useEffect(() => {
     fetchBookings();
-  }, [filterType, filterStatus, activeTab, selectedDate]);
+  }, [filterType, filterStatus, selectedDate]);
 
-  const handleTabClick = (tab: "ALL" | "UPCOMING" | "COMPLETED" | "CANCELLED") => {
-    setActiveTab(tab);
-    if (tab === "ALL") setFilterStatus("ALL");
-    else if (tab === "UPCOMING") setFilterStatus("CONFIRMED");
-    else if (tab === "COMPLETED") setFilterStatus("COMPLETED");
-    else if (tab === "CANCELLED") setFilterStatus("CANCELLED");
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchBookings();
   };
 
   const getEndTime = (start: string, duration: number) => {
@@ -103,7 +88,7 @@ export default function AdminBookingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingType: newBookingType,
-          bookingDate: newDate,
+          date: newDate,
           startTime: newStartTime,
           endTime,
           guestCount: newGuestCount,
@@ -116,11 +101,9 @@ export default function AdminBookingsPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to create booking.");
+        throw new Error(data.error || "Failed to create staff booking.");
       }
       setShowCreateModal(false);
-      setNewCustomerName("");
-      setNewCustomerPhone("");
       fetchBookings();
     } catch (err: any) {
       setModalError(err.message || "Failed to create booking.");
@@ -129,20 +112,20 @@ export default function AdminBookingsPage() {
     }
   };
 
-  const handleCollectSubmit = async (e: React.FormEvent) => {
+  const handleCollectBalance = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!collectingBooking) return;
     setCollecting(true);
     setCollectError(null);
     try {
-      const res = await fetch("/api/admin/closing", {
+      const res = await fetch("/api/admin/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "COLLECT_BALANCE",
           bookingId: collectingBooking.id,
-          amount: collectAmount,
-          method: collectMethod,
+          paymentAmount: collectAmount,
+          paymentMethod: collectMethod,
         }),
       });
       const data = await res.json();
@@ -152,233 +135,168 @@ export default function AdminBookingsPage() {
       setCollectingBooking(null);
       fetchBookings();
     } catch (err: any) {
-      setCollectError(err.message || "Payment collection error.");
+      setCollectError(err.message || "Failed to collect balance.");
     } finally {
       setCollecting(false);
     }
   };
 
-  const formatShortDate = (dStr: string) => {
-    if (!dStr) return "";
-    const dateObj = new Date(dStr);
-    return dateObj.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-    });
-  };
-
   return (
     <div className="space-y-6">
-      {/* Top Header Matching Reference Image */}
+      {/* Title & Primary Action */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl font-black text-[#0A192F] tracking-tight">Bookings</h1>
-          <p className="text-xs text-slate-500">Manage all swimming pool bookings</p>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Booking Operations</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Manage reservation schedules, record phone/WhatsApp bookings, and collect counter balances
+          </p>
         </div>
 
-        {/* Teal Action Button Matching Reference */}
         <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-[#00838F] hover:bg-[#007079] text-white font-bold px-4 py-2 rounded-lg text-xs shadow-xs transition flex items-center gap-1.5"
+          onClick={() => {
+            setModalError(null);
+            setShowCreateModal(true);
+          }}
+          className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-3.5 py-2 rounded-lg text-xs shadow-xs transition flex items-center gap-1.5"
         >
-          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>+ New Booking</span>
+          <Plus className="w-4 h-4" />
+          + Create Staff Booking
         </button>
       </div>
 
-      {/* Status Filter Tabs Matching Reference Image */}
-      <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2">
-        <button
-          type="button"
-          onClick={() => handleTabClick("ALL")}
-          className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${
-            activeTab === "ALL"
-              ? "bg-[#00838F] text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200"
-          }`}
-        >
-          All
-        </button>
-        <button
-          type="button"
-          onClick={() => handleTabClick("UPCOMING")}
-          className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${
-            activeTab === "UPCOMING"
-              ? "bg-[#00838F] text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200"
-          }`}
-        >
-          Upcoming
-        </button>
-        <button
-          type="button"
-          onClick={() => handleTabClick("COMPLETED")}
-          className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${
-            activeTab === "COMPLETED"
-              ? "bg-[#00838F] text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200"
-          }`}
-        >
-          Completed
-        </button>
-        <button
-          type="button"
-          onClick={() => handleTabClick("CANCELLED")}
-          className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${
-            activeTab === "CANCELLED"
-              ? "bg-[#00838F] text-white shadow-xs"
-              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200"
-          }`}
-        >
-          Cancelled
-        </button>
-      </div>
-
-      {/* Filter Bar Matching Reference Image */}
-      <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs items-center">
-          {/* Date Range Selector */}
-          <div className="sm:col-span-3">
-            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Date</label>
+      {/* High-density Filter Toolbar */}
+      <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+        <form onSubmit={handleSearchSubmit} className="flex-1 w-full flex items-center gap-2">
+          <div className="relative flex-1">
             <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono text-slate-900 bg-slate-50"
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Filter by Booking ID, customer name or phone..."
+              className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500"
             />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
           </div>
+          <button type="submit" className="bg-slate-900 text-white px-3 py-1.5 rounded-lg font-semibold">
+            Search
+          </button>
+        </form>
 
-          {/* Booking Type Dropdown */}
-          <div className="sm:col-span-3">
-            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Booking Type</label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-900 bg-slate-50"
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="px-2 py-1.5 border border-slate-300 rounded-lg text-xs"
+          />
+
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-medium"
+          >
+            <option value="ALL">All Sessions</option>
+            <option value="FAMILY">Family (Exclusive)</option>
+            <option value="PUBLIC">Public Swimming</option>
+          </select>
+
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-medium"
+          >
+            <option value="ALL">All Status</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="CANCELLED">Cancelled</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+
+          {(selectedDate || filterType !== "ALL" || filterStatus !== "ALL" || search) && (
+            <button
+              onClick={() => {
+                setSelectedDate("");
+                setFilterType("ALL");
+                setFilterStatus("ALL");
+                setSearch("");
+              }}
+              className="text-[11px] text-rose-600 font-bold hover:underline px-1"
             >
-              <option value="ALL">All Types</option>
-              <option value="FAMILY">Family (Exclusive)</option>
-              <option value="PUBLIC">Public Swimming</option>
-            </select>
-          </div>
-
-          {/* Status Dropdown */}
-          <div className="sm:col-span-3">
-            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Status</label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-900 bg-slate-50"
-            >
-              <option value="ALL">All Status</option>
-              <option value="CONFIRMED">Confirmed</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
-          </div>
-
-          {/* Search Input */}
-          <div className="sm:col-span-3">
-            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Search</label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search by customer name..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && fetchBookings()}
-                className="w-full pl-7 pr-2.5 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-900 bg-slate-50"
-              />
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2" />
-            </div>
-          </div>
+              Reset
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Bookings Table Matching Reference Image */}
-      <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+      {/* Bookings Table */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-xs font-mono">
-            Loading bookings table...
-          </div>
+          <div className="p-8 text-center text-slate-400 text-xs">Loading bookings ledger...</div>
         ) : bookings.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+            <table className="w-full text-left text-xs text-slate-700">
+              <thead className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <tr>
-                  <th className="px-4 py-3">Date &amp; Time</th>
-                  <th className="px-4 py-3">Customer</th>
+                  <th className="px-4 py-3">Booking ID</th>
+                  <th className="px-4 py-3">Session Date & Time</th>
                   <th className="px-4 py-3">Type</th>
+                  <th className="px-4 py-3">Customer</th>
                   <th className="px-4 py-3">Guests</th>
-                  <th className="px-4 py-3">Amount</th>
+                  <th className="px-4 py-3">Total Amount</th>
+                  <th className="px-4 py-3">Paid Amount</th>
+                  <th className="px-4 py-3">Balance</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100">
                 {bookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-slate-50/50 transition">
+                  <tr key={b.id} className="hover:bg-slate-50/60 transition">
+                    <td className="px-4 py-3 font-mono font-bold text-cyan-800">{b.id}</td>
                     <td className="px-4 py-3">
-                      <span className="font-semibold text-slate-900 font-mono">
-                        {formatShortDate(b.bookingDate)}, {b.startTime}
-                      </span>
+                      <div className="font-semibold text-slate-900">{b.bookingDate}</div>
+                      <div className="text-[11px] text-slate-500 tabular-nums">{b.startTime} – {b.endTime}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-slate-900">{b.customerName || "Customer"}</div>
-                      <div className="text-[10px] text-slate-500 font-mono">{b.customerPhone}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-slate-700">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        b.type === "FAMILY"
+                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                          : "bg-sky-50 text-sky-700 border border-sky-200"
+                      }`}>
                         {b.type === "FAMILY" ? "Family" : "Public"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono">{b.guestCount}</td>
-                    <td className="px-4 py-3 font-bold text-slate-900 font-mono">₹{b.totalAmount}</td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase ${
-                          b.status === "CONFIRMED"
-                            ? b.balanceAmount > 0
-                              ? "bg-amber-50 text-amber-800 border border-amber-200"
-                              : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : b.status === "COMPLETED"
-                            ? "bg-sky-50 text-sky-700 border border-sky-200"
-                            : b.status === "CANCELLED"
-                            ? "bg-rose-50 text-rose-700 border border-rose-200"
-                            : "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {b.status === "CONFIRMED" && b.balanceAmount > 0
-                          ? "Pending Payment"
-                          : b.status === "CONFIRMED"
-                          ? "Confirmed"
-                          : b.status === "COMPLETED"
-                          ? "Checked-in"
-                          : b.status}
+                      <div className="font-semibold text-slate-900">{b.customerName}</div>
+                      <div className="text-[10px] text-slate-500">{b.customerPhone}</div>
+                    </td>
+                    <td className="px-4 py-3">{b.guestCount}</td>
+                    <td className="px-4 py-3 font-bold text-slate-900 tabular-nums">₹{b.totalAmount}</td>
+                    <td className="px-4 py-3 font-semibold text-emerald-700 tabular-nums">₹{b.totalPaid}</td>
+                    <td className="px-4 py-3 font-bold text-amber-700 tabular-nums">₹{b.balanceAmount}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        b.status === "CONFIRMED"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-rose-50 text-rose-700 border border-rose-200"
+                      }`}>
+                        {b.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {b.balanceAmount > 0 && b.status === "CONFIRMED" && (
-                          <button
-                            onClick={() => {
-                              setCollectingBooking(b);
-                              setCollectAmount(b.balanceAmount);
-                              setCollectError(null);
-                            }}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs transition"
-                          >
-                            Collect ₹{b.balanceAmount}
-                          </button>
-                        )}
+                      {b.balanceAmount > 0 && b.status === "CONFIRMED" ? (
                         <button
-                          onClick={() => setReceiptBooking(b)}
-                          className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                          title="Receipt"
+                          onClick={() => {
+                            setCollectingBooking(b);
+                            setCollectAmount(b.balanceAmount);
+                            setCollectError(null);
+                          }}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-xs"
                         >
-                          <Printer className="w-3.5 h-3.5" />
+                          Collect ₹{b.balanceAmount}
                         </button>
-                      </div>
+                      ) : (
+                        <span className="text-slate-400 text-[11px]">Paid</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -387,189 +305,10 @@ export default function AdminBookingsPage() {
           </div>
         ) : (
           <div className="p-8 text-center text-slate-400 text-xs">
-            No bookings found matching current filters.
+            No bookings found matching the current search parameters.
           </div>
         )}
-
-        {/* Pagination Matching Reference Image */}
-        <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center text-xs">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            className="px-2.5 py-1 rounded border border-slate-200 bg-white text-slate-600 disabled:opacity-50 hover:bg-slate-50 transition"
-          >
-            &lt; Previous
-          </button>
-
-          <div className="flex items-center gap-1 font-mono text-xs">
-            <span className="w-6 h-6 rounded bg-[#00838F] text-white flex items-center justify-center font-bold">
-              1
-            </span>
-            <span className="w-6 h-6 rounded text-slate-600 hover:bg-slate-200 flex items-center justify-center cursor-pointer">
-              2
-            </span>
-            <span className="w-6 h-6 rounded text-slate-600 hover:bg-slate-200 flex items-center justify-center cursor-pointer">
-              3
-            </span>
-          </div>
-
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            className="px-2.5 py-1 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition"
-          >
-            Next &gt;
-          </button>
-        </div>
       </div>
-
-      {/* Create Staff Booking Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4">
-            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 text-sm">Create Pool Booking (Staff Counter)</h3>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 text-slate-400 hover:text-slate-600">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {modalError && (
-              <div className="p-3 rounded bg-red-50 text-red-700 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{modalError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleCreateSubmit} className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Session Type</label>
-                  <select
-                    value={newBookingType}
-                    onChange={(e) => setNewBookingType(e.target.value as any)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
-                  >
-                    <option value="FAMILY">Family (Exclusive)</option>
-                    <option value="PUBLIC">Public Swimming</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Start Time</label>
-                  <input
-                    type="time"
-                    required
-                    value={newStartTime}
-                    onChange={(e) => setNewStartTime(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Duration (Hours)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={6}
-                    required
-                    value={newDuration}
-                    onChange={(e) => setNewDuration(Number(e.target.value))}
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Guests</label>
-                  <input
-                    type="number"
-                    min={1}
-                    required
-                    value={newGuestCount}
-                    onChange={(e) => setNewGuestCount(Number(e.target.value))}
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Customer Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Anand Menon"
-                    value={newCustomerName}
-                    onChange={(e) => setNewCustomerName(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Customer Phone *</label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="98470XXXXX"
-                    value={newCustomerPhone}
-                    onChange={(e) => setNewCustomerPhone(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Advance Collected (₹)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={newAdvancePaid}
-                    onChange={(e) => setNewAdvancePaid(Number(e.target.value))}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Payment Method</label>
-                  <select
-                    value={newPaymentMethod}
-                    onChange={(e) => setNewPaymentMethod(e.target.value as any)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
-                  >
-                    <option value="CASH">Counter Cash</option>
-                    <option value="UPI">Counter UPI</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="px-4 py-1.5 rounded-lg bg-[#00838F] hover:bg-[#007079] text-white text-xs font-bold transition shadow-xs"
-                >
-                  {creating ? "Creating..." : "Confirm & Book Slot"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Collect Balance Modal */}
       {collectingBooking && (
@@ -577,8 +316,8 @@ export default function AdminBookingsPage() {
           <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
             <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">Collect Remaining Counter Balance</h3>
-                <p className="text-xs text-slate-500 font-mono">Booking: {collectingBooking.id}</p>
+                <h3 className="font-bold text-slate-900 text-sm">Collect Counter Balance</h3>
+                <p className="text-xs text-slate-500 font-mono">Booking Ref: {collectingBooking.id}</p>
               </div>
               <button onClick={() => setCollectingBooking(null)} className="p-1 text-slate-400 hover:text-slate-600">
                 <X className="w-4 h-4" />
@@ -586,34 +325,31 @@ export default function AdminBookingsPage() {
             </div>
 
             {collectError && (
-              <div className="p-3 bg-red-50 text-red-700 rounded text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{collectError}</span>
-              </div>
+              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-xs">{collectError}</div>
             )}
 
-            <form onSubmit={handleCollectSubmit} className="space-y-3 text-xs">
+            <form onSubmit={handleCollectBalance} className="space-y-4 text-xs">
               <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
                 <div className="flex justify-between text-slate-600">
                   <span>Customer:</span>
-                  <span className="font-bold text-slate-900">{collectingBooking.customerName}</span>
+                  <strong className="text-slate-900">{collectingBooking.customerName}</strong>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Total Amount:</span>
-                  <span className="font-mono text-slate-900">₹{collectingBooking.totalAmount}</span>
+                  <span className="font-semibold">₹{collectingBooking.totalAmount}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Already Paid:</span>
-                  <span className="font-mono text-emerald-700">₹{collectingBooking.totalPaid}</span>
+                  <span className="text-emerald-700 font-semibold">₹{collectingBooking.totalPaid}</span>
                 </div>
-                <div className="flex justify-between text-slate-700 font-bold pt-1 border-t border-slate-200">
-                  <span>Outstanding Balance:</span>
-                  <span className="font-mono text-rose-700">₹{collectingBooking.balanceAmount}</span>
+                <div className="flex justify-between text-slate-900 font-bold border-t border-slate-200 pt-1 mt-1 text-sm">
+                  <span>Remaining Balance:</span>
+                  <span className="text-amber-700">₹{collectingBooking.balanceAmount}</span>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Amount to Collect (₹) *</label>
+                <label className="block font-semibold text-slate-700 mb-1">Collection Amount (₹) *</label>
                 <input
                   type="number"
                   min={1}
@@ -621,36 +357,48 @@ export default function AdminBookingsPage() {
                   required
                   value={collectAmount}
                   onChange={(e) => setCollectAmount(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Payment Method *</label>
-                <select
-                  value={collectMethod}
-                  onChange={(e) => setCollectMethod(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-                >
-                  <option value="CASH">Cash Drawer</option>
-                  <option value="UPI">Counter UPI QR</option>
-                </select>
+                <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCollectMethod("CASH")}
+                    className={`p-2 rounded-lg border text-center font-bold text-xs ${
+                      collectMethod === "CASH" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 text-slate-700"
+                    }`}
+                  >
+                    Cash
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCollectMethod("UPI")}
+                    className={`p-2 rounded-lg border text-center font-bold text-xs ${
+                      collectMethod === "UPI" ? "border-cyan-600 bg-cyan-50 text-cyan-900" : "border-slate-200 text-slate-700"
+                    }`}
+                  >
+                    UPI QR Code
+                  </button>
+                </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setCollectingBooking(null)}
-                  className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 font-bold text-xs"
+                  className="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={collecting}
-                  className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-xs"
+                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
                 >
-                  {collecting ? "Recording..." : `Confirm Payment • ₹${collectAmount}`}
+                  {collecting ? "Recording..." : `Confirm ₹${collectAmount} Collected`}
                 </button>
               </div>
             </form>
@@ -658,52 +406,171 @@ export default function AdminBookingsPage() {
         </div>
       )}
 
-      {/* View / Print Receipt Modal */}
-      {receiptBooking && (
+      {/* Staff Manual Booking Modal */}
+      {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">M.A.K Indoor Pool Receipt</h3>
-                <p className="text-xs text-slate-500 font-mono">Ref: {receiptBooking.id}</p>
+                <h3 className="font-bold text-slate-900 text-sm">New Staff-Created Booking</h3>
+                <p className="text-xs text-slate-500">Record phone, WhatsApp or walk-in bookings</p>
               </div>
-              <button onClick={() => setReceiptBooking(null)} className="p-1 text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowCreateModal(false)} className="p-1 text-slate-400 hover:text-slate-600">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Customer:</span>
-                <span className="font-bold text-slate-900">{receiptBooking.customerName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Session:</span>
-                <span className="font-mono text-slate-900">{receiptBooking.bookingDate} ({receiptBooking.startTime} – {receiptBooking.endTime})</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Total Charged:</span>
-                <span className="font-bold font-mono text-slate-900">₹{receiptBooking.totalAmount}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Total Paid:</span>
-                <span className="font-bold font-mono text-emerald-700">₹{receiptBooking.totalPaid}</span>
-              </div>
-              <div className="flex justify-between pt-1 border-t border-slate-200">
-                <span className="text-slate-500">Remaining Balance:</span>
-                <span className="font-bold font-mono text-slate-900">₹{receiptBooking.balanceAmount}</span>
-              </div>
-            </div>
+            {modalError && (
+              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-xs">{modalError}</div>
+            )}
 
-            <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
-              <button
-                onClick={() => window.print()}
-                className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Receipt</span>
-              </button>
-            </div>
+            <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Session Type</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewBookingType("FAMILY");
+                      setNewStartTime("17:00");
+                      setNewAdvancePaid(750);
+                    }}
+                    className={`p-2 rounded-lg border text-center font-bold text-xs ${
+                      newBookingType === "FAMILY" ? "border-cyan-600 bg-cyan-50 text-cyan-900" : "border-slate-200"
+                    }`}
+                  >
+                    Family (4 PM – 11 PM)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewBookingType("PUBLIC");
+                      setNewStartTime("10:00");
+                      setNewAdvancePaid(300);
+                    }}
+                    className={`p-2 rounded-lg border text-center font-bold text-xs ${
+                      newBookingType === "PUBLIC" ? "border-cyan-600 bg-cyan-50 text-cyan-900" : "border-slate-200"
+                    }`}
+                  >
+                    Public (9 AM – 4 PM)
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={newDate}
+                    onChange={(e) => setNewDate(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Start Time</label>
+                  <input
+                    type="time"
+                    required
+                    value={newStartTime}
+                    onChange={(e) => setNewStartTime(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Duration</label>
+                  <select
+                    value={newDuration}
+                    onChange={(e) => setNewDuration(Number(e.target.value))}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
+                  >
+                    <option value={1}>1 Hr</option>
+                    <option value={2}>2 Hrs</option>
+                    <option value={3}>3 Hrs</option>
+                    <option value={4}>4 Hrs</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Total Guests</label>
+                <input
+                  type="number"
+                  min={1}
+                  required
+                  value={newGuestCount}
+                  onChange={(e) => setNewGuestCount(Number(e.target.value))}
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Customer Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newCustomerName}
+                    onChange={(e) => setNewCustomerName(e.target.value)}
+                    placeholder="e.g. Sreejith V"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Phone Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={newCustomerPhone}
+                    onChange={(e) => setNewCustomerPhone(e.target.value)}
+                    placeholder="9847012345"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Initial Payment (₹)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={newAdvancePaid}
+                    onChange={(e) => setNewAdvancePaid(Number(e.target.value))}
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Method</label>
+                  <select
+                    value={newPaymentMethod}
+                    onChange={(e) => setNewPaymentMethod(e.target.value as any)}
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  >
+                    <option value="CASH">Cash</option>
+                    <option value="UPI">UPI</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-3 flex justify-end gap-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold"
+                >
+                  {creating ? "Confirming..." : "Confirm Staff Booking"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

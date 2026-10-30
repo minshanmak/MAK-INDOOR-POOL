@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   Clock,
-  Wrench,
 } from "lucide-react";
 
 export default function AdminMaintenancePage() {
@@ -22,68 +21,6 @@ export default function AdminMaintenancePage() {
   const [waterClarity, setWaterClarity] = useState("CLEAR");
   const [readingRemarks, setReadingRemarks] = useState("");
   const [readingSubmitting, setReadingSubmitting] = useState(false);
-
-  // Safety Diagnostic Helpers
-  const getChlorineTolerance = (val: number) => {
-    if (val < 1.0) {
-      return {
-        label: "Critical Low",
-        detail: "Unsanitary risk; dose sodium hypochlorite immediately",
-        badgeClass: "bg-rose-100 text-rose-800 border-rose-300",
-        indicatorColor: "bg-rose-500",
-      };
-    }
-    if (val < 1.5) {
-      return {
-        label: "Low (Sub-optimal)",
-        detail: "Below target; increase chlorination rate",
-        badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
-        indicatorColor: "bg-amber-500",
-      };
-    }
-    if (val <= 3.0) {
-      return {
-        label: "Optimal (Sanitary)",
-        detail: "Ideal sanitary range (1.5–3.0 ppm)",
-        badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
-        indicatorColor: "bg-emerald-500",
-      };
-    }
-    return {
-      label: "Elevated / High",
-      detail: "Eye & skin irritation risk; pause chlorinator",
-      badgeClass: "bg-rose-100 text-rose-800 border-rose-300",
-      indicatorColor: "bg-rose-500",
-    };
-  };
-
-  const getPhTolerance = (val: number) => {
-    if (val < 7.2) {
-      return {
-        label: "Acidic (Corrosive)",
-        detail: "Corrosive to tile grout & pipes; add soda ash",
-        badgeClass: "bg-rose-100 text-rose-800 border-rose-300",
-        indicatorColor: "bg-rose-500",
-      };
-    }
-    if (val <= 7.6) {
-      return {
-        label: "Optimal Balance",
-        detail: "Maximum bather comfort & UV efficacy (7.2–7.6)",
-        badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
-        indicatorColor: "bg-emerald-500",
-      };
-    }
-    return {
-      label: "Alkaline (Scale-forming)",
-      detail: "Causes cloudy water and reduces sanitizer power",
-      badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
-      indicatorColor: "bg-amber-500",
-    };
-  };
-
-  const clTolerance = getChlorineTolerance(chlorinePpm);
-  const phTolerance = getPhTolerance(phLevel);
 
   // Checklist Form State
   const [shift, setShift] = useState<"MORNING" | "EVENING">("MORNING");
@@ -175,7 +112,7 @@ export default function AdminMaintenancePage() {
     }
   };
 
-  const handleReportIssue = async (e: React.FormEvent) => {
+  const handleIssueSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIssueSubmitting(true);
     try {
@@ -219,159 +156,109 @@ export default function AdminMaintenancePage() {
   };
 
   if (loading) {
-    return (
-      <div className="p-12 text-center text-slate-400 text-xs font-mono">
-        <div className="inline-flex items-center gap-2">
-          <div className="w-3.5 h-3.5 border-2 border-cyan-600 border-t-transparent rounded-full animate-spin" />
-          <span>Loading water telemetry & maintenance audit records...</span>
-        </div>
-      </div>
-    );
+    return <div className="p-8 text-center text-slate-400 text-xs">Loading maintenance & water safety records...</div>;
   }
 
   const { readings = [], checklists = [], issues = [] } = data || {};
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Title */}
-      <div className="border-b border-slate-200/90 pb-4">
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-cyan-800 font-semibold mb-1">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>WATER HYGIENE & PLANT SAFETY GOVERNANCE</span>
-        </div>
-        <h1 className="text-xl font-black text-slate-900 tracking-tight">Maintenance & Water Safety</h1>
-        <p className="text-xs text-slate-500">
-          Twice-daily chlorine/pH testing, shift cleaning checklists, and plant defect inspection logs
+      <div>
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Maintenance & Water Safety</h1>
+        <p className="text-xs text-slate-500 mt-0.5">
+          Twice-daily chlorine/pH testing, shift cleaning checklists, and equipment inspection logs
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Module 1: Water Reading Form & Logs */}
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 space-y-4">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Droplets className="w-4 h-4 text-cyan-700" />
-              <span>Log Water Quality Chemical Test</span>
+            <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <Droplets className="w-4 h-4 text-ocean-600" />
+              Log Water Quality Test
             </h2>
-            <span className="text-[10px] text-slate-500 font-mono">
-              Target: Cl 1.5–3.0 ppm | pH 7.2–7.6
+            <span className="text-[10px] text-slate-400 font-mono">
+              Ideal: Cl 1.5–3.0 ppm | pH 7.2–7.6
             </span>
           </div>
 
           <form onSubmit={handleWaterReadingSubmit} className="space-y-3 text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="block font-bold text-slate-700 text-[11px]">Chlorine (ppm) *</label>
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold font-mono border ${clTolerance.badgeClass}`}
-                  >
-                    {clTolerance.label}
-                  </span>
-                </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Chlorine (ppm) *</label>
                 <input
                   type="number"
                   step="0.1"
                   required
                   value={chlorinePpm}
                   onChange={(e) => setChlorinePpm(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono text-slate-900"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm"
                 />
-                <p className="text-[10px] text-slate-500 leading-tight">
-                  {clTolerance.detail}
-                </p>
               </div>
 
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="block font-bold text-slate-700 text-[11px]">pH Level *</label>
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold font-mono border ${phTolerance.badgeClass}`}
-                  >
-                    {phTolerance.label}
-                  </span>
-                </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">pH Level *</label>
                 <input
                   type="number"
                   step="0.1"
                   required
                   value={phLevel}
                   onChange={(e) => setPhLevel(Number(e.target.value))}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono text-slate-900"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm"
                 />
-                <p className="text-[10px] text-slate-500 leading-tight">
-                  {phTolerance.detail}
-                </p>
               </div>
 
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="block font-bold text-slate-700 text-[11px]">Water Clarity</label>
-                  <span className="text-[9px] font-mono text-slate-400">Visual index</span>
-                </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Water Clarity</label>
                 <select
                   value={waterClarity}
                   onChange={(e) => setWaterClarity(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
+                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm"
                 >
                   <option value="CLEAR">Crystal Clear</option>
                   <option value="SLIGHTLY_HAZY">Slightly Hazy</option>
                   <option value="HAZY">Hazy</option>
                   <option value="TURBID">Turbid (Alert)</option>
                 </select>
-                <p className="text-[10px] text-slate-400 leading-tight">
-                  Target: 1.8m deep basin floor clearly visible
-                </p>
               </div>
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1 text-[11px]">
-                Remarks / Chemical Dosing Adjustments
-              </label>
+              <label className="block font-semibold text-slate-700 mb-1">Remarks / Chemical Adjustments</label>
               <input
                 type="text"
                 value={readingRemarks}
                 onChange={(e) => setReadingRemarks(e.target.value)}
-                placeholder="e.g. Backwashed sand filters; added 200g sodium bicarbonate"
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
+                placeholder="e.g. Added 200g sodium bicarbonate / backwash performed"
+                className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
               />
             </div>
 
             <button
               type="submit"
               disabled={readingSubmitting}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-lg text-xs shadow-xs transition"
+              className="w-full bg-ocean-600 hover:bg-ocean-700 text-white font-bold py-2 rounded-xl text-xs transition"
             >
-              {readingSubmitting ? "Logging Test..." : "Record Water Quality Test"}
+              {readingSubmitting ? "Logging..." : "Record Water Reading"}
             </button>
           </form>
 
           {/* Recent Readings List */}
           <div className="pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
-              Recent Water Audits
-            </h3>
-            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            <h3 className="text-xs font-bold text-slate-700 mb-2">Recent Readings History</h3>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
               {readings.map((r: any) => (
-                <div
-                  key={r.id}
-                  className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-lg flex justify-between items-center text-xs"
-                >
+                <div key={r.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${
-                          r.status === "OPTIMAL"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
-                        }`}
-                      >
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        r.status === "OPTIMAL" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                      }`}>
                         {r.status}
                       </span>
-                      <strong className="text-slate-900 font-mono text-xs tabular-nums">
-                        Cl: {r.chlorinePpm} ppm • pH: {r.phLevel}
-                      </strong>
+                      <strong className="text-slate-900 font-mono">Cl: {r.chlorinePpm} ppm | pH: {r.phLevel}</strong>
                     </div>
                     <span className="text-[10px] text-slate-400 block mt-0.5">
                       {r.date} at {r.time} by {r.staffUser?.name || "Staff"} ({r.waterClarity})
@@ -384,16 +271,16 @@ export default function AdminMaintenancePage() {
         </div>
 
         {/* Module 2: Shift Cleaning Checklist */}
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 space-y-4">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+            <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
               <CheckSquare className="w-4 h-4 text-emerald-600" />
-              <span>Shift Cleaning Checklist Signoff</span>
+              Daily Shift Cleaning Checklist
             </h2>
             <select
               value={shift}
               onChange={(e) => setShift(e.target.value as any)}
-              className="px-2 py-1 border border-slate-300 rounded text-xs font-bold"
+              className="px-2 py-1 border border-slate-300 rounded text-xs font-semibold"
             >
               <option value="MORNING">Morning Shift</option>
               <option value="EVENING">Evening Shift</option>
@@ -401,29 +288,15 @@ export default function AdminMaintenancePage() {
           </div>
 
           <form onSubmit={handleChecklistSubmit} className="space-y-3 text-xs">
-            <div className="space-y-2 bg-slate-50 p-3.5 rounded-lg border border-slate-200/80">
+            <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={poolCleaned}
                   onChange={(e) => setPoolCleaned(e.target.checked)}
-                  className="rounded text-cyan-600 focus:ring-cyan-500"
+                  className="rounded text-ocean-600 focus:ring-ocean-500"
                 />
-                <span className="font-semibold text-slate-800">
-                  Pool surface vacuumed & skimmer baskets cleared
-                </span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={deckSanitized}
-                  onChange={(e) => setDeckSanitized(e.target.checked)}
-                  className="rounded text-cyan-600 focus:ring-cyan-500"
-                />
-                <span className="font-semibold text-slate-800">
-                  Pool deck tiles washed and scrubbed with disinfectant
-                </span>
+                <span className="font-medium text-slate-800">Pool surface vacuumed & skimmer nets cleaned</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -431,11 +304,19 @@ export default function AdminMaintenancePage() {
                   type="checkbox"
                   checked={surroundingsCleaned}
                   onChange={(e) => setSurroundingsCleaned(e.target.checked)}
-                  className="rounded text-cyan-600 focus:ring-cyan-500"
+                  className="rounded text-ocean-600 focus:ring-ocean-500"
                 />
-                <span className="font-semibold text-slate-800">
-                  Changing rooms, hot showers & toilets sanitized
-                </span>
+                <span className="font-medium text-slate-800">Deck tile floor scrubbed & disinfected</span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={deckSanitized}
+                  onChange={(e) => setDeckSanitized(e.target.checked)}
+                  className="rounded text-ocean-600 focus:ring-ocean-500"
+                />
+                <span className="font-medium text-slate-800">Changing rooms & shower stalls sanitized</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -443,11 +324,9 @@ export default function AdminMaintenancePage() {
                   type="checkbox"
                   checked={filtersChecked}
                   onChange={(e) => setFiltersChecked(e.target.checked)}
-                  className="rounded text-cyan-600 focus:ring-cyan-500"
+                  className="rounded text-ocean-600 focus:ring-ocean-500"
                 />
-                <span className="font-semibold text-slate-800">
-                  Sand filter pressure gauges checked & UV lamps inspected
-                </span>
+                <span className="font-medium text-slate-800">Sand filter pressure gauge inspected</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -455,56 +334,44 @@ export default function AdminMaintenancePage() {
                   type="checkbox"
                   checked={safetyGearChecked}
                   onChange={(e) => setSafetyGearChecked(e.target.checked)}
-                  className="rounded text-cyan-600 focus:ring-cyan-500"
+                  className="rounded text-ocean-600 focus:ring-ocean-500"
                 />
-                <span className="font-semibold text-slate-800">
-                  Lifebuoys, reach poles & first-aid kits verified on deck
-                </span>
+                <span className="font-medium text-slate-800">Life rings, ropes & kids vests in position</span>
               </label>
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1 text-[11px]">
-                Shift Notes & Handover Remarks
-              </label>
+              <label className="block font-semibold text-slate-700 mb-1">Checklist Notes</label>
               <input
                 type="text"
                 value={checklistNotes}
                 onChange={(e) => setChecklistNotes(e.target.value)}
-                placeholder="All items verified; facility ready for swimmers"
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
+                placeholder="Optional shift notes"
+                className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg"
               />
             </div>
 
             <button
               type="submit"
               disabled={checklistSubmitting}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs shadow-xs transition"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition"
             >
-              {checklistSubmitting ? "Signing Off..." : `Sign Off ${shift} Cleaning Checklist`}
+              {checklistSubmitting ? "Signing Off..." : `Sign Off ${shift} Checklist`}
             </button>
           </form>
 
           {/* Recent Checklists History */}
           <div className="pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
-              Recent Shift Signoffs
-            </h3>
-            <div className="space-y-1.5 max-h-36 overflow-y-auto">
+            <h3 className="text-xs font-bold text-slate-700 mb-2">Signed Checklists</h3>
+            <div className="space-y-1.5 max-h-40 overflow-y-auto text-xs">
               {checklists.map((c: any) => (
-                <div
-                  key={c.id}
-                  className="p-2 bg-slate-50 border border-slate-200/80 rounded-lg flex justify-between items-center text-xs"
-                >
-                  <div>
-                    <span className="font-bold text-slate-900">
-                      {c.date} • {c.shift} Shift
-                    </span>
-                    <span className="text-[10px] text-slate-500 block">
-                      Signed off by {c.staffUser?.name || "Staff"}
-                    </span>
-                  </div>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <div key={c.id} className="p-2 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center">
+                  <span className="font-semibold text-slate-800">
+                    {c.date} ({c.shift}) — Completed
+                  </span>
+                  <span className="text-[10px] text-slate-500">
+                    {c.staffUser?.name || "Staff"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -512,96 +379,98 @@ export default function AdminMaintenancePage() {
         </div>
       </div>
 
-      {/* Module 3: Maintenance Issues & Equipment Defect Tracker */}
-      <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-6 space-y-4">
+      {/* Module 3: Maintenance Issues Log */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-          <div>
-            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Wrench className="w-4 h-4 text-amber-600" />
-              <span>Plant & Equipment Defect Tracker ({issues.length})</span>
-            </h2>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              Report pumps, filtration valves, geysers, or deck fixtures needing service
-            </p>
-          </div>
+          <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            Report Maintenance Issue / Equipment Defect
+          </h2>
         </div>
 
-        <form onSubmit={handleReportIssue} className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs items-end">
-          <div className="sm:col-span-4">
-            <label className="block font-bold text-slate-700 mb-1 text-[11px]">Issue Title *</label>
+        <form onSubmit={handleIssueSubmit} className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+          <div className="sm:col-span-2">
             <input
               type="text"
               required
               value={issueTitle}
               onChange={(e) => setIssueTitle(e.target.value)}
-              placeholder="e.g. Pump #2 pressure drop"
-              className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
+              placeholder="Issue title e.g. Pool light bulb replaced / pump pressure high"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
             />
           </div>
-
-          <div className="sm:col-span-4">
-            <label className="block font-bold text-slate-700 mb-1 text-[11px]">Severity Level</label>
+          <div>
             <select
               value={issueSeverity}
               onChange={(e) => setIssueSeverity(e.target.value)}
-              className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-medium"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
             >
-              <option value="LOW">Low (Cosmetic / Deck fixture)</option>
-              <option value="MEDIUM">Medium (Filter or valve maintenance)</option>
-              <option value="HIGH">High (Immediate intervention required)</option>
+              <option value="LOW">Low Severity</option>
+              <option value="MEDIUM">Medium Severity</option>
+              <option value="HIGH">High Severity</option>
+              <option value="CRITICAL">Critical (Pool Closure)</option>
             </select>
           </div>
-
-          <div className="sm:col-span-4">
+          <div>
             <button
               type="submit"
               disabled={issueSubmitting}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-lg text-xs shadow-xs transition"
+              className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg"
             >
-              {issueSubmitting ? "Logging..." : "+ Log Defect Ticket"}
+              Log Issue
             </button>
+          </div>
+          <div className="sm:col-span-4">
+            <textarea
+              rows={2}
+              required
+              value={issueDesc}
+              onChange={(e) => setIssueDesc(e.target.value)}
+              placeholder="Detailed description of defect, affected equipment, and corrective action required..."
+              className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+            />
           </div>
         </form>
 
-        {issues.length > 0 && (
-          <div className="divide-y divide-slate-100 border-t border-slate-100 pt-3 text-xs">
-            {issues.map((iss: any) => (
-              <div key={iss.id} className="py-2.5 flex justify-between items-center">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${
-                        iss.severity === "HIGH"
-                          ? "bg-rose-50 text-rose-700 border border-rose-200"
-                          : iss.severity === "MEDIUM"
-                          ? "bg-amber-50 text-amber-700 border border-amber-200"
-                          : "bg-slate-100 text-slate-700 border border-slate-200"
-                      }`}
-                    >
-                      {iss.severity}
-                    </span>
-                    <strong className="text-slate-900">{iss.title}</strong>
-                  </div>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">
-                    Reported on {new Date(iss.createdAt).toLocaleDateString()} • Status: {iss.status}
+        {/* Issues List */}
+        <div className="pt-4 border-t border-slate-100 space-y-2">
+          {issues.map((i: any) => (
+            <div key={i.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-start text-xs">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                    i.status === "RESOLVED"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : i.severity === "CRITICAL"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-amber-100 text-amber-800"
+                  }`}>
+                    {i.status} ({i.severity})
                   </span>
+                  <strong className="text-slate-900">{i.title}</strong>
                 </div>
-
-                {iss.status !== "RESOLVED" ? (
+                <p className="text-slate-600 mt-1">{i.description}</p>
+                {i.resolutionNotes && (
+                  <p className="text-emerald-700 text-[11px] mt-1 font-semibold">
+                    Resolution: {i.resolutionNotes}
+                  </p>
+                )}
+              </div>
+              <div>
+                {i.status !== "RESOLVED" && (
                   <button
-                    onClick={() => handleResolveIssue(iss.id)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] px-2.5 py-1 rounded transition"
+                    onClick={() => handleResolveIssue(i.id)}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded text-[11px]"
                   >
                     Mark Resolved
                   </button>
-                ) : (
-                  <span className="text-emerald-700 text-[11px] font-semibold">Resolved</span>
                 )}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+

@@ -4,7 +4,8 @@ import { createTemporaryHold } from "@/lib/booking-engine";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { bookingType, date, startTime, endTime, guestCount } = body;
+    const { bookingType, startTime, endTime, guestCount } = body;
+    const date = body.date || body.bookingDate;
 
     if (!bookingType || !date || !startTime || !endTime || !guestCount) {
       return NextResponse.json(
