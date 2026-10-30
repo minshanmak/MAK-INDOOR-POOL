@@ -90,43 +90,53 @@ export default function PricingPage() {
           </div>
 
           {/* Card 2: Family Exclusive Booking */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-sm p-8 text-center flex flex-col justify-between space-y-6">
+          <div className="bg-white rounded-2xl border-2 border-[#00838F] shadow-float p-8 text-center flex flex-col justify-between space-y-6 relative overflow-hidden">
+            {/* Top Right Ribbon */}
+            <div className="absolute top-0 right-0 bg-[#00838F] text-white text-[10px] font-black uppercase tracking-wider py-1 px-4 rounded-bl-xl shadow-xs">
+              MOST POPULAR • 100% PRIVATE
+            </div>
+
             <div className="space-y-4">
               {/* Teal Family Icon */}
-              <div className="w-14 h-14 mx-auto rounded-full bg-cyan-50 text-[#00838F] flex items-center justify-center">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-teal-50 border border-teal-100 text-[#00838F] flex items-center justify-center">
                 <Users className="w-7 h-7 stroke-[2.2]" />
               </div>
 
-              <h2 className="text-xl font-bold text-[#0A192F]">Family Exclusive Booking</h2>
+              <div>
+                <h2 className="text-xl font-bold text-[#0A192F]">Family Exclusive Booking</h2>
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mt-1">
+                  Evening 4:00 PM – 11:00 PM
+                </span>
+              </div>
 
               <div>
                 <div className="text-4xl font-black text-[#0A192F] font-mono">₹1,500</div>
                 <div className="text-xs text-slate-500 font-medium mt-0.5">
-                  per hour (up to 12 people)
+                  per hour (up to 12 people included)
                 </div>
               </div>
 
               {/* Checklist */}
               <ul className="space-y-2.5 text-xs text-slate-600 text-left pt-4 border-t border-slate-100 max-w-xs mx-auto">
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>Private pool time for your family</span>
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>100% private pool time for your family</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>Up to 12 people included</span>
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Up to 12 people included in base rate</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>Additional guests: ₹100 per person per hour</span>
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Additional guests: ₹100 / person / hr</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>Advance payment of ₹750 required</span>
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>₹750 online advance to secure slot</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>Remaining amount to be paid on arrival</span>
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Remaining balance paid at counter on arrival</span>
                 </li>
               </ul>
             </div>
@@ -134,9 +144,10 @@ export default function PricingPage() {
             <div className="pt-4 border-t border-slate-100">
               <Link
                 href="/book?type=FAMILY"
-                className="w-full bg-[#00838F] hover:bg-[#007079] text-white font-bold py-3 rounded-lg text-xs shadow-xs transition duration-150 inline-block text-center"
+                className="w-full bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold py-3.5 rounded-xl text-xs shadow-xs transition duration-150 inline-flex items-center justify-center gap-1.5 text-center"
               >
-                Book Family Slot
+                <span>Book Family Exclusive Slot</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>

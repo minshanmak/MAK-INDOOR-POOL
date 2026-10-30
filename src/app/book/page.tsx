@@ -260,28 +260,52 @@ export default function BookNowPage() {
   const remainingArrivalBalance = computedTotal - requiredAdvance;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-10 sm:py-14">
+    <div className="min-h-screen bg-[#F8FAFC] py-10 sm:py-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Modern Step Progress Indicator */}
+        <div className="max-w-md mx-auto flex items-center justify-between text-xs font-semibold text-slate-500">
+          <div className={`flex items-center gap-2 ${step >= 1 ? "text-[#00838F] font-bold" : "text-slate-400"}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 1 ? "bg-[#00838F] text-white" : "bg-slate-200 text-slate-600"}`}>
+              1
+            </span>
+            <span>Configure</span>
+          </div>
+          <span className="h-0.5 w-12 bg-slate-200" />
+          <div className={`flex items-center gap-2 ${step >= 2 ? "text-[#00838F] font-bold" : "text-slate-400"}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 2 ? "bg-[#00838F] text-white" : "bg-slate-200 text-slate-600"}`}>
+              2
+            </span>
+            <span>Secure Hold</span>
+          </div>
+          <span className="h-0.5 w-12 bg-slate-200" />
+          <div className={`flex items-center gap-2 ${step >= 3 ? "text-emerald-700 font-bold" : "text-slate-400"}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 3 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600"}`}>
+              3
+            </span>
+            <span>Receipt</span>
+          </div>
+        </div>
+
         {/* Title & Subtitle Matching Reference */}
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h1 className="text-2xl sm:text-3xl font-black text-[#0A192F] tracking-tight">
             Book Your Swimming Slot
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
-            Choose between public swimming or an exclusive family booking.
+            Choose between daytime public swimming or an exclusive evening family booking.
           </p>
         </div>
 
         {/* Top Segmented Toggle Matching Reference Image */}
         {step === 1 && (
           <div className="flex justify-center">
-            <div className="inline-flex p-1 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="inline-flex p-1.5 bg-slate-100/90 border border-slate-200/90 rounded-2xl shadow-xs">
               <button
                 type="button"
                 onClick={() => setBookingType("PUBLIC")}
-                className={`px-6 py-2.5 rounded-lg text-xs font-bold transition duration-150 ${
+                className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 ${
                   bookingType === "PUBLIC"
-                    ? "bg-[#00838F] text-white shadow-xs"
+                    ? "bg-[#00838F] text-white shadow-xs scale-[1.02]"
                     : "text-slate-600 hover:text-[#00838F]"
                 }`}
               >
@@ -290,9 +314,9 @@ export default function BookNowPage() {
               <button
                 type="button"
                 onClick={() => setBookingType("FAMILY")}
-                className={`px-6 py-2.5 rounded-lg text-xs font-bold transition duration-150 ${
+                className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 ${
                   bookingType === "FAMILY"
-                    ? "bg-[#00838F] text-white shadow-xs"
+                    ? "bg-[#00838F] text-white shadow-xs scale-[1.02]"
                     : "text-slate-600 hover:text-[#00838F]"
                 }`}
               >

@@ -90,7 +90,7 @@ export default function AdminOverviewPage() {
       {/* 4 Metric Cards in a Row Matching Reference Image */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Today's Bookings */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-xs text-slate-500 font-medium block">Today's Bookings</span>
             <div className="text-2xl font-black text-[#0A192F] font-mono">
@@ -100,13 +100,13 @@ export default function AdminOverviewPage() {
               +2 from yesterday
             </span>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-sky-50 text-[#00838F] flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-sky-50 text-[#00838F] border border-sky-100 flex items-center justify-center shrink-0">
             <Calendar className="w-5 h-5 stroke-[2.2]" />
           </div>
         </div>
 
         {/* Card 2: Today's Collections */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-xs text-slate-500 font-medium block">Today's Collections</span>
             <div className="text-2xl font-black text-[#0A192F] font-mono">
@@ -116,13 +116,13 @@ export default function AdminOverviewPage() {
               +12% from yesterday
             </span>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center shrink-0">
             <IndianRupee className="w-5 h-5 stroke-[2.2]" />
           </div>
         </div>
 
         {/* Card 3: Upcoming Bookings */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-xs text-slate-500 font-medium block">Upcoming Bookings</span>
             <div className="text-2xl font-black text-[#0A192F] font-mono">
@@ -132,13 +132,13 @@ export default function AdminOverviewPage() {
               Next 7 days
             </span>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0">
             <Clock className="w-5 h-5 stroke-[2.2]" />
           </div>
         </div>
 
         {/* Card 4: Outstanding Balance */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-xs text-slate-500 font-medium block">Outstanding Balance</span>
             <div className="text-2xl font-black text-[#0A192F] font-mono">
@@ -148,7 +148,7 @@ export default function AdminOverviewPage() {
               From {todayBookings.filter((b: any) => b.balanceAmount > 0).length || 8} bookings
             </span>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0">
             <CreditCard className="w-5 h-5 stroke-[2.2]" />
           </div>
         </div>
