@@ -17,49 +17,50 @@ export default function PricingPage() {
   const balanceAtCounter = Math.max(0, totalPrice - advanceRequired);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
-      {/* 1. Hero Header with Pool Photography & Dark Teal Overlay Matching Reference */}
-      <section className="relative py-16 sm:py-20 bg-[#07172C] overflow-hidden text-center text-white">
+    <div className="min-h-screen bg-[#F8FAFC] pb-24">
+      {/* 1. Hero Header with Pool Photography & Deep Aquatic Navy Overlay */}
+      <section className="relative pt-16 sm:pt-20 pb-28 sm:pb-36 bg-[#07172C] overflow-hidden text-center text-white">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-35"
+          className="absolute inset-0 bg-cover bg-center opacity-30"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1920&q=80')`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#07172C]/85 via-[#07172C]/70 to-[#07172C]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#07172C]/90 via-[#07172C]/80 to-[#07172C]" />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 z-10">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
             Our Pricing
           </h1>
-          <p className="text-xs sm:text-sm text-slate-200 font-medium">
+          <p className="text-xs sm:text-sm text-slate-200 font-medium max-w-xl mx-auto">
             Simple and transparent pricing for a great swimming experience.
           </p>
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 space-y-12">
-        {/* 2. Side-by-Side Pricing Cards Matching Reference Image */}
+      {/* Main Content: Floating Pricing Cards and Details */}
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 sm:-mt-24 space-y-12">
+        {/* 2. Side-by-Side Symmetrical Pricing Cards Matching Reference Image */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           {/* Card 1: Public Swimming */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-sm p-8 text-center flex flex-col justify-between space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-lg hover:shadow-xl transition-all duration-200 p-8 sm:p-10 text-center flex flex-col justify-between space-y-6 relative">
             <div className="space-y-4">
-              {/* Teal Swimmer Icon */}
-              <div className="w-14 h-14 mx-auto rounded-full bg-cyan-50 text-[#00838F] flex items-center justify-center">
+              {/* Teal Swimmer Icon Badge */}
+              <div className="w-14 h-14 mx-auto rounded-full bg-teal-50 border border-teal-100/80 text-[#00838F] flex items-center justify-center">
                 <Waves className="w-7 h-7 stroke-[2.2]" />
               </div>
 
               <h2 className="text-xl font-bold text-[#0A192F]">Public Swimming</h2>
 
-              <div>
-                <div className="text-4xl font-black text-[#0A192F] font-mono">₹150</div>
-                <div className="text-xs text-slate-500 font-medium mt-0.5">
+              <div className="space-y-0.5">
+                <div className="text-4xl font-extrabold text-[#0A192F] font-mono tracking-tight">₹150</div>
+                <div className="text-xs text-slate-500 font-medium">
                   per person per hour
                 </div>
               </div>
 
               {/* Checklist */}
-              <ul className="space-y-2.5 text-xs text-slate-600 text-left pt-4 border-t border-slate-100 max-w-xs mx-auto">
+              <ul className="space-y-3 text-xs text-slate-600 text-left pt-5 border-t border-slate-100 max-w-xs mx-auto">
                 <li className="flex items-center gap-2.5">
                   <Check className="w-4 h-4 text-[#00838F] shrink-0" />
                   <span>Open swimming sessions</span>
@@ -82,7 +83,7 @@ export default function PricingPage() {
             <div className="pt-4 border-t border-slate-100">
               <Link
                 href="/book?type=PUBLIC"
-                className="w-full bg-[#00838F] hover:bg-[#007079] text-white font-bold py-3 rounded-lg text-xs shadow-xs transition duration-150 inline-block text-center"
+                className="w-full bg-[#00838F] hover:bg-[#007079] active:scale-[0.99] text-white font-bold py-3.5 rounded-xl text-xs shadow-xs transition duration-150 inline-block text-center"
               >
                 Book Public Swimming
               </Link>
@@ -90,53 +91,43 @@ export default function PricingPage() {
           </div>
 
           {/* Card 2: Family Exclusive Booking */}
-          <div className="bg-white rounded-2xl border-2 border-[#00838F] shadow-float p-8 text-center flex flex-col justify-between space-y-6 relative overflow-hidden">
-            {/* Top Right Ribbon */}
-            <div className="absolute top-0 right-0 bg-[#00838F] text-white text-[10px] font-black uppercase tracking-wider py-1 px-4 rounded-bl-xl shadow-xs">
-              MOST POPULAR • 100% PRIVATE
-            </div>
-
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-lg hover:shadow-xl transition-all duration-200 p-8 sm:p-10 text-center flex flex-col justify-between space-y-6 relative">
             <div className="space-y-4">
-              {/* Teal Family Icon */}
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-teal-50 border border-teal-100 text-[#00838F] flex items-center justify-center">
+              {/* Teal Family Icon Badge */}
+              <div className="w-14 h-14 mx-auto rounded-full bg-teal-50 border border-teal-100/80 text-[#00838F] flex items-center justify-center">
                 <Users className="w-7 h-7 stroke-[2.2]" />
               </div>
 
-              <div>
-                <h2 className="text-xl font-bold text-[#0A192F]">Family Exclusive Booking</h2>
-                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mt-1">
-                  Evening 4:00 PM – 11:00 PM
-                </span>
-              </div>
+              <h2 className="text-xl font-bold text-[#0A192F]">Family Exclusive Booking</h2>
 
-              <div>
-                <div className="text-4xl font-black text-[#0A192F] font-mono">₹1,500</div>
-                <div className="text-xs text-slate-500 font-medium mt-0.5">
-                  per hour (up to 12 people included)
+              <div className="space-y-0.5">
+                <div className="text-4xl font-extrabold text-[#0A192F] font-mono tracking-tight">₹1,500</div>
+                <div className="text-xs text-slate-500 font-medium">
+                  per hour (up to 12 people)
                 </div>
               </div>
 
               {/* Checklist */}
-              <ul className="space-y-2.5 text-xs text-slate-600 text-left pt-4 border-t border-slate-100 max-w-xs mx-auto">
+              <ul className="space-y-3 text-xs text-slate-600 text-left pt-5 border-t border-slate-100 max-w-xs mx-auto">
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>100% private pool time for your family</span>
+                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
+                  <span>Private pool time for your family</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Up to 12 people included in base rate</span>
+                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
+                  <span>Up to 12 people included</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Additional guests: ₹100 / person / hr</span>
+                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
+                  <span>Additional guests: ₹100 per person per hour</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>₹750 online advance to secure slot</span>
+                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
+                  <span>Advance payment of ₹750 required</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Remaining balance paid at counter on arrival</span>
+                  <Check className="w-4 h-4 text-[#00838F] shrink-0" />
+                  <span>Remaining amount to be paid on arrival</span>
                 </li>
               </ul>
             </div>
@@ -144,53 +135,52 @@ export default function PricingPage() {
             <div className="pt-4 border-t border-slate-100">
               <Link
                 href="/book?type=FAMILY"
-                className="w-full bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold py-3.5 rounded-xl text-xs shadow-xs transition duration-150 inline-flex items-center justify-center gap-1.5 text-center"
+                className="w-full bg-[#00838F] hover:bg-[#007079] active:scale-[0.99] text-white font-bold py-3.5 rounded-xl text-xs shadow-xs transition duration-150 inline-block text-center"
               >
-                <span>Book Family Exclusive Slot</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                Book Family Slot
               </Link>
             </div>
           </div>
         </div>
 
         {/* 3. Price Details Table Matching Reference Image */}
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
-          <div className="p-5 border-b border-slate-100">
-            <h2 className="text-sm font-bold text-[#0A192F]">Price Details</h2>
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 sm:px-8 sm:py-5 border-b border-slate-100">
+            <h2 className="text-base font-bold text-[#0A192F]">Price Details</h2>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+            <table className="w-full text-left text-xs sm:text-sm">
+              <thead className="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-3.5">Service</th>
-                  <th className="px-6 py-3.5 text-right">Price</th>
+                  <th className="px-6 py-3.5 sm:px-8">Service</th>
+                  <th className="px-6 py-3.5 sm:px-8 text-right">Price</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 <tr className="hover:bg-slate-50/50 transition">
-                  <td className="px-6 py-4 font-medium">Public swimming (per person per hour)</td>
-                  <td className="px-6 py-4 text-right font-bold text-[#0A192F] font-mono">₹150</td>
+                  <td className="px-6 py-4 sm:px-8 font-medium">Public swimming (per person per hour)</td>
+                  <td className="px-6 py-4 sm:px-8 text-right font-bold text-[#0A192F] font-mono">₹150</td>
                 </tr>
                 <tr className="hover:bg-slate-50/50 transition">
-                  <td className="px-6 py-4 font-medium">Family exclusive booking (per hour, up to 12 people)</td>
-                  <td className="px-6 py-4 text-right font-bold text-[#0A192F] font-mono">₹1,500</td>
+                  <td className="px-6 py-4 sm:px-8 font-medium">Family exclusive booking (per hour, up to 12 people)</td>
+                  <td className="px-6 py-4 sm:px-8 text-right font-bold text-[#0A192F] font-mono">₹1,500</td>
                 </tr>
                 <tr className="hover:bg-slate-50/50 transition">
-                  <td className="px-6 py-4 font-medium">Additional guest (above 12 people, per person per hour)</td>
-                  <td className="px-6 py-4 text-right font-bold text-[#0A192F] font-mono">₹100</td>
+                  <td className="px-6 py-4 sm:px-8 font-medium">Additional guest (above 12 people, per person per hour)</td>
+                  <td className="px-6 py-4 sm:px-8 text-right font-bold text-[#0A192F] font-mono">₹100</td>
                 </tr>
                 <tr className="hover:bg-slate-50/50 transition">
-                  <td className="px-6 py-4 font-medium">Advance payment for family booking (per booking)</td>
-                  <td className="px-6 py-4 text-right font-bold text-[#0A192F] font-mono">₹750</td>
+                  <td className="px-6 py-4 sm:px-8 font-medium">Advance payment for family booking (per booking)</td>
+                  <td className="px-6 py-4 sm:px-8 text-right font-bold text-[#0A192F] font-mono">₹750</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* 4. Interactive Price Calculator Slider */}
-        <div className="bg-white rounded-xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-5">
+        {/* 4. Interactive Price Calculator */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-5">
           <div className="flex items-center gap-2 text-[#00838F] font-bold text-xs uppercase tracking-wider">
             <Calculator className="w-4 h-4" />
             <span>Interactive Family Price Calculator</span>
@@ -209,7 +199,7 @@ export default function PricingPage() {
                   max="30"
                   value={calcGuests}
                   onChange={(e) => setCalcGuests(Number(e.target.value))}
-                  className="w-full accent-[#00838F]"
+                  className="w-full accent-[#00838F] cursor-pointer"
                 />
               </div>
 
@@ -224,7 +214,7 @@ export default function PricingPage() {
                   max="6"
                   value={calcHours}
                   onChange={(e) => setCalcHours(Number(e.target.value))}
-                  className="w-full accent-[#00838F]"
+                  className="w-full accent-[#00838F] cursor-pointer"
                 />
               </div>
             </div>
@@ -232,7 +222,7 @@ export default function PricingPage() {
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
               <div className="flex justify-between text-slate-600">
                 <span>Calculated Total:</span>
-                <span className="font-bold text-slate-900 font-mono text-sm">₹{totalPrice}</span>
+                <span className="font-bold text-slate-900 font-mono text-sm">₹{totalPrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Online Advance Required:</span>
@@ -240,7 +230,7 @@ export default function PricingPage() {
               </div>
               <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
                 <span>Remaining on Arrival:</span>
-                <span className="font-bold text-slate-900 font-mono">₹{balanceAtCounter}</span>
+                <span className="font-bold text-slate-900 font-mono">₹{balanceAtCounter.toLocaleString()}</span>
               </div>
             </div>
           </div>
