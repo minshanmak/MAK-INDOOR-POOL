@@ -34,7 +34,15 @@ export default function ContactPage() {
                 <MapPin className="w-5 h-5 text-ocean-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="block text-slate-900">Address</strong>
-                  <span>Near Metro Junction, Aluva, Ernakulam, Kerala - 683101</span>
+                  <span>Kalathingalpara, Kunnathparambi, Moonniyur, Malappuram district, Kerala — 676311</span>
+                  <a
+                    href="https://maps.google.com/?q=M.A.K+Indoor+pool+Moonniyur"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-xs text-cyan-700 hover:underline mt-1 font-medium"
+                  >
+                    View on Google Maps &rarr;
+                  </a>
                 </div>
               </div>
 
@@ -42,7 +50,9 @@ export default function ContactPage() {
                 <Phone className="w-5 h-5 text-ocean-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="block text-slate-900">Direct Calls & WhatsApp</strong>
-                  <span>+91 94470 12345 / +91 484 2621000</span>
+                  <a href="tel:+919947714716" className="text-slate-800 hover:text-cyan-700 font-mono">
+                    +91 99477 14716
+                  </a>
                 </div>
               </div>
 

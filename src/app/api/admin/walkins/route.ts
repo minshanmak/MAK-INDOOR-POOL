@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
+import { getPoolDate, getPoolTime } from "@/lib/timezone";
+import { isTimeOverlapping, timeToMinutes } from "@/lib/booking-engine";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +83,32 @@ export async function POST(req: NextRequest) {
   const collected = collectedAmount !== undefined && collectedAmount !== null ? Number(collectedAmount) : finalCharge;
 
   if (action === "QUICK_ENTRY" || action === "CHECK_IN") {
+    // Check if pool is currently reserved for a private family booking
+    const now = new Date();
+    const todayStr = getPoolDate(now);
+    const currentTimeStr = getPoolTime(now);
+    const endMinutes = timeToMinutes(currentTimeStr) + duration * 60;
+    const targetEndTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+
+    const activeFamilyBookings = await prisma.booking.findMany({
+      where: {
+        bookingDate: todayStr,
+        type: "FAMILY",
+        status: { in: ["CONFIRMED", "HOLD"] },
+      },
+    });
+
+    for (const fb of activeFamilyBookings) {
+      if (isTimeOverlapping(currentTimeStr, targetEndTime, fb.startTime, fb.endTime)) {
+        return NextResponse.json(
+          {
+            error: `Cannot admit public walk-ins: The pool is exclusively reserved for a private family booking (${fb.startTime} – ${fb.endTime}).`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     const walkIn = await prisma.$transaction(async (tx) => {
       const entry = await tx.walkIn.create({
         data: {

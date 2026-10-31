@@ -40,13 +40,15 @@ describe("Booking Engine & Concurrency Safety", () => {
       expect(latePublic.error).toContain("Public swimming is only available between 9:00 AM and 4:00 PM");
     });
 
-    it("enforces Family swimming operating hours: 04:00 PM - 11:00 PM", () => {
+    it("enforces Family swimming operating hours: 09:00 AM - 11:00 PM (Full Day & Evening)", () => {
+      expect(validateOperatingHours("FAMILY", "09:00", "12:00").valid).toBe(true);
+      expect(validateOperatingHours("FAMILY", "12:00", "14:00").valid).toBe(true);
       expect(validateOperatingHours("FAMILY", "16:00", "19:00").valid).toBe(true);
       expect(validateOperatingHours("FAMILY", "20:00", "23:00").valid).toBe(true);
-      // Attempting family booking at 12:00 PM should fail
-      const earlyFamily = validateOperatingHours("FAMILY", "12:00", "14:00");
+      // Attempting family booking before 9:00 AM should fail
+      const earlyFamily = validateOperatingHours("FAMILY", "08:00", "10:00");
       expect(earlyFamily.valid).toBe(false);
-      expect(earlyFamily.error).toContain("Exclusive family bookings are only available between 4:00 PM and 11:00 PM");
+      expect(earlyFamily.error).toContain("Operating hours are 9:00 AM to 11:00 PM");
     });
   });
 
@@ -192,5 +194,69 @@ describe("Booking Engine & Concurrency Safety", () => {
       expect(availGroupC.reason).toContain("Only 5 spots left");
     });
   });
-});
+    it("prevents public swimming booking when a family booking is confirmed for that slot", async () => {
+      const testDate = "2026-11-18";
+
+      // 1. Confirm morning family booking: 10:00 - 12:00
+      await confirmBooking({
+        bookingType: "FAMILY",
+        date: testDate,
+        startTime: "10:00",
+        endTime: "12:00",
+        guestCount: 10,
+        customerName: "Amina R",
+        customerPhone: "+919800022222",
+        initialPayment: {
+          amount: 750,
+          method: "GATEWAY",
+          transactionRef: "TEST-FAM-AM",
+        },
+      });
+
+      // 2. Query public swimming availability overlapping with family slot (11:00 - 12:00)
+      const publicQuery = await checkAvailability({
+        bookingType: "PUBLIC",
+        date: testDate,
+        startTime: "11:00",
+        endTime: "12:00",
+        guestCount: 2,
+      });
+
+      expect(publicQuery.available).toBe(false);
+      expect(publicQuery.reason).toContain("exclusively reserved for a private family booking");
+    });
+
+    it("prevents family booking when public swimmers already booked that slot", async () => {
+      const testDate = "2026-11-19";
+
+      // 1. Confirm public booking: 10:00 - 11:00
+      await confirmBooking({
+        bookingType: "PUBLIC",
+        date: testDate,
+        startTime: "10:00",
+        endTime: "11:00",
+        guestCount: 3,
+        customerName: "Rahul P",
+        customerPhone: "+919800033333",
+        initialPayment: {
+          amount: 450,
+          method: "GATEWAY",
+          transactionRef: "TEST-PUB-1",
+        },
+      });
+
+      // 2. Query family availability overlapping with public slot (09:00 - 11:00)
+      const familyQuery = await checkAvailability({
+        bookingType: "FAMILY",
+        date: testDate,
+        startTime: "09:00",
+        endTime: "11:00",
+        guestCount: 8,
+      });
+
+      expect(familyQuery.available).toBe(false);
+      expect(familyQuery.reason).toContain("Cannot book exclusive family session because public swimmers are already booked");
+    });
+  });
+
 

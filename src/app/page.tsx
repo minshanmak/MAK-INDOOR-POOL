@@ -137,7 +137,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-2.5 px-4 justify-center">
               <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span><strong>100% Private</strong> Evening Family</span>
+              <span><strong>100% Private</strong> Family Exclusivity</span>
             </div>
             <div className="flex items-center gap-2.5 px-4 justify-center">
               <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
@@ -283,7 +283,7 @@ export default function HomePage() {
             Choose Your Swimming Session
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-            Strict division between daytime shared swimming and evening 100% exclusive private bookings.
+            Guaranteed 100% private pool lockdown for family sessions, with shared daytime public swimming.
           </p>
         </div>
 
@@ -350,7 +350,7 @@ export default function HomePage() {
             <div className="space-y-4">
               <div className="flex justify-between items-start">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                  EVENING SESSION • 4:00 PM – 11:00 PM
+                  FULL DAY &amp; EVENING • 9:00 AM – 11:00 PM
                 </span>
               </div>
 

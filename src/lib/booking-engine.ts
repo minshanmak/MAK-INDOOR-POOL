@@ -74,10 +74,11 @@ export function validateOperatingHours(
       };
     }
   } else if (bookingType === "FAMILY") {
-    if (startMin < publicEndMin || endMin > dayCloseMin) {
+    // Family bookings are available between 9:00 AM and 11:00 PM (entire operating hours)
+    if (startMin < dayOpenMin || endMin > dayCloseMin) {
       return {
         valid: false,
-        error: `Exclusive family bookings are only available between 4:00 PM and 11:00 PM.`,
+        error: `Exclusive family bookings are available between ${settings.openHour}:00 AM and ${settings.closeHour % 12 || 12}:00 PM.`,
       };
     }
   }
@@ -163,10 +164,99 @@ export async function checkAvailability(
       }
     }
 
+    // C) Check overlapping PUBLIC bookings (since Family requires 100% private exclusivity)
+    const publicBookings = await db.booking.findMany({
+      where: {
+        bookingDate: query.date,
+        type: "PUBLIC",
+        status: { in: ["CONFIRMED", "HOLD"] },
+      },
+    });
+
+    for (const pb of publicBookings) {
+      if (isTimeOverlapping(query.startTime, query.endTime, pb.startTime, pb.endTime)) {
+        return {
+          available: false,
+          reason: `Cannot book exclusive family session because public swimmers are already booked for this slot (${pb.startTime} – ${pb.endTime}).`,
+        };
+      }
+    }
+
+    // D) Check active unexpired PUBLIC slot holds
+    const activePublicHolds = await db.slotHold.findMany({
+      where: {
+        date: query.date,
+        bookingType: "PUBLIC",
+        status: "ACTIVE",
+        expiresAt: { gt: now },
+      },
+    });
+
+    for (const hold of activePublicHolds) {
+      if (isTimeOverlapping(query.startTime, query.endTime, hold.startTime, hold.endTime)) {
+        return {
+          available: false,
+          reason: "Cannot book exclusive family session because public swimming checkout is currently in progress for this slot.",
+        };
+      }
+    }
+
+    // E) Check active walk-in visitors if query is for today
+    const todayStr = getPoolDate(now);
+    if (query.date === todayStr) {
+      const activeWalkIns = await db.walkIn.findMany({
+        where: { status: "ACTIVE" },
+      });
+      if (activeWalkIns.length > 0) {
+        return {
+          available: false,
+          reason: "Cannot book exclusive family session because public walk-in swimmers are currently in the pool.",
+        };
+      }
+    }
+
     return { available: true };
   }
 
-  // 2. PUBLIC SWIMMING: Shared capacity up to maxCapacity
+  // 2. PUBLIC SWIMMING: Must NEVER be booked during any slot reserved for an exclusive Family booking!
+  // A) Check overlapping confirmed or in-progress FAMILY bookings
+  const confirmedFamilyBookings = await db.booking.findMany({
+    where: {
+      bookingDate: query.date,
+      type: "FAMILY",
+      status: { in: ["CONFIRMED", "HOLD"] },
+    },
+  });
+
+  for (const fb of confirmedFamilyBookings) {
+    if (isTimeOverlapping(query.startTime, query.endTime, fb.startTime, fb.endTime)) {
+      return {
+        available: false,
+        reason: `This slot is exclusively reserved for a private family booking (${fb.startTime} – ${fb.endTime}). Public swimming is not permitted during private family sessions.`,
+      };
+    }
+  }
+
+  // B) Check active unexpired FAMILY slot holds
+  const activeFamilyHolds = await db.slotHold.findMany({
+    where: {
+      date: query.date,
+      bookingType: "FAMILY",
+      status: "ACTIVE",
+      expiresAt: { gt: now },
+    },
+  });
+
+  for (const hold of activeFamilyHolds) {
+    if (isTimeOverlapping(query.startTime, query.endTime, hold.startTime, hold.endTime)) {
+      return {
+        available: false,
+        reason: "This slot is currently held for a private family checkout in progress. Public swimming is not permitted during private family sessions.",
+      };
+    }
+  }
+
+  // C) Check public capacity up to maxCapacity
   const maxCap = settings?.maxCapacity || 25;
   const publicBookings = await db.booking.findMany({
     where: {

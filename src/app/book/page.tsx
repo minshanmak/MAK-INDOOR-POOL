@@ -114,16 +114,16 @@ function BookingContent() {
       setDurationHours(1);
     } else {
       // FAMILY
-      // If current hour is >= 23, evening exclusive has finished for today
+      // If current hour is >= 23, exclusive sessions finished for today
       if (currentISTHour >= 23) {
         setDate(tomorrowIST);
-        setStartTime("16:00");
+        setStartTime("09:00");
       } else {
         setDate(todayIST);
-        if (currentISTHour >= 16 && currentISTHour < 22) {
+        if (currentISTHour >= 9 && currentISTHour < 22) {
           setStartTime(`${String(currentISTHour + 1).padStart(2, "0")}:00`);
         } else {
-          setStartTime("16:00");
+          setStartTime("09:00");
         }
       }
       setGuestCount(8);
@@ -219,7 +219,10 @@ function BookingContent() {
 
   // Available Slot Choices
   const publicSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"];
-  const familySlots = ["16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+  const familySlots = [
+    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+    "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"
+  ];
   const activeSlots = bookingType === "PUBLIC" ? publicSlots : familySlots;
 
   // Check if slot has already concluded today
@@ -487,7 +490,7 @@ function BookingContent() {
                     2. Select Start Time
                   </label>
                   <span className="text-[10px] font-mono text-slate-400">
-                    {isFamily ? "Evening Exclusive (16:00 – 23:00)" : "Daytime Public (09:00 – 16:00)"}
+                    {isFamily ? "Full Day & Evening Exclusive (09:00 – 23:00)" : "Daytime Public (09:00 – 16:00)"}
                   </span>
                 </div>
 
@@ -648,7 +651,8 @@ function BookingContent() {
                     <span>Family Exclusive Booking Rules</span>
                   </div>
                   <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
-                    <li>Evening private sessions operate between 4:00 PM and 11:00 PM.</li>
+                    <li>Private exclusive sessions can be booked anytime between 9:00 AM and 11:00 PM.</li>
+                    <li>100% Private Pool: Once booked, public swimming is completely closed for your confirmed slot.</li>
                     <li>Base rate is ₹1,500 per hour for up to 12 guests (100% private pool).</li>
                     <li>Additional guests above 12 add ₹100 per person per hour across duration.</li>
                     <li>₹750 online advance required to hold and confirm your exclusive slot.</li>
