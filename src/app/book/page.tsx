@@ -50,6 +50,7 @@ function BookingContent() {
 
   // Server-Authoritative State
   const [availResult, setAvailResult] = useState<any>(null);
+  const [daySlots, setDaySlots] = useState<Record<string, { status: string; reason?: string; remainingCapacity?: number }>>({});
   const [holdToken, setHoldToken] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
@@ -70,6 +71,29 @@ function BookingContent() {
       setBookingType(paramType);
     }
   }, [paramType]);
+
+  // Fetch authoritative slot availability for the selected date and session type
+  useEffect(() => {
+    if (!date) return;
+    let isCancelled = false;
+
+    const fetchDaySlots = async () => {
+      try {
+        const res = await fetch(`/api/availability?date=${encodeURIComponent(date)}&type=${encodeURIComponent(bookingType)}`);
+        const json = await res.json();
+        if (!isCancelled && json.slots) {
+          setDaySlots(json.slots);
+        }
+      } catch (e) {
+        console.error("Failed to load day slots", e);
+      }
+    };
+
+    fetchDaySlots();
+    return () => {
+      isCancelled = true;
+    };
+  }, [date, bookingType]);
 
   // Handle switching between PUBLIC and FAMILY
   useEffect(() => {
@@ -132,12 +156,26 @@ function BookingContent() {
   const [startH] = startTime.split(":").map(Number);
   const maxAllowedHours = Math.max(1, Math.min(4, sessionEndHour - startH));
 
-  // Auto-clamp duration when slot changes
+  // Auto-clamp duration when slot changes or if it collides with a booked slot
   useEffect(() => {
     if (durationHours > maxAllowedHours) {
       setDurationHours(maxAllowedHours);
     }
   }, [startTime, maxAllowedHours, durationHours]);
+
+  // Helper to check if any intermediate hour in the selected duration is booked
+  const isDurationColliding = (start: string, duration: number) => {
+    const [startH] = start.split(":").map(Number);
+    for (let offset = 1; offset < duration; offset++) {
+      const intermediateSlot = `${String(startH + offset).padStart(2, "0")}:00`;
+      const status = daySlots[intermediateSlot]?.status;
+      if (status === "BOOKED" || status === "HELD") {
+        return true;
+      }
+    }
+    return false;
+  };
+
 
   const getEndTime = (start: string, duration: number): string => {
     const [h, m] = start.split(":").map(Number);
@@ -172,6 +210,9 @@ function BookingContent() {
             setAvailResult({ available: false, reason: data.error });
           } else {
             setAvailResult(data);
+            if (data.slots) {
+              setDaySlots(data.slots);
+            }
           }
         }
       } catch (err: any) {
@@ -208,6 +249,18 @@ function BookingContent() {
     const [slotH] = slot.split(":").map(Number);
     return slotH <= currentISTHour;
   };
+
+  // If currently selected slot is booked/held/past on newly loaded date, auto-select first available slot
+  useEffect(() => {
+    if (!daySlots || Object.keys(daySlots).length === 0) return;
+    const currentStatus = daySlots[startTime]?.status;
+    if (currentStatus === "BOOKED" || currentStatus === "HELD" || currentStatus === "PAST") {
+      const firstAvail = activeSlots.find((s) => daySlots[s]?.status === "AVAILABLE");
+      if (firstAvail) {
+        setStartTime(firstAvail);
+      }
+    }
+  }, [daySlots, startTime, activeSlots]);
 
   // Step 1 to Step 2: Request 15-Minute Slot Hold
   const handleProceedToPayment = async (e: React.FormEvent) => {
@@ -467,21 +520,27 @@ function BookingContent() {
                     2. Select Start Time
                   </label>
                   <span className="text-[10px] font-mono text-slate-400">
-                    {isFamily ? "Full Day & Evening Exclusive (09:00 – 23:00)" : "Daytime Public (09:00 – 16:00)"}
+                    {isFamily ? "Full Day & Evening Exclusive (09:00 AM – 11:00 PM)" : "Daytime Public (09:00 AM – 04:00 PM)"}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {activeSlots.map((slot) => {
-                    const isSelected = startTime === slot;
-                    const isPast = isSlotPastToday(slot);
+                    const slotInfo = daySlots[slot];
+                    const isPast = isSlotPastToday(slot) || slotInfo?.status === "PAST";
+                    const isBooked = slotInfo?.status === "BOOKED";
+                    const isHeld = slotInfo?.status === "HELD";
+                    const isDisabled = isPast || isBooked || isHeld;
+                    const isSelected = startTime === slot && !isDisabled;
 
                     return (
                       <button
                         key={slot}
                         type="button"
-                        disabled={isPast}
+                        disabled={isDisabled}
+                        title={slotInfo?.reason || undefined}
                         onClick={() => {
+                          if (isDisabled) return;
                           setStartTime(slot);
                           // Auto clamp duration if slot is near closing
                           const [sH] = slot.split(":").map(Number);
@@ -493,26 +552,61 @@ function BookingContent() {
                         className={`p-2.5 rounded-lg border text-center transition ${
                           isPast
                             ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-60"
+                            : isBooked
+                            ? "border-rose-200 bg-rose-50 text-rose-700 cursor-not-allowed"
+                            : isHeld
+                            ? "border-amber-200 bg-amber-50 text-amber-700 cursor-not-allowed"
                             : isSelected
                             ? "border-[#00838F] bg-[#00838F]/5 text-[#00838F] ring-1 ring-[#00838F]"
                             : "border-slate-200 bg-white hover:border-[#00838F]/40 text-slate-800"
                         }`}
                       >
-                        <div className="font-bold text-xs font-mono">{formatTimeSlot(slot)}</div>
+                        <div className={`font-bold text-xs font-mono ${isBooked ? "text-rose-900" : ""}`}>
+                          {formatTimeSlot(slot)}
+                        </div>
                         <div
                           className={`text-[10px] font-semibold mt-0.5 ${
                             isPast
                               ? "text-slate-400"
+                              : isBooked
+                              ? "text-rose-700 font-bold"
+                              : isHeld
+                              ? "text-amber-700 font-bold"
                               : isSelected
                               ? "text-[#00838F] font-bold"
                               : "text-emerald-700"
                           }`}
                         >
-                          {isPast ? "Past" : isSelected ? "Selected" : "Available"}
+                          {isPast
+                            ? "Past"
+                            : isBooked
+                            ? "Booked"
+                            : isHeld
+                            ? "In Checkout"
+                            : isSelected
+                            ? "Selected"
+                            : bookingType === "PUBLIC" && slotInfo?.remainingCapacity !== undefined && slotInfo.remainingCapacity < 10
+                            ? `${slotInfo.remainingCapacity} Left`
+                            : "Available"}
                         </div>
                       </button>
                     );
                   })}
+                </div>
+                {/* Visual Legend */}
+                <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" /> Available
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" /> Booked
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" /> In Checkout
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-slate-300" /> Past
+                  </span>
                 </div>
               </div>
 
@@ -570,7 +664,7 @@ function BookingContent() {
                   className="w-full sm:w-64 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00838F]"
                 >
                   {[1, 2, 3, 4]
-                    .filter((h) => h <= maxAllowedHours)
+                    .filter((h) => h <= maxAllowedHours && !isDurationColliding(startTime, h))
                     .map((h) => (
                       <option key={h} value={h}>
                         {h} Hour{h > 1 ? "s" : ""} (until {formatTimeSlot(getEndTime(startTime, h))})

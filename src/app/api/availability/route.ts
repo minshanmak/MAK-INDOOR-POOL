@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkAvailability } from "@/lib/booking-engine";
+import { checkAvailability, getDaySlotsAvailability } from "@/lib/booking-engine";
 import { calculateBookingPrice, DEFAULT_PRICING } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 
@@ -14,11 +14,22 @@ export async function GET(req: NextRequest) {
     const endTime = searchParams.get("endTime");
     const guestCount = parseInt(searchParams.get("guests") || "1", 10);
 
-    if (!date || !startTime || !endTime) {
+    if (!date) {
       return NextResponse.json(
-        { error: "Missing required query parameters: date, startTime, endTime" },
+        { error: "Missing required query parameter: date" },
         { status: 400 }
       );
+    }
+
+    // Always fetch authoritative day-level slot statuses
+    const daySlots = await getDaySlotsAvailability(date, bookingType);
+
+    // If caller only requested day-level slot status
+    if (!startTime || !endTime) {
+      return NextResponse.json({
+        available: true,
+        slots: daySlots,
+      });
     }
 
     const avail = await checkAvailability({
@@ -51,6 +62,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       ...avail,
       pricing,
+      slots: daySlots,
     });
   } catch (err: any) {
     console.error("Availability error:", err);

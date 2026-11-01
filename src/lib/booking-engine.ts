@@ -1,7 +1,7 @@
 import { prisma } from "./prisma";
 import { calculateBookingPrice, calculateRemainingBalance, DEFAULT_PRICING, PricingConfig } from "./pricing";
 import { hasPermission, PERMISSIONS } from "./permissions";
-import { getPoolDate } from "./timezone";
+import { getPoolDate, getPoolHour } from "./timezone";
 import { notificationService } from "./notifications";
 
 export interface SlotAvailabilityQuery {
@@ -318,6 +318,207 @@ export async function checkAvailability(
 /**
  * Creates a safe, expiring temporary slot hold for checkout.
  */
+
+export interface SlotStatusInfo {
+  slot: string;
+  status: "AVAILABLE" | "BOOKED" | "HELD" | "PAST";
+  reason?: string;
+  remainingCapacity?: number;
+}
+
+/**
+ * Returns the availability status of all slots on a given date for either PUBLIC or FAMILY.
+ */
+export async function getDaySlotsAvailability(
+  date: string,
+  bookingType: "PUBLIC" | "FAMILY",
+  db: any = prisma
+): Promise<Record<string, SlotStatusInfo>> {
+  const publicSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"];
+  const familySlots = [
+    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+    "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"
+  ];
+  const slots = bookingType === "PUBLIC" ? publicSlots : familySlots;
+
+  const settings = await db.poolSetting.findUnique({
+    where: { id: "singleton_settings" },
+  });
+  const maxCap = settings?.maxCapacity || 25;
+
+  const now = new Date();
+  const todayStr = getPoolDate(now);
+  const currentISTHour = getPoolHour(now);
+
+  await db.slotHold.updateMany({
+    where: {
+      status: "ACTIVE",
+      expiresAt: { lte: now },
+    },
+    data: { status: "EXPIRED" },
+  });
+
+  const bookings = await db.booking.findMany({
+    where: {
+      bookingDate: date,
+      status: { in: ["CONFIRMED", "HOLD"] },
+    },
+  });
+
+  const holds = await db.slotHold.findMany({
+    where: {
+      date,
+      status: "ACTIVE",
+      expiresAt: { gt: now },
+    },
+  });
+
+  let activeWalkInGuests = 0;
+  if (date === todayStr) {
+    const activeWalkIns = await db.walkIn.findMany({
+      where: { status: "ACTIVE" },
+    });
+    activeWalkInGuests = activeWalkIns.reduce((sum: number, w: any) => sum + w.visitorCount, 0);
+  }
+
+  const result: Record<string, SlotStatusInfo> = {};
+
+  for (const slot of slots) {
+    const [h, m] = slot.split(":").map(Number);
+    const endMinutes = h * 60 + (m || 0) + 60;
+    const endH = Math.floor(endMinutes / 60);
+    const endM = endMinutes % 60;
+    const slotEnd = String(endH).padStart(2, "0") + ":" + String(endM).padStart(2, "0");
+
+    if (date === todayStr && h <= currentISTHour) {
+      result[slot] = { slot, status: "PAST", reason: "Slot time has already passed today." };
+      continue;
+    }
+
+    if (settings?.maintenanceMode) {
+      result[slot] = { slot, status: "BOOKED", reason: settings.maintenanceMessage || "Under maintenance." };
+      continue;
+    }
+
+    if (bookingType === "FAMILY") {
+      const bookedFamily = bookings.find(
+        (b: any) => b.type === "FAMILY" && isTimeOverlapping(slot, slotEnd, b.startTime, b.endTime)
+      );
+      if (bookedFamily) {
+        result[slot] = {
+          slot,
+          status: "BOOKED",
+          reason: "Exclusive family slot is reserved (" + bookedFamily.startTime + " – " + bookedFamily.endTime + ").",
+        };
+        continue;
+      }
+
+      const heldFamily = holds.find(
+        (hold: any) => hold.bookingType === "FAMILY" && isTimeOverlapping(slot, slotEnd, hold.startTime, hold.endTime)
+      );
+      if (heldFamily) {
+        result[slot] = {
+          slot,
+          status: "HELD",
+          reason: "Checkout in progress for this family slot.",
+        };
+        continue;
+      }
+
+      const bookedPublic = bookings.find(
+        (b: any) => b.type === "PUBLIC" && isTimeOverlapping(slot, slotEnd, b.startTime, b.endTime)
+      );
+      if (bookedPublic) {
+        result[slot] = {
+          slot,
+          status: "BOOKED",
+          reason: "Public swimming visitors already booked for this slot.",
+        };
+        continue;
+      }
+
+      const heldPublic = holds.find(
+        (hold: any) => hold.bookingType === "PUBLIC" && isTimeOverlapping(slot, slotEnd, hold.startTime, hold.endTime)
+      );
+      if (heldPublic) {
+        result[slot] = {
+          slot,
+          status: "HELD",
+          reason: "Public swimming checkout in progress.",
+        };
+        continue;
+      }
+
+      if (date === todayStr && activeWalkInGuests > 0 && slot === (String(currentISTHour).padStart(2, "0") + ":00")) {
+        result[slot] = {
+          slot,
+          status: "BOOKED",
+          reason: "Public walk-in swimmers currently in the pool.",
+        };
+        continue;
+      }
+
+      result[slot] = { slot, status: "AVAILABLE" };
+    } else {
+      const bookedFamily = bookings.find(
+        (b: any) => b.type === "FAMILY" && isTimeOverlapping(slot, slotEnd, b.startTime, b.endTime)
+      );
+      if (bookedFamily) {
+        result[slot] = {
+          slot,
+          status: "BOOKED",
+          reason: "Exclusively reserved for private family session (" + bookedFamily.startTime + " – " + bookedFamily.endTime + ").",
+        };
+        continue;
+      }
+
+      const heldFamily = holds.find(
+        (hold: any) => hold.bookingType === "FAMILY" && isTimeOverlapping(slot, slotEnd, hold.startTime, hold.endTime)
+      );
+      if (heldFamily) {
+        result[slot] = {
+          slot,
+          status: "HELD",
+          reason: "Private family checkout in progress.",
+        };
+        continue;
+      }
+
+      let overlapGuests = 0;
+      for (const b of bookings as any[]) {
+        if (b.type === "PUBLIC" && isTimeOverlapping(slot, slotEnd, b.startTime, b.endTime)) {
+          overlapGuests += b.guestCount;
+        }
+      }
+      for (const hold of holds as any[]) {
+        if (hold.bookingType === "PUBLIC" && isTimeOverlapping(slot, slotEnd, hold.startTime, hold.endTime)) {
+          overlapGuests += hold.guestCount;
+        }
+      }
+      if (date === todayStr && slot === (String(currentISTHour).padStart(2, "0") + ":00")) {
+        overlapGuests += activeWalkInGuests;
+      }
+
+      if (overlapGuests >= maxCap) {
+        result[slot] = {
+          slot,
+          status: "BOOKED",
+          reason: "Slot capacity full (" + overlapGuests + "/" + maxCap + " booked).",
+          remainingCapacity: 0,
+        };
+      } else {
+        result[slot] = {
+          slot,
+          status: "AVAILABLE",
+          remainingCapacity: maxCap - overlapGuests,
+        };
+      }
+    }
+  }
+
+  return result;
+}
+
 export async function createTemporaryHold(
   query: SlotAvailabilityQuery
 ): Promise<{ holdToken: string; expiresAt: Date }> {

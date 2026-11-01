@@ -6,6 +6,7 @@ import {
   confirmBooking,
   validateOperatingHours,
   isTimeOverlapping,
+  getDaySlotsAvailability,
 } from "@/lib/booking-engine";
 
 describe("Booking Engine & Concurrency Safety", () => {
@@ -258,5 +259,38 @@ describe("Booking Engine & Concurrency Safety", () => {
       expect(familyQuery.reason).toContain("Cannot book exclusive family session because public swimmers are already booked");
     });
   });
+
+  describe("Day-level Slot Status Calculation (Booked vs Available)", () => {
+    it("marks booked family slots as BOOKED across entire duration", async () => {
+      const testDate = "2026-11-25";
+
+      // Confirm family booking for 17:00 to 19:00 (2 hours)
+      await confirmBooking({
+        bookingType: "FAMILY",
+        date: testDate,
+        startTime: "17:00",
+        endTime: "19:00",
+        guestCount: 6,
+        customerName: "Suresh K",
+        customerPhone: "+919800044444",
+        initialPayment: {
+          amount: 750,
+          method: "GATEWAY",
+          transactionRef: "TEST-FAM-D1",
+        },
+      });
+
+      const daySlots = await getDaySlotsAvailability(testDate, "FAMILY");
+
+      // 17:00 and 18:00 must be marked as BOOKED
+      expect(daySlots["17:00"].status).toBe("BOOKED");
+      expect(daySlots["18:00"].status).toBe("BOOKED");
+
+      // 16:00 and 19:00 must remain AVAILABLE
+      expect(daySlots["16:00"].status).toBe("AVAILABLE");
+      expect(daySlots["19:00"].status).toBe("AVAILABLE");
+    });
+  });
+
 
 
