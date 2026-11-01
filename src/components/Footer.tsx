@@ -284,7 +284,15 @@ export default function Footer() {
             <span className="text-slate-400">Moonniyur, Malappuram, Kerala, India</span>
             <span className="hidden sm:inline text-slate-700">•</span>
             <span className="text-slate-400">
-              Developed by <span className="text-cyan-400 font-semibold">MishGa</span>
+              Developed by{" "}
+              <a
+                href="https://mishga.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 font-semibold underline underline-offset-2 transition-colors"
+              >
+                MishGa
+              </a>
             </span>
           </div>
 

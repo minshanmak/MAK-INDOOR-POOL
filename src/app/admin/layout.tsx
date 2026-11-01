@@ -232,7 +232,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
           </div>
           <div className="pt-2 border-t border-slate-800/50 text-center text-[10px] text-slate-500">
-            Developed by <span className="text-cyan-400 font-semibold">MishGa</span>
+            Developed by{" "}
+            <a
+              href="https://mishga.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 font-semibold underline underline-offset-2 transition-colors"
+            >
+              MishGa
+            </a>
           </div>
         </div>
       </aside>
