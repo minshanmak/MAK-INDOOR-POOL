@@ -13,8 +13,6 @@ import {
   Clock,
   MapPin,
   Search,
-  ArrowRight,
-  ShieldCheck,
   ChevronRight,
 } from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
@@ -38,34 +36,24 @@ export default function Navbar() {
       try {
         const istHour = getPoolHour();
 
-
-
-
-
-
-
-
         if (istHour >= 9 && istHour < 16) {
           setCurrentSessionText(
             lang === "ml"
               ? "പൊതു നീന്തൽ സെഷൻ (വൈകിട്ട് 4 വരെ)"
               : "Public Swimming (Until 4:00 PM)"
           );
-  
         } else if (istHour >= 16 && istHour < 23) {
           setCurrentSessionText(
             lang === "ml"
               ? "പ്രത്യേക ഫാമിലി സെഷനുകൾ (രാത്രി 11 വരെ)"
               : "Family Exclusive Sessions (Until 11:00 PM)"
           );
-  
         } else {
           setCurrentSessionText(
             lang === "ml"
               ? "പൂൾ അടച്ചിരിക്കുന്നു (രാവിലെ 9 ന് തുറക്കും)"
               : "Pool Closed (Opens at 9:00 AM)"
           );
-  
         }
       } catch {
         // Fallback
@@ -114,9 +102,9 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-xs">
+    <header className="sticky top-0 z-50 bg-[#07172C] text-slate-100 shadow-md">
       {/* 1. TOP UTILITY RIBBON (Deep Aquatic Midnight Navy) */}
-      <div className="bg-[#06111E] text-slate-300 text-[11px] border-b border-slate-800/80">
+      <div className="bg-[#050E1A] text-slate-300 text-[11px] border-b border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex justify-between items-center gap-4">
           {/* Left: Live Facility Status & Location */}
           <div className="flex items-center gap-3 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -203,8 +191,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* 2. MAIN NAVIGATION BAR (Crisp White Surface with Refined Spacing) */}
-      <div className="border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
+      {/* 2. MAIN NAVIGATION BAR (Deep Aquatic Midnight connected seamlessly with Hero) */}
+      <div className="border-b border-slate-800/80 bg-[#07172C]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
             {/* Brand Logo */}
@@ -213,7 +201,7 @@ export default function Navbar() {
               className="flex items-center group py-2"
               aria-label="M.A.K Indoor Pool - Home"
             >
-              <MakLogo size="md" />
+              <MakLogo size="md" light={true} />
             </Link>
 
             {/* Desktop Navigation Links */}
@@ -229,17 +217,16 @@ export default function Navbar() {
                     href={link.href}
                     className={`relative flex items-center h-full text-[13px] font-semibold transition-colors duration-150 ${
                       isActive
-                        ? "text-[#00838F]"
-                        : "text-slate-600 hover:text-[#00838F]"
+                        ? "text-cyan-400 font-bold"
+                        : "text-slate-200 hover:text-cyan-300"
                     }`}
                   >
                     <span>{link.label}</span>
                     {/* Active Bottom Indicator Bar */}
                     {isActive && (
-                      <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#00838F] rounded-t-full shadow-xs" />
+                      <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-cyan-400 rounded-t-full shadow-[0_0_8px_rgba(34,211,238,0.7)]" />
                     )}
                   </Link>
-        
                 );
               })}
             </nav>
@@ -253,7 +240,7 @@ export default function Navbar() {
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                   Quick Enquiries
                 </span>
-                <span className="text-xs font-bold text-slate-800 group-hover:text-[#00838F] transition-colors tabular-nums">
+                <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors tabular-nums">
                   +91 99477 14716
                 </span>
               </a>
@@ -280,12 +267,12 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition"
+                className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition"
                 aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                 aria-expanded={mobileMenuOpen}
               >
                 {mobileMenuOpen ? (
-                  <X className="w-5 h-5 text-slate-900" />
+                  <X className="w-5 h-5 text-white" />
                 ) : (
                   <Menu className="w-5 h-5" />
                 )}
@@ -300,22 +287,22 @@ export default function Navbar() {
         <div className="fixed inset-0 z-50 top-[110px] md:hidden">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
 
           {/* Drawer Menu Surface */}
-          <div className="relative bg-white border-b border-slate-200 shadow-xl max-h-[calc(100vh-110px)] overflow-y-auto px-4 py-5 space-y-5">
+          <div className="relative bg-[#07172C] border-b border-slate-800 text-slate-100 shadow-2xl max-h-[calc(100vh-110px)] overflow-y-auto px-4 py-5 space-y-5">
             {/* Live Operational Status Banner */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-start gap-3 text-xs">
-              <div className="p-1.5 rounded-lg bg-teal-50 text-[#00838F] shrink-0 mt-0.5">
+            <div className="bg-slate-850/80 border border-slate-700/80 rounded-xl p-3 flex items-start gap-3 text-xs">
+              <div className="p-1.5 rounded-lg bg-cyan-950 text-cyan-400 shrink-0 mt-0.5">
                 <Clock className="w-4 h-4" />
               </div>
               <div className="leading-tight">
-                <span className="font-bold text-slate-900 block">
+                <span className="font-bold text-white block">
                   Open Daily: 9:00 AM – 11:00 PM
                 </span>
-                <span className="text-slate-500 text-[11px] block mt-0.5">
+                <span className="text-cyan-300 text-[11px] block mt-0.5">
                   {currentSessionText}
                 </span>
               </div>
@@ -338,24 +325,23 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold transition ${
                       isActive
-                        ? "text-[#00838F] bg-teal-50/80 font-bold"
-                        : "text-slate-700 hover:bg-slate-50"
+                        ? "text-cyan-300 bg-slate-800/90 font-bold border-l-2 border-cyan-400"
+                        : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
                     }`}
                   >
                     <span>{link.label}</span>
                     <ChevronRight
                       className={`w-4 h-4 ${
-                        isActive ? "text-[#00838F]" : "text-slate-400"
+                        isActive ? "text-cyan-400" : "text-slate-500"
                       }`}
                     />
                   </Link>
-        
                 );
               })}
             </div>
 
             {/* Action Group: Direct Call, WhatsApp & Booking */}
-            <div className="space-y-2 pt-2 border-t border-slate-100">
+            <div className="space-y-2 pt-2 border-t border-slate-800">
               <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-3 block mb-1">
                 Contact &amp; Reservations
               </span>
@@ -372,9 +358,9 @@ export default function Navbar() {
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <a
                   href="tel:+919947714716"
-                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition"
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-slate-700 bg-slate-800/60 text-slate-200 font-semibold text-xs hover:bg-slate-800 transition"
                 >
-                  <Phone className="w-3.5 h-3.5 text-cyan-600" />
+                  <Phone className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Call Desk</span>
                 </a>
 
@@ -382,9 +368,9 @@ export default function Navbar() {
                   href="https://wa.me/919947714716?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold text-xs hover:bg-emerald-100 transition"
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-emerald-800/80 bg-emerald-950/50 text-emerald-300 font-semibold text-xs hover:bg-emerald-900/60 transition"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
                   <span>WhatsApp</span>
                 </a>
               </div>
@@ -392,30 +378,30 @@ export default function Navbar() {
               <Link
                 href="/booking-status"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition text-center"
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-slate-700 bg-slate-800/40 text-slate-300 font-semibold text-xs hover:bg-slate-800 transition text-center"
               >
-                <Search className="w-3.5 h-3.5 text-slate-400" />
+                <Search className="w-3.5 h-3.5 text-cyan-400" />
                 <span>{t.checkBooking || "Lookup Existing Booking"}</span>
               </Link>
             </div>
 
             {/* Bottom Utility: Language Switcher & Staff Access */}
-            <div className="pt-3 border-t border-slate-100 flex justify-between items-center px-2 text-xs">
+            <div className="pt-3 border-t border-slate-800 flex justify-between items-center px-2 text-xs">
               <button
                 onClick={() => {
                   toggleLanguage();
                   setMobileMenuOpen(false);
                 }}
-                className="inline-flex items-center gap-1.5 text-slate-700 font-medium py-1 px-2 rounded-md hover:bg-slate-100 transition"
+                className="inline-flex items-center gap-1.5 text-slate-300 font-medium py-1 px-2 rounded-md hover:bg-slate-800 transition"
               >
-                <Globe className="w-3.5 h-3.5 text-[#00838F]" />
+                <Globe className="w-3.5 h-3.5 text-cyan-400" />
                 <span>{lang === "en" ? "ഭാഷ: മലയാളം" : "Language: English"}</span>
               </button>
 
               <Link
                 href="/admin/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-[#00838F] font-bold py-1 px-2 rounded-md hover:bg-teal-50 transition"
+                className="text-cyan-400 font-bold py-1 px-2 rounded-md hover:bg-slate-800 transition"
               >
                 {t.staffLogin || "Staff Portal"} &rarr;
               </Link>
