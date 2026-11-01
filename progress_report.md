@@ -21,7 +21,6 @@ The complete, production-oriented **M.A.K Indoor Pool Management System** has be
 - **Cancellation Workflow**: Cancellation requests register without releasing the slot. The slot is released only upon authorized manager cancellation approval.
 
 ### Phase 3 — Public Customer Website & Payment Gateway
-- **Bilingual Experience**: English and Malayalam (മലയാളം) toggle.
 - **Customer Pages**:
   - `/`: Hero, aquatic schedule distinction, features, safety protocols, and booking CTAs.
   - `/book`: 4-step guided booking flow (Slot selection, customer details, 15-min hold, test payment verification, and printable digital receipt).

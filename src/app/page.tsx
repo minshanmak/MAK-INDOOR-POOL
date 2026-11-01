@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import {
   Waves,
@@ -21,22 +21,8 @@ import {
   Activity,
   CheckCircle,
 } from "lucide-react";
-import { translations, Language } from "@/lib/i18n";
 
 export default function HomePage() {
-  const [lang, setLang] = useState<Language>("en");
-
-  useEffect(() => {
-    const updateLang = () => {
-      const saved = (localStorage.getItem("mak_lang") as Language) || "en";
-      setLang(saved);
-    };
-    updateLang();
-    window.addEventListener("languageChange", updateLang);
-    return () => window.removeEventListener("languageChange", updateLang);
-  }, []);
-
-  const t = translations[lang];
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-20 bg-[#F8FAFC]">

@@ -12,7 +12,6 @@ The system unifies two connected applications sharing an authoritative backend a
 
 ### A. Public Customer Website
 - **Pages**: Home, Book Now, Pricing, Facility Gallery, About Us, Contact, Operational Policies, FAQ, and Self-Service Booking Status Lookup.
-- **Bilingual Interface**: English and Malayalam (മലയാളം) toggle.
 - **Guided Booking Experience**:
   1. Slot type selection (Daily Public Swimming vs. Exclusive Family Booking).
   2. Date & slot availability with live capacity tracking.

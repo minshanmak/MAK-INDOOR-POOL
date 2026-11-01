@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
-  Globe,
   Phone,
   MessageCircle,
   Calendar,
@@ -14,48 +13,28 @@ import {
   Search,
   ChevronRight,
 } from "lucide-react";
-import { translations, Language } from "@/lib/i18n";
 import MakLogo from "@/components/MakLogo";
 import { getPoolHour } from "@/lib/timezone";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [lang, setLang] = useState<Language>("en");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentSessionText, setCurrentSessionText] = useState("Public Swimming (Until 4 PM)");
+  const [currentSessionText, setCurrentSessionText] = useState("Public Swimming (Until 4:00 PM)");
 
   useEffect(() => {
-    const saved = localStorage.getItem("mak_lang") as Language;
-    if (saved && (saved === "en" || saved === "ml")) {
-      setLang(saved);
-    }
-
     // Determine current live session based on IST hour (Asia/Kolkata)
     const updateSessionStatus = () => {
       try {
         const istHour = getPoolHour();
 
         if (istHour >= 9 && istHour < 16) {
-          setCurrentSessionText(
-            lang === "ml"
-              ? "പൊതു നീന്തൽ സെഷൻ (വൈകിട്ട് 4 വരെ)"
-              : "Public Swimming (Until 4:00 PM)"
-          );
+          setCurrentSessionText("Public Swimming (Until 4:00 PM)");
         } else if (istHour >= 16 && istHour < 23) {
-          setCurrentSessionText(
-            lang === "ml"
-              ? "പ്രത്യേക ഫാമിലി സെഷനുകൾ (രാത്രി 11 വരെ)"
-              : "Family Exclusive Sessions (Until 11:00 PM)"
-          );
+          setCurrentSessionText("Family Exclusive Sessions (Until 11:00 PM)");
         } else {
-          setCurrentSessionText(
-            lang === "ml"
-              ? "പൂൾ അടച്ചിരിക്കുന്നു (രാവിലെ 9 ന് തുറക്കും)"
-              : "Pool Closed (Opens at 9:00 AM)"
-          );
+          setCurrentSessionText("Pool Closed (Opens at 9:00 AM)");
         }
       } catch {
-        // Fallback
         setCurrentSessionText("Public 9 AM - 4 PM • Family 9 AM - 11 PM");
       }
     };
@@ -63,7 +42,7 @@ export default function Navbar() {
     updateSessionStatus();
     const interval = setInterval(updateSessionStatus, 60000);
     return () => clearInterval(interval);
-  }, [lang]);
+  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -77,27 +56,18 @@ export default function Navbar() {
     };
   }, [mobileMenuOpen]);
 
-  const toggleLanguage = () => {
-    const nextLang: Language = lang === "en" ? "ml" : "en";
-    setLang(nextLang);
-    localStorage.setItem("mak_lang", nextLang);
-    window.dispatchEvent(new Event("languageChange"));
-  };
-
-  const t = translations[lang];
-
   // Do not render public header on admin management routes
   if (pathname.startsWith("/admin")) {
     return null;
   }
 
   const navLinks = [
-    { href: "/", label: t.home || "Home" },
-    { href: "/about", label: t.about || "About" },
-    { href: "/pricing", label: t.prices || "Prices" },
-    { href: "/gallery", label: t.gallery || "Gallery" },
-    { href: "/policies", label: t.policies || "Policies" },
-    { href: "/contact", label: t.contact || "Contact" },
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About" },
+    { href: "/pricing", label: "Prices" },
+    { href: "/gallery", label: "Gallery" },
+    { href: "/policies", label: "Policies" },
+    { href: "/contact", label: "Contact" },
   ];
 
   return (
@@ -142,8 +112,8 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Right Action Group: Desk Contact, Language Switcher & Teal Book Now CTA */}
-            <div className="hidden md:flex items-center gap-3 lg:gap-4">
+            {/* Right Action Group: Desk Contact & Teal Book Now CTA */}
+            <div className="hidden md:flex items-center gap-4">
               <a
                 href="tel:+919947714716"
                 className="hidden lg:flex flex-col text-right leading-tight group"
@@ -156,22 +126,12 @@ export default function Navbar() {
                 </span>
               </a>
 
-              {/* Language Switcher Pill */}
-              <button
-                onClick={toggleLanguage}
-                className="inline-flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white px-2.5 py-1.5 rounded-lg border border-slate-700/80 transition-all text-xs font-semibold"
-                title="Toggle Language (English / മലയാളം)"
-              >
-                <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{lang === "en" ? "മലയാളം" : "English"}</span>
-              </button>
-
               <Link
                 href="/book"
                 className="bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold px-5 py-2.5 rounded-lg text-xs shadow-xs hover:shadow transition-all duration-150 flex items-center gap-2 group"
               >
                 <Calendar className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
-                <span>{t.bookNow || "Book Now"}</span>
+                <span>Book Now</span>
               </Link>
             </div>
 
@@ -273,7 +233,7 @@ export default function Navbar() {
                 className="w-full bg-[#00838F] hover:bg-[#007079] text-white font-bold py-3 rounded-lg text-xs shadow-xs flex items-center justify-center gap-2"
               >
                 <Calendar className="w-4 h-4" />
-                <span>{t.bookNow || "Book Swimming Slot Online"}</span>
+                <span>Book Swimming Slot Online</span>
               </Link>
 
               <div className="grid grid-cols-2 gap-2 pt-1">
@@ -302,29 +262,19 @@ export default function Navbar() {
                 className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-slate-700 bg-slate-800/40 text-slate-300 font-semibold text-xs hover:bg-slate-800 transition text-center"
               >
                 <Search className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{t.checkBooking || "Lookup Existing Booking"}</span>
+                <span>Lookup Existing Booking</span>
               </Link>
             </div>
 
-            {/* Bottom Utility: Language Switcher & Staff Access */}
-            <div className="pt-3 border-t border-slate-800 flex justify-between items-center px-2 text-xs">
-              <button
-                onClick={() => {
-                  toggleLanguage();
-                  setMobileMenuOpen(false);
-                }}
-                className="inline-flex items-center gap-1.5 text-slate-300 font-medium py-1 px-2 rounded-md hover:bg-slate-800 transition"
-              >
-                <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{lang === "en" ? "ഭാഷ: മലയാളം" : "Language: English"}</span>
-              </button>
-
+            {/* Bottom Utility: Staff Access */}
+            <div className="pt-3 border-t border-slate-800 flex justify-end items-center px-2 text-xs">
               <Link
                 href="/admin/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-cyan-400 font-bold py-1 px-2 rounded-md hover:bg-slate-800 transition"
+                className="text-cyan-400 hover:text-cyan-300 font-bold py-1 px-2 rounded-md hover:bg-slate-800 transition inline-flex items-center gap-1"
               >
-                {t.staffLogin || "Staff Portal"} &rarr;
+                <span>Staff Portal</span>
+                <span>&rarr;</span>
               </Link>
             </div>
           </div>
