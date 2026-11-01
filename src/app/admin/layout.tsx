@@ -231,6 +231,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Logout
             </button>
           </div>
+          <div className="pt-2 border-t border-slate-800/50 text-center text-[10px] text-slate-500">
+            Developed by <span className="text-cyan-400 font-semibold">MishGa</span>
+          </div>
         </div>
       </aside>
 

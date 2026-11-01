@@ -282,6 +282,10 @@ export default function Footer() {
             <p>© {currentYear} M.A.K Indoor Pool. All rights reserved.</p>
             <span className="hidden sm:inline text-slate-700">•</span>
             <span className="text-slate-400">Moonniyur, Malappuram, Kerala, India</span>
+            <span className="hidden sm:inline text-slate-700">•</span>
+            <span className="text-slate-400">
+              Developed by <span className="text-cyan-400 font-semibold">MishGa</span>
+            </span>
           </div>
 
           <div className="flex items-center gap-3.5 flex-wrap justify-center">
