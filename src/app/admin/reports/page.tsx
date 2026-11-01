@@ -10,7 +10,6 @@ import {
   Users,
   CreditCard,
   Clock,
-  ArrowUpRight,
   PieChart,
   Search,
   FileSpreadsheet,
@@ -19,6 +18,12 @@ import {
   Flame,
   Layers,
   Sparkles,
+  RefreshCw,
+  Sun,
+  Sunset,
+  Moon,
+  ChevronRight,
+  ArrowRight,
 } from "lucide-react";
 import { formatSlotTime } from "@/lib/timezone";
 
@@ -34,7 +39,7 @@ export default function AdminReportsPage() {
   const [activeAnalyticsTab, setActiveAnalyticsTab] = useState<ActiveTab>("timeline");
   const [tableFilter, setTableFilter] = useState<TableFilter>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
-  const [hoveredDay, setHoveredDay] = useState<any | null>(null);
+  const [selectedDay, setSelectedDay] = useState<any | null>(null);
 
   // Helper to set preset date ranges in Asia/Kolkata
   const applyPreset = (preset: string) => {
@@ -92,6 +97,10 @@ export default function AdminReportsPage() {
       const res = await fetch(url);
       const json = await res.json();
       setData(json);
+      // Auto-select latest day for inspection
+      if (json?.dailyTrends?.length > 0) {
+        setSelectedDay(json.dailyTrends[json.dailyTrends.length - 1]);
+      }
     } catch (err) {
       console.error("Failed to load reports:", err);
     } finally {
@@ -130,14 +139,12 @@ export default function AdminReportsPage() {
   // Filtered Bookings for Table
   const filteredBookings = useMemo(() => {
     return bookings.filter((b: any) => {
-      // Table tab filter
       if (tableFilter === "FAMILY" && b.type !== "FAMILY") return false;
       if (tableFilter === "PUBLIC" && b.type !== "PUBLIC") return false;
       if (tableFilter === "PENDING_BALANCE" && (b.balanceAmount <= 0 || b.status !== "CONFIRMED"))
         return false;
       if (tableFilter === "CANCELLED" && b.status !== "CANCELLED") return false;
 
-      // Text search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchId = b.id?.toLowerCase().includes(q);
@@ -169,6 +176,28 @@ export default function AdminReportsPage() {
     return [...hourlyDistribution].sort((a, b) => b.swimmers - a.swimmers)[0];
   }, [hourlyDistribution]);
 
+  // Group slots by operational periods
+  const morningSlots = useMemo(() => {
+    return hourlyDistribution.filter((s: any) => {
+      const h = parseInt(s.slot.split(":")[0], 10);
+      return h >= 9 && h < 12;
+    });
+  }, [hourlyDistribution]);
+
+  const afternoonSlots = useMemo(() => {
+    return hourlyDistribution.filter((s: any) => {
+      const h = parseInt(s.slot.split(":")[0], 10);
+      return h >= 12 && h < 16;
+    });
+  }, [hourlyDistribution]);
+
+  const eveningSlots = useMemo(() => {
+    return hourlyDistribution.filter((s: any) => {
+      const h = parseInt(s.slot.split(":")[0], 10);
+      return h >= 16;
+    });
+  }, [hourlyDistribution]);
+
   // Weekend vs Weekday revenue
   const weekendRevenue = useMemo(() => {
     return (
@@ -186,32 +215,61 @@ export default function AdminReportsPage() {
     );
   }, [dayOfWeekTrends]);
 
+  // Peak day in trends
+  const peakDay = useMemo(() => {
+    if (!dailyTrends.length) return null;
+    return [...dailyTrends].sort((a, b) => b.revenue - a.revenue)[0];
+  }, [dailyTrends]);
+
   return (
-    <div className="space-y-6 pb-12">
-      {/* 1. HEADER & CONTROLS */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
-        <div>
-          <div className="flex items-center gap-2 text-cyan-700 text-xs font-bold uppercase tracking-wider mb-1">
-            <BarChart3 className="w-4 h-4 text-cyan-600" />
-            <span>Executive Business Intelligence</span>
+    <div className="space-y-6 pb-12 text-slate-800">
+      {/* 1. TOP HEADER & FILTER BAR */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 sm:p-6 space-y-5">
+        {/* Row 1: Title, Subtitle, & Export Actions */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2 text-cyan-700 text-xs font-bold uppercase tracking-wider mb-1">
+              <BarChart3 className="w-4 h-4 text-cyan-600" />
+              <span>Executive Business Intelligence</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Reports &amp; Analytics
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Authoritative revenue trends, slot occupancy heatmaps, and financial audit reconciliation.
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Reports &amp; Analytics
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Real-time financial performance, revenue trends, slot occupancy curves, and customer intelligence.
-          </p>
+
+          {/* Export Actions */}
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <button
+              onClick={() => handleDownloadCsv("csv")}
+              className="flex-1 sm:flex-none bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-xs hover:shadow transition flex items-center justify-center gap-2"
+              title="Download detailed Bookings Report (.csv)"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export Bookings CSV</span>
+            </button>
+            <button
+              onClick={() => handleDownloadCsv("payments-csv")}
+              className="flex-1 sm:flex-none bg-slate-850 hover:bg-slate-900 active:scale-[0.98] text-slate-100 font-bold px-4 py-2.5 rounded-xl text-xs shadow-xs hover:shadow transition flex items-center justify-center gap-2 border border-slate-700/80"
+              title="Download Financial Transaction Ledger (.csv)"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-cyan-400" />
+              <span>Export Ledger CSV</span>
+            </button>
+          </div>
         </div>
 
-        {/* Date Filter Toolbar & Exports */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
-          {/* Preset Buttons */}
-          <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-semibold overflow-x-auto">
+        {/* Row 2: Date Presets & Custom Pickers */}
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pt-1">
+          {/* Preset Buttons Strip */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/90 text-xs font-semibold overflow-x-auto w-full xl:w-auto">
             {[
               { id: "today", label: "Today" },
               { id: "yesterday", label: "Yesterday" },
-              { id: "7d", label: "7 Days" },
-              { id: "30d", label: "30 Days" },
+              { id: "7d", label: "Last 7 Days" },
+              { id: "30d", label: "Last 30 Days" },
               { id: "this-month", label: "This Month" },
               { id: "all", label: "All Time" },
             ].map((preset) => (
@@ -219,7 +277,7 @@ export default function AdminReportsPage() {
                 key={preset.id}
                 type="button"
                 onClick={() => applyPreset(preset.id)}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
+                className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
                   activeDatePreset === preset.id
                     ? "bg-white text-slate-900 shadow-xs font-bold"
                     : "text-slate-600 hover:text-slate-900"
@@ -230,48 +288,40 @@ export default function AdminReportsPage() {
             ))}
           </div>
 
-          {/* Custom Date Pickers */}
-          <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setActiveDatePreset("custom");
-                setStartDate(e.target.value);
-              }}
-              className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700"
-              title="From Date"
-            />
-            <span className="text-slate-400 text-xs px-0.5">–</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setActiveDatePreset("custom");
-                setEndDate(e.target.value);
-              }}
-              className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700"
-              title="To Date"
-            />
-          </div>
+          {/* Custom Date Pickers & Refresh Button */}
+          <div className="flex items-center gap-2.5 w-full xl:w-auto">
+            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-600 w-full sm:w-auto">
+              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setActiveDatePreset("custom");
+                  setStartDate(e.target.value);
+                }}
+                className="bg-transparent font-medium text-slate-800 focus:outline-none"
+                title="Start Date"
+              />
+              <span className="text-slate-400 font-bold">–</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => {
+                  setActiveDatePreset("custom");
+                  setEndDate(e.target.value);
+                }}
+                className="bg-transparent font-medium text-slate-800 focus:outline-none"
+                title="End Date"
+              />
+            </div>
 
-          {/* Export Dropdown / Actions */}
-          <div className="flex items-center gap-2">
             <button
-              onClick={() => handleDownloadCsv("csv")}
-              className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-xs hover:shadow transition flex items-center justify-center gap-1.5 shrink-0"
-              title="Export Bookings CSV with full details"
+              onClick={fetchReport}
+              disabled={loading}
+              className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
+              title="Refresh Analytics"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Bookings CSV</span>
-            </button>
-            <button
-              onClick={() => handleDownloadCsv("payments-csv")}
-              className="bg-slate-800 hover:bg-slate-900 text-slate-100 font-bold px-3.5 py-2 rounded-xl text-xs shadow-xs hover:shadow transition flex items-center justify-center gap-1.5 shrink-0"
-              title="Export Payment Transactions Ledger"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Ledger CSV</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-cyan-600" : ""}`} />
             </button>
           </div>
         </div>
@@ -279,89 +329,97 @@ export default function AdminReportsPage() {
 
       {loading ? (
         <div className="p-16 text-center text-slate-500 bg-white rounded-2xl border border-slate-200/90 shadow-xs flex flex-col items-center justify-center gap-3">
-          <div className="w-6 h-6 border-2 border-cyan-600 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-semibold">Aggregating real-time business metrics &amp; trends...</span>
+          <div className="w-7 h-7 border-2 border-[#00838F] border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-semibold">Recalculating real-time pool metrics &amp; timeline trends...</span>
         </div>
       ) : (
         <>
-          {/* 2. EXECUTIVE KPI CARDS (6 METRICS) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            {/* Card 1: Net Revenue */}
-            <div className="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Net Revenue
+          {/* 2. EXECUTIVE 6-CARD KPI GRID (Responsive 3x2) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* KPI 1: Net Realized Revenue */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Net Realized Revenue
                 </span>
-                <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
+                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
                   <IndianRupee className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-2xl font-black text-slate-900 tracking-tight font-mono">
+              <div className="text-3xl font-black text-slate-900 tracking-tight font-mono">
                 ₹{summary.netRevenue?.toLocaleString("en-IN") || 0}
               </div>
-              <div className="text-[10px] text-slate-500 flex justify-between pt-1 border-t border-slate-100">
-                <span>Gross: ₹{summary.totalRevenue?.toLocaleString("en-IN") || 0}</span>
-                {summary.refundsApprovedTotal > 0 && (
-                  <span className="text-rose-600 font-medium">
+              <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-100 flex justify-between items-center">
+                <span>Gross: <strong>₹{summary.totalRevenue?.toLocaleString("en-IN") || 0}</strong></span>
+                {summary.refundsApprovedTotal > 0 ? (
+                  <span className="text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded">
                     Refunds: -₹{summary.refundsApprovedTotal}
                   </span>
+                ) : (
+                  <span className="text-emerald-700 font-semibold">Zero refunds</span>
                 )}
               </div>
             </div>
 
-            {/* Card 2: Total Swimmers */}
-            <div className="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Swimmers
+            {/* KPI 2: Total Swimmers Attended */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Total Swimmers
                 </span>
-                <span className="p-1.5 rounded-lg bg-cyan-50 text-cyan-700">
+                <span className="p-2 rounded-xl bg-cyan-50 text-cyan-700 border border-cyan-100">
                   <Users className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-2xl font-black text-cyan-900 tracking-tight font-mono">
+              <div className="text-3xl font-black text-cyan-900 tracking-tight font-mono">
                 {summary.totalSwimmers || 0}
               </div>
-              <div className="text-[10px] text-slate-500 flex justify-between pt-1 border-t border-slate-100">
-                <span>Fam: {summary.familySwimmers || 0}</span>
-                <span>Pub: {summary.publicSwimmers || 0}</span>
-                <span>Walk: {summary.walkInSwimmers || 0}</span>
+              <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-100 flex justify-between items-center">
+                <span>Family: <strong>{summary.familySwimmers || 0}</strong></span>
+                <span className="text-slate-300">•</span>
+                <span>Public: <strong>{summary.publicSwimmers || 0}</strong></span>
+                <span className="text-slate-300">•</span>
+                <span>Walk-in: <strong>{summary.walkInSwimmers || 0}</strong></span>
               </div>
             </div>
 
-            {/* Card 3: Total Bookings */}
-            <div className="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Total Bookings
+            {/* KPI 3: Total Sessions Booked */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Total Booked Sessions
                 </span>
-                <span className="p-1.5 rounded-lg bg-indigo-50 text-indigo-700">
+                <span className="p-2 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-100">
                   <Calendar className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-2xl font-black text-slate-900 tracking-tight font-mono">
+              <div className="text-3xl font-black text-slate-900 tracking-tight font-mono">
                 {(summary.familyBookingsCount || 0) + (summary.publicBookingsCount || 0)}
               </div>
-              <div className="text-[10px] text-slate-500 flex justify-between pt-1 border-t border-slate-100">
-                <span>Family: {summary.familyBookingsCount || 0}</span>
-                <span>Public: {summary.publicBookingsCount || 0}</span>
+              <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-100 flex justify-between items-center">
+                <span>Family Exclusive: <strong>{summary.familyBookingsCount || 0}</strong></span>
+                <span className="text-slate-300">•</span>
+                <span>Public Swim: <strong>{summary.publicBookingsCount || 0}</strong></span>
               </div>
             </div>
 
-            {/* Card 4: Collection Efficiency */}
-            <div className="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            {/* KPI 4: Collection Efficiency */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Collection Rate
                 </span>
-                <span className="p-1.5 rounded-lg bg-teal-50 text-teal-700">
+                <span className="p-2 rounded-xl bg-teal-50 text-teal-700 border border-teal-100">
                   <TrendingUp className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-2xl font-black text-teal-900 tracking-tight font-mono">
-                {summary.collectionEfficiency || 100}%
+              <div className="flex items-baseline gap-2">
+                <div className="text-3xl font-black text-teal-900 tracking-tight font-mono">
+                  {summary.collectionEfficiency || 100}%
+                </div>
+                <span className="text-xs text-slate-500 font-medium">collected upfront</span>
               </div>
-              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-1">
                 <div
                   className="bg-teal-600 h-full rounded-full transition-all duration-500"
                   style={{ width: `${summary.collectionEfficiency || 100}%` }}
@@ -369,48 +427,48 @@ export default function AdminReportsPage() {
               </div>
             </div>
 
-            {/* Card 5: Average Booking Value */}
-            <div className="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Avg. Booking (ARPB)
+            {/* KPI 5: Average Booking Value (ARPB) */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Avg. Spend / Session
                 </span>
-                <span className="p-1.5 rounded-lg bg-purple-50 text-purple-700">
+                <span className="p-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-100">
                   <Sparkles className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-2xl font-black text-slate-900 tracking-tight font-mono">
+              <div className="text-3xl font-black text-slate-900 tracking-tight font-mono">
                 ₹{summary.avgBookingValue?.toLocaleString("en-IN") || 0}
               </div>
-              <div className="text-[10px] text-slate-500 pt-1 border-t border-slate-100">
-                <span>Avg / Swimmer: ₹{summary.avgSwimmerValue || 0}</span>
+              <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-100 flex justify-between items-center">
+                <span>Avg per swimmer: <strong>₹{summary.avgSwimmerValue || 0}</strong></span>
               </div>
             </div>
 
-            {/* Card 6: Outstanding Receivables */}
-            <div className="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Due At Arrival
+            {/* KPI 6: Outstanding Balance Due At Arrival */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Counter Receivables
                 </span>
-                <span className="p-1.5 rounded-lg bg-amber-50 text-amber-700">
+                <span className="p-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
                   <CreditCard className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-2xl font-black text-amber-700 tracking-tight font-mono">
+              <div className="text-3xl font-black text-amber-700 tracking-tight font-mono">
                 ₹{summary.outstandingBalanceTotal?.toLocaleString("en-IN") || 0}
               </div>
-              <div className="text-[10px] text-slate-500 pt-1 border-t border-slate-100">
-                <span>Awaiting counter check-in</span>
+              <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-100 flex justify-between items-center">
+                <span>To be collected upon check-in</span>
               </div>
             </div>
           </div>
 
-          {/* 3. INTERACTIVE VISUAL TRENDS & ANALYTICS PANELS */}
+          {/* 3. VISUAL ANALYTICS PANELS (WITH CRISP NAVIGATION) */}
           <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
             {/* Visual Tabs Navigation */}
-            <div className="border-b border-slate-100 px-6 pt-4 flex flex-wrap gap-4 justify-between items-center bg-slate-50/50">
-              <div className="flex gap-2">
+            <div className="border-b border-slate-200/80 px-4 sm:px-6 pt-3 flex flex-wrap gap-2 justify-between items-center bg-slate-50/60">
+              <div className="flex gap-1 sm:gap-2 overflow-x-auto">
                 {[
                   { id: "timeline", label: "Revenue & Swimmers Timeline", icon: TrendingUp },
                   { id: "peak-hours", label: "Peak Hours & Slot Occupancy", icon: Clock },
@@ -424,9 +482,9 @@ export default function AdminReportsPage() {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveAnalyticsTab(tab.id as ActiveTab)}
-                      className={`flex items-center gap-2 py-3 px-3.5 text-xs font-bold border-b-2 transition-all ${
+                      className={`flex items-center gap-2 py-3 px-3.5 text-xs font-bold border-b-2 whitespace-nowrap transition-all ${
                         isActive
-                          ? "border-[#00838F] text-[#00838F]"
+                          ? "border-[#00838F] text-[#00838F] bg-white rounded-t-lg shadow-xs"
                           : "border-transparent text-slate-600 hover:text-slate-900"
                       }`}
                     >
@@ -437,43 +495,43 @@ export default function AdminReportsPage() {
                 })}
               </div>
 
-              {/* Right Summary Badge */}
-              <div className="hidden md:flex items-center gap-2 text-xs text-slate-500 pb-2">
-                {busiestHour && busiestHour.swimmers > 0 && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200/80 text-rose-700 font-semibold text-[11px]">
+              {/* Prime Slot Flag */}
+              {busiestHour && busiestHour.swimmers > 0 && (
+                <div className="hidden lg:flex items-center gap-2 text-xs py-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200/80 text-rose-700 font-bold text-[11px]">
                     <Flame className="w-3.5 h-3.5 text-rose-600" />
-                    <span>Prime Slot: <strong>{busiestHour.label}</strong> ({busiestHour.swimmers} swimmers)</span>
+                    <span>Peak Slot: {busiestHour.label} ({busiestHour.swimmers} swimmers)</span>
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* TAB CONTENT 1: REVENUE & SWIMMERS TIMELINE */}
+            {/* TAB 1: REVENUE & SWIMMERS TIMELINE */}
             {activeAnalyticsTab === "timeline" && (
-              <div className="p-6 space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div className="p-5 sm:p-6 space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                   <div>
                     <h2 className="text-sm font-bold text-slate-900">
-                      Daily Revenue &amp; Swimmer Volume Distribution
+                      Daily Revenue &amp; Attendance Trend
                     </h2>
                     <p className="text-xs text-slate-500">
-                      Hover over any day bar to inspect payment method breakdowns, booking volumes, and attendance.
+                      Tap or hover any day bar to inspect payment channels and attendance volume.
                     </p>
                   </div>
 
                   {/* Legend */}
-                  <div className="flex items-center gap-4 text-xs font-semibold text-slate-600">
+                  <div className="flex flex-wrap items-center gap-3.5 text-xs font-semibold text-slate-600">
                     <span className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-xs bg-[#00838F]" />
                       <span>Online Gateway</span>
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-xs bg-emerald-600" />
-                      <span>UPI</span>
+                      <span>Counter UPI</span>
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-xs bg-indigo-600" />
-                      <span>Cash</span>
+                      <span>Counter Cash</span>
                     </span>
                   </div>
                 </div>
@@ -484,34 +542,32 @@ export default function AdminReportsPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {/* SVG / HTML Bar Chart */}
-                    <div className="relative pt-6 pb-2 overflow-x-auto">
-                      <div className="min-w-[640px] flex items-end justify-between gap-2 h-56 border-b border-slate-200 pb-1">
+                    {/* Bar Chart Canvas */}
+                    <div className="pt-6 pb-2 overflow-x-auto">
+                      <div className="min-w-[620px] flex items-end justify-between gap-2.5 h-60 border-b border-slate-200 pb-1">
                         {dailyTrends.map((d: any) => {
-                          const heightPct = Math.max(8, Math.round((d.revenue / maxDayRevenue) * 100));
-                          const isHovered = hoveredDay?.date === d.date;
+                          const heightPct = Math.max(10, Math.round((d.revenue / maxDayRevenue) * 100));
+                          const isSelected = selectedDay?.date === d.date;
 
                           return (
                             <div
                               key={d.date}
-                              onMouseEnter={() => setHoveredDay(d)}
-                              onMouseLeave={() => setHoveredDay(null)}
+                              onClick={() => setSelectedDay(d)}
+                              onMouseEnter={() => setSelectedDay(d)}
                               className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative"
                             >
                               {/* Swimmer badge above bar */}
-                              {d.swimmersCount > 0 && (
-                                <span className="text-[10px] font-bold font-mono text-slate-500 mb-1 group-hover:text-cyan-700 transition">
-                                  {d.swimmersCount}
-                                </span>
-                              )}
+                              <span className="text-[10px] font-bold font-mono text-slate-500 mb-1 group-hover:text-cyan-700 transition">
+                                {d.swimmersCount > 0 ? d.swimmersCount : "–"}
+                              </span>
 
-                              {/* Stacked / Proportionate Bar */}
+                              {/* Stacked Bar */}
                               <div
                                 style={{ height: `${heightPct}%` }}
-                                className={`w-full max-w-[42px] rounded-t-lg transition-all duration-200 overflow-hidden flex flex-col justify-end ${
-                                  isHovered
-                                    ? "ring-2 ring-cyan-500 shadow-md scale-[1.03]"
-                                    : "opacity-90 hover:opacity-100"
+                                className={`w-full max-w-[44px] rounded-t-lg transition-all duration-150 overflow-hidden flex flex-col justify-end ${
+                                  isSelected
+                                    ? "ring-2 ring-[#00838F] shadow-md scale-[1.04]"
+                                    : "opacity-85 hover:opacity-100"
                                 }`}
                               >
                                 {d.revenue > 0 ? (
@@ -539,7 +595,7 @@ export default function AdminReportsPage() {
                                     />
                                   </>
                                 ) : (
-                                  <div className="w-full h-full bg-slate-200/80 rounded-t-lg" />
+                                  <div className="w-full h-full bg-slate-200/70 rounded-t-lg" />
                                 )}
                               </div>
 
@@ -558,141 +614,260 @@ export default function AdminReportsPage() {
                       </div>
                     </div>
 
-                    {/* Interactive Tooltip Card */}
-                    {hoveredDay ? (
-                      <div className="p-3.5 bg-slate-900 text-white rounded-xl shadow-lg flex flex-wrap items-center justify-between gap-4 text-xs">
+                    {/* Inspector Details Box */}
+                    {selectedDay && (
+                      <div className="p-4 bg-slate-900 text-slate-100 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs">
                         <div className="flex items-center gap-3">
                           <span className="font-bold text-cyan-300 text-sm">
-                            {hoveredDay.label} ({hoveredDay.dayName})
+                            {selectedDay.label} ({selectedDay.dayName})
                           </span>
-                          <span className="text-slate-400">•</span>
-                          <span className="font-mono text-white font-bold">
-                            Total Revenue: ₹{hoveredDay.revenue.toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-slate-300">
-                          <span>
-                            Online: <strong className="text-cyan-400">₹{hoveredDay.onlineRevenue}</strong>
-                          </span>
-                          <span>
-                            UPI: <strong className="text-emerald-400">₹{hoveredDay.upiRevenue}</strong>
-                          </span>
-                          <span>
-                            Cash: <strong className="text-indigo-300">₹{hoveredDay.cashRevenue}</strong>
-                          </span>
-                          <span>
-                            Swimmers: <strong className="text-white">{hoveredDay.swimmersCount}</strong>
-                          </span>
-                          <span>
-                            Bookings: <strong className="text-white">{hoveredDay.bookingsCount}</strong>
+                          <span className="text-slate-600">|</span>
+                          <span className="font-mono text-white font-bold text-sm">
+                            Total Revenue: ₹{selectedDay.revenue.toLocaleString("en-IN")}
                           </span>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="text-[11px] text-slate-400 italic text-center py-1">
-                        Move your cursor over any bar above to inspect specific date collections and traffic breakdown.
+                        <div className="flex flex-wrap items-center gap-4 text-slate-300 text-[11px]">
+                          <span>
+                            Online: <strong className="text-cyan-400 font-mono">₹{selectedDay.onlineRevenue}</strong>
+                          </span>
+                          <span>
+                            UPI: <strong className="text-emerald-400 font-mono">₹{selectedDay.upiRevenue}</strong>
+                          </span>
+                          <span>
+                            Cash: <strong className="text-indigo-300 font-mono">₹{selectedDay.cashRevenue}</strong>
+                          </span>
+                          <span>
+                            Swimmers: <strong className="text-white font-mono">{selectedDay.swimmersCount}</strong>
+                          </span>
+                          <span>
+                            Bookings: <strong className="text-white font-mono">{selectedDay.bookingsCount}</strong>
+                          </span>
+                        </div>
                       </div>
                     )}
+
+                    {/* Summary Quick Stats Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <span className="text-slate-500 block text-[11px]">Peak Collection Day</span>
+                        <strong className="text-slate-900 font-bold">
+                          {peakDay ? `${peakDay.label} (₹${peakDay.revenue.toLocaleString("en-IN")})` : "N/A"}
+                        </strong>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <span className="text-slate-500 block text-[11px]">Daily Average Revenue</span>
+                        <strong className="text-slate-900 font-bold">
+                          ₹{dailyTrends.length > 0 ? Math.round(summary.totalRevenue / dailyTrends.length).toLocaleString("en-IN") : 0} / day
+                        </strong>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <span className="text-slate-500 block text-[11px]">Daily Average Swimmers</span>
+                        <strong className="text-slate-900 font-bold">
+                          {dailyTrends.length > 0 ? Math.round(summary.totalSwimmers / dailyTrends.length) : 0} swimmers / day
+                        </strong>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* TAB CONTENT 2: PEAK HOURS & SLOT OCCUPANCY */}
+            {/* TAB 2: PEAK HOURS & SLOT OCCUPANCY */}
             {activeAnalyticsTab === "peak-hours" && (
-              <div className="p-6 space-y-6">
+              <div className="p-5 sm:p-6 space-y-6">
                 <div>
                   <h2 className="text-sm font-bold text-slate-900">
-                    Hourly Slot Occupancy &amp; Heatmap (9:00 AM – 10:00 PM)
+                    Hourly Slot Occupancy &amp; Density Heatmap
                   </h2>
                   <p className="text-xs text-slate-500">
-                    Identify high-demand slots, evening family surges, and off-peak daytime hours to optimize capacity.
+                    Arranged by facility operating shifts (Morning Public, Afternoon Public, and Evening Family Exclusive).
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
-                  {hourlyDistribution.map((slot: any) => {
-                    const isBusiest = busiestHour?.slot === slot.slot && slot.swimmers > 0;
-                    const fillRatio = Math.round((slot.swimmers / maxSlotSwimmers) * 100);
+                {/* Period 1: Morning Public Swimming */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    <Sun className="w-4 h-4 text-amber-500" />
+                    <span>Morning Public Swimming (09:00 AM – 12:00 PM)</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {morningSlots.map((slot: any) => {
+                      const isBusiest = busiestHour?.slot === slot.slot && slot.swimmers > 0;
+                      const fillRatio = Math.round((slot.swimmers / maxSlotSwimmers) * 100);
 
-                    return (
-                      <div
-                        key={slot.slot}
-                        className={`p-3.5 rounded-xl border transition-all ${
-                          isBusiest
-                            ? "bg-rose-50/60 border-rose-300 shadow-xs ring-1 ring-rose-400"
-                            : "bg-slate-50/80 border-slate-200/80 hover:bg-white"
-                        }`}
-                      >
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="font-mono font-bold text-xs text-slate-900">
-                            {slot.label}
-                          </span>
-                          {isBusiest && (
-                            <span className="text-[9px] font-bold uppercase bg-rose-600 text-white px-1.5 py-0.5 rounded">
-                              Top Slot
+                      return (
+                        <div
+                          key={slot.slot}
+                          className={`p-4 rounded-xl border transition-all ${
+                            isBusiest
+                              ? "bg-rose-50/70 border-rose-300 ring-1 ring-rose-400"
+                              : "bg-slate-50/70 border-slate-200/80 hover:bg-white"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-mono font-bold text-xs text-slate-900">
+                              {slot.label}
                             </span>
-                          )}
+                            {isBusiest && (
+                              <span className="text-[9px] font-bold uppercase bg-rose-600 text-white px-1.5 py-0.5 rounded">
+                                #1 Peak Slot
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-2xl font-black text-slate-900 font-mono">
+                            {slot.swimmers} <span className="text-xs font-normal text-slate-500">swimmers</span>
+                          </div>
+                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-2">
+                            <div
+                              className={`h-full rounded-full ${
+                                isBusiest ? "bg-rose-500" : slot.swimmers > 0 ? "bg-cyan-600" : "bg-slate-300"
+                              }`}
+                              style={{ width: `${Math.max(4, fillRatio)}%` }}
+                            />
+                          </div>
+                          <div className="text-[11px] text-slate-500 flex justify-between">
+                            <span>{slot.bookingsCount} booking{slot.bookingsCount !== 1 ? "s" : ""}</span>
+                            <span className="font-semibold text-slate-800">₹{slot.revenue}</span>
+                          </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                </div>
 
-                        <div className="text-xl font-black text-slate-900 font-mono">
-                          {slot.swimmers} <span className="text-[11px] font-normal text-slate-500">swimmers</span>
-                        </div>
+                {/* Period 2: Afternoon Public Swimming */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    <Sunset className="w-4 h-4 text-orange-500" />
+                    <span>Afternoon Public Swimming (12:00 PM – 04:00 PM)</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {afternoonSlots.map((slot: any) => {
+                      const isBusiest = busiestHour?.slot === slot.slot && slot.swimmers > 0;
+                      const fillRatio = Math.round((slot.swimmers / maxSlotSwimmers) * 100);
 
-                        {/* Density Bar */}
-                        <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-2">
-                          <div
-                            className={`h-full rounded-full ${
-                              isBusiest
-                                ? "bg-rose-500"
-                                : slot.swimmers > 0
-                                ? "bg-cyan-600"
-                                : "bg-slate-300"
-                            }`}
-                            style={{ width: `${Math.max(4, fillRatio)}%` }}
-                          />
+                      return (
+                        <div
+                          key={slot.slot}
+                          className={`p-4 rounded-xl border transition-all ${
+                            isBusiest
+                              ? "bg-rose-50/70 border-rose-300 ring-1 ring-rose-400"
+                              : "bg-slate-50/70 border-slate-200/80 hover:bg-white"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-mono font-bold text-xs text-slate-900">
+                              {slot.label}
+                            </span>
+                            {isBusiest && (
+                              <span className="text-[9px] font-bold uppercase bg-rose-600 text-white px-1.5 py-0.5 rounded">
+                                #1 Peak Slot
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-2xl font-black text-slate-900 font-mono">
+                            {slot.swimmers} <span className="text-xs font-normal text-slate-500">swimmers</span>
+                          </div>
+                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-2">
+                            <div
+                              className={`h-full rounded-full ${
+                                isBusiest ? "bg-rose-500" : slot.swimmers > 0 ? "bg-cyan-600" : "bg-slate-300"
+                              }`}
+                              style={{ width: `${Math.max(4, fillRatio)}%` }}
+                            />
+                          </div>
+                          <div className="text-[11px] text-slate-500 flex justify-between">
+                            <span>{slot.bookingsCount} booking{slot.bookingsCount !== 1 ? "s" : ""}</span>
+                            <span className="font-semibold text-slate-800">₹{slot.revenue}</span>
+                          </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                </div>
 
-                        <div className="text-[10px] text-slate-500 flex justify-between">
-                          <span>{slot.bookingsCount} session{slot.bookingsCount !== 1 ? "s" : ""}</span>
-                          <span className="font-semibold text-slate-700">₹{slot.revenue}</span>
+                {/* Period 3: Evening Family Exclusive */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    <Moon className="w-4 h-4 text-cyan-600" />
+                    <span>Evening Family Exclusive (04:00 PM – 11:00 PM)</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+                    {eveningSlots.map((slot: any) => {
+                      const isBusiest = busiestHour?.slot === slot.slot && slot.swimmers > 0;
+                      const fillRatio = Math.round((slot.swimmers / maxSlotSwimmers) * 100);
+
+                      return (
+                        <div
+                          key={slot.slot}
+                          className={`p-3.5 rounded-xl border transition-all ${
+                            isBusiest
+                              ? "bg-rose-50/70 border-rose-300 ring-1 ring-rose-400"
+                              : "bg-slate-50/70 border-slate-200/80 hover:bg-white"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-mono font-bold text-xs text-slate-900">
+                              {slot.label}
+                            </span>
+                            {isBusiest && (
+                              <span className="text-[9px] font-bold uppercase bg-rose-600 text-white px-1.5 py-0.5 rounded">
+                                Top Slot
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xl font-black text-slate-900 font-mono">
+                            {slot.swimmers} <span className="text-[10px] font-normal text-slate-500">swimmers</span>
+                          </div>
+                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-2">
+                            <div
+                              className={`h-full rounded-full ${
+                                isBusiest ? "bg-rose-500" : slot.swimmers > 0 ? "bg-teal-600" : "bg-slate-300"
+                              }`}
+                              style={{ width: `${Math.max(4, fillRatio)}%` }}
+                            />
+                          </div>
+                          <div className="text-[10px] text-slate-500 flex justify-between">
+                            <span>{slot.bookingsCount} fam</span>
+                            <span className="font-semibold text-slate-800">₹{slot.revenue}</span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* TAB CONTENT 3: DAY OF WEEK CURVE */}
+            {/* TAB 3: DAY OF WEEK CURVE */}
             {activeAnalyticsTab === "day-of-week" && (
-              <div className="p-6 space-y-6">
+              <div className="p-5 sm:p-6 space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                     <h2 className="text-sm font-bold text-slate-900">
-                      Day of Week Aggregate Performance
+                      Day of Week Aggregate Volume &amp; Collections
                     </h2>
                     <p className="text-xs text-slate-500">
-                      Compare weekend vs weekday collections and footfall to optimize staff scheduling and capacity.
+                      Identifies weekly customer traffic patterns to plan lifeguards, water treatments, and rates.
                     </p>
                   </div>
 
-                  {/* Weekend vs Weekday Split */}
-                  <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200 text-xs">
+                  {/* Split Tag */}
+                  <div className="flex items-center gap-3 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs">
                     <div>
                       <span className="text-slate-400 block text-[10px] uppercase font-bold">
-                        Weekend (Sat+Sun)
+                        Weekend (Sat + Sun)
                       </span>
-                      <strong className="text-slate-900 font-mono">
+                      <strong className="text-slate-900 font-mono text-sm">
                         ₹{weekendRevenue.toLocaleString("en-IN")}
                       </strong>
                     </div>
-                    <span className="text-slate-300">|</span>
+                    <span className="text-slate-300 text-base">|</span>
                     <div>
                       <span className="text-slate-400 block text-[10px] uppercase font-bold">
-                        Weekdays (Mon-Fri)
+                        Weekdays (Mon – Fri)
                       </span>
-                      <strong className="text-slate-900 font-mono">
+                      <strong className="text-slate-900 font-mono text-sm">
                         ₹{weekdayRevenue.toLocaleString("en-IN")}
                       </strong>
                     </div>
@@ -706,9 +881,9 @@ export default function AdminReportsPage() {
                     return (
                       <div
                         key={d.dayName}
-                        className={`p-4 rounded-xl border text-center space-y-2 transition ${
+                        className={`p-4 rounded-xl border text-center space-y-2.5 transition ${
                           d.isWeekend
-                            ? "bg-cyan-50/40 border-cyan-200"
+                            ? "bg-cyan-50/40 border-cyan-200 shadow-xs"
                             : "bg-slate-50/60 border-slate-200/80"
                         }`}
                       >
@@ -739,7 +914,7 @@ export default function AdminReportsPage() {
 
                         <div className="text-[11px] text-slate-500 pt-1 flex justify-between">
                           <span>{d.bookingsCount} slots</span>
-                          <span>{d.swimmersCount} guests</span>
+                          <span className="font-semibold text-slate-700">{d.swimmersCount} guests</span>
                         </div>
                       </div>
                     );
@@ -748,23 +923,23 @@ export default function AdminReportsPage() {
               </div>
             )}
 
-            {/* TAB CONTENT 4: PAYMENT & SESSION MIX */}
+            {/* TAB 4: PAYMENT & SESSION MIX */}
             {activeAnalyticsTab === "mix" && (
-              <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* 1. Payment Methods Breakdown */}
-                <div className="p-5 rounded-xl border border-slate-200/90 bg-slate-50/50 space-y-4">
+              <div className="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* 1. Payment Channels */}
+                <div className="p-5 rounded-2xl border border-slate-200/90 bg-slate-50/40 space-y-4">
                   <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-cyan-600" />
+                    <CreditCard className="w-4 h-4 text-[#00838F]" />
                     <h3 className="font-bold text-xs text-slate-900 uppercase tracking-wider">
-                      Payment Channels
+                      Financial Collection Channels
                     </h3>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-3.5">
                     {/* Gateway */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="font-semibold text-slate-700">Online Gateway (Card/Net)</span>
+                        <span className="font-semibold text-slate-700">Online Gateway (Cards / Net)</span>
                         <span className="font-mono font-bold text-slate-900">
                           ₹{paymentMethods.gateway?.amount?.toLocaleString("en-IN") || 0} ({paymentMethods.gateway?.percentage || 0}%)
                         </span>
@@ -780,7 +955,7 @@ export default function AdminReportsPage() {
                     {/* UPI */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="font-semibold text-slate-700">UPI / QR Counter</span>
+                        <span className="font-semibold text-slate-700">Counter UPI / Dynamic QR</span>
                         <span className="font-mono font-bold text-slate-900">
                           ₹{paymentMethods.upi?.amount?.toLocaleString("en-IN") || 0} ({paymentMethods.upi?.percentage || 0}%)
                         </span>
@@ -796,7 +971,7 @@ export default function AdminReportsPage() {
                     {/* Cash */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="font-semibold text-slate-700">Counter Cash</span>
+                        <span className="font-semibold text-slate-700">Counter Physical Cash</span>
                         <span className="font-mono font-bold text-slate-900">
                           ₹{paymentMethods.cash?.amount?.toLocaleString("en-IN") || 0} ({paymentMethods.cash?.percentage || 0}%)
                         </span>
@@ -811,34 +986,34 @@ export default function AdminReportsPage() {
                   </div>
                 </div>
 
-                {/* 2. Session Type Mix */}
-                <div className="p-5 rounded-xl border border-slate-200/90 bg-slate-50/50 space-y-4">
+                {/* 2. Session Categories */}
+                <div className="p-5 rounded-2xl border border-slate-200/90 bg-slate-50/40 space-y-4">
                   <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-cyan-600" />
+                    <Layers className="w-4 h-4 text-[#00838F]" />
                     <h3 className="font-bold text-xs text-slate-900 uppercase tracking-wider">
-                      Session Categories
+                      Session Revenue &amp; Headcount
                     </h3>
                   </div>
 
                   <div className="space-y-3 text-xs">
                     {/* Family Exclusive */}
-                    <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-1">
+                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-1">
                       <div className="flex justify-between font-bold">
-                        <span className="text-slate-900">Family Exclusive</span>
-                        <span className="text-cyan-700 font-mono">
+                        <span className="text-teal-900">Family Exclusive</span>
+                        <span className="text-teal-800 font-mono">
                           ₹{sessionMix.family?.revenue?.toLocaleString("en-IN") || 0}
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-500 flex justify-between">
-                        <span>{sessionMix.family?.count || 0} sessions booked</span>
+                        <span>{sessionMix.family?.count || 0} slots reserved</span>
                         <span>{sessionMix.family?.swimmers || 0} swimmers ({sessionMix.family?.percentage || 0}%)</span>
                       </div>
                     </div>
 
                     {/* Public Swimming */}
-                    <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-1">
+                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-1">
                       <div className="flex justify-between font-bold">
-                        <span className="text-slate-900">Daytime Public Swimming</span>
+                        <span className="text-sky-900">Daytime Public Swimming</span>
                         <span className="text-slate-900 font-mono">
                           ₹{sessionMix.public?.revenue?.toLocaleString("en-IN") || 0}
                         </span>
@@ -850,54 +1025,54 @@ export default function AdminReportsPage() {
                     </div>
 
                     {/* Walk-ins */}
-                    <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-1">
+                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-1">
                       <div className="flex justify-between font-bold">
-                        <span className="text-slate-900">Front Desk Walk-ins</span>
+                        <span className="text-emerald-900">Front Desk Walk-ins</span>
                         <span className="text-emerald-700 font-mono">
                           ₹{sessionMix.walkIn?.revenue?.toLocaleString("en-IN") || 0}
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-500 flex justify-between">
-                        <span>{sessionMix.walkIn?.count || 0} walk-ins</span>
+                        <span>{sessionMix.walkIn?.count || 0} walk-in parties</span>
                         <span>{sessionMix.walkIn?.swimmers || 0} swimmers ({sessionMix.walkIn?.percentage || 0}%)</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 3. Booking Fulfillment & Cancellation Rate */}
-                <div className="p-5 rounded-xl border border-slate-200/90 bg-slate-50/50 space-y-4">
+                {/* 3. Fulfillment Health */}
+                <div className="p-5 rounded-2xl border border-slate-200/90 bg-slate-50/40 space-y-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     <h3 className="font-bold text-xs text-slate-900 uppercase tracking-wider">
-                      Fulfillment Health
+                      Fulfillment &amp; Retention
                     </h3>
                   </div>
 
                   <div className="space-y-3 text-xs">
-                    <div className="flex justify-between items-center py-1.5 border-b border-slate-200">
-                      <span className="text-slate-600">Active Confirmed</span>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-200/80">
+                      <span className="text-slate-600 font-medium">Active Confirmed</span>
                       <strong className="text-emerald-700 font-mono text-sm">
                         {statusBreakdown.confirmed || 0}
                       </strong>
                     </div>
 
-                    <div className="flex justify-between items-center py-1.5 border-b border-slate-200">
-                      <span className="text-slate-600">Successfully Completed</span>
-                      <strong className="text-cyan-700 font-mono text-sm">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-200/80">
+                      <span className="text-slate-600 font-medium">Completed Sessions</span>
+                      <strong className="text-cyan-800 font-mono text-sm">
                         {statusBreakdown.completed || 0}
                       </strong>
                     </div>
 
-                    <div className="flex justify-between items-center py-1.5 border-b border-slate-200">
-                      <span className="text-slate-600">Cancelled / Refunded</span>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-200/80">
+                      <span className="text-slate-600 font-medium">Cancelled Bookings</span>
                       <strong className="text-rose-600 font-mono text-sm">
                         {statusBreakdown.cancelled || 0}
                       </strong>
                     </div>
 
-                    <div className="flex justify-between items-center py-1.5">
-                      <span className="text-slate-600">Cancellation Rate</span>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-slate-600 font-medium">Cancellation Rate</span>
                       <strong className={`font-mono text-sm ${
                         statusBreakdown.cancellationRate > 15 ? "text-rose-600" : "text-slate-800"
                       }`}>
@@ -910,10 +1085,10 @@ export default function AdminReportsPage() {
             )}
           </div>
 
-          {/* 4. DETAILED BOOKINGS AUDIT LEDGER */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden space-y-0">
-            {/* Table Header with Search & Filter Tabs */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50/30">
+          {/* 4. COMPREHENSIVE BOOKINGS AUDIT LEDGER */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+            {/* Table Header Filter Toolbar */}
+            <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50/40">
               <div className="flex flex-wrap items-center gap-2">
                 {[
                   { id: "ALL", label: `All (${bookings.length})` },
@@ -937,12 +1112,12 @@ export default function AdminReportsPage() {
                 ))}
               </div>
 
-              {/* Search Bar */}
-              <div className="relative w-full md:w-64">
+              {/* Search Box */}
+              <div className="relative w-full md:w-72">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search ID, customer, phone..."
+                  placeholder="Search Booking ID, name, or phone..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-8.5 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00838F]"
@@ -953,7 +1128,7 @@ export default function AdminReportsPage() {
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <tr>
                     <th className="px-4 py-3">Booking ID</th>
                     <th className="px-4 py-3">Date &amp; Time</th>
@@ -970,7 +1145,7 @@ export default function AdminReportsPage() {
                   {filteredBookings.length === 0 ? (
                     <tr>
                       <td colSpan={9} className="py-12 text-center text-slate-400 text-xs">
-                        No bookings match the selected criteria.
+                        No bookings match the current filter selection.
                       </td>
                     </tr>
                   ) : (
@@ -1042,7 +1217,7 @@ export default function AdminReportsPage() {
                   )}
                 </tbody>
 
-                {/* Table Footer Summary Row */}
+                {/* Table Footer Totals */}
                 {filteredBookings.length > 0 && (
                   <tfoot className="bg-slate-50/90 border-t-2 border-slate-200 text-xs font-bold text-slate-900">
                     <tr>
