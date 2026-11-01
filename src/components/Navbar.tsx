@@ -11,7 +11,6 @@ import {
   MessageCircle,
   Calendar,
   Clock,
-  MapPin,
   Search,
   ChevronRight,
 } from "lucide-react";
@@ -103,95 +102,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-[#07172C] text-slate-100 shadow-md">
-      {/* 1. TOP UTILITY RIBBON (Deep Aquatic Midnight Navy) */}
-      <div className="bg-[#050E1A] text-slate-300 text-[11px] border-b border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex justify-between items-center gap-4">
-          {/* Left: Live Facility Status & Location */}
-          <div className="flex items-center gap-3 overflow-hidden text-ellipsis whitespace-nowrap">
-            <div className="flex items-center gap-1.5 font-medium text-emerald-400 shrink-0">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span>Open Daily: 9:00 AM – 11:00 PM</span>
-            </div>
-
-            <span className="hidden lg:inline text-slate-700">|</span>
-
-            <span className="hidden lg:inline-flex items-center gap-1 text-slate-400 truncate">
-              <Clock className="w-3 h-3 text-cyan-400 shrink-0" />
-              <span className="text-cyan-300 font-medium">{currentSessionText}</span>
-            </span>
-
-            <span className="hidden md:inline text-slate-700">|</span>
-
-            <span className="hidden md:inline-flex items-center gap-1 text-slate-400">
-              <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
-              <span>Kalathingalpara, Moonniyur, Malappuram</span>
-            </span>
-          </div>
-
-          {/* Right: Actions, Contact, Language & Staff */}
-          <div className="flex items-center gap-3.5 shrink-0 text-slate-300">
-            {/* Click-to-Call */}
-            <a
-              href="tel:+919947714716"
-              className="hidden sm:inline-flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors"
-              title="Call Front Desk"
-            >
-              <Phone className="w-3 h-3 text-cyan-400" />
-              <span className="font-medium tabular-nums">+91 99477 14716</span>
-            </a>
-
-            {/* WhatsApp Direct */}
-            <a
-              href="https://wa.me/919947714716?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
-              title="Chat on WhatsApp"
-            >
-              <MessageCircle className="w-3 h-3" />
-              <span>WhatsApp</span>
-            </a>
-
-            <span className="hidden sm:inline text-slate-700">|</span>
-
-            {/* Self-Service Booking Status Lookup */}
-            <Link
-              href="/booking-status"
-              className="inline-flex items-center gap-1 text-slate-300 hover:text-cyan-400 transition-colors"
-            >
-              <Search className="w-3 h-3 text-cyan-400" />
-              <span>{t.checkBooking || "Lookup Booking"}</span>
-            </Link>
-
-            <span className="text-slate-700">|</span>
-
-            {/* Staff Portal Link */}
-            <Link
-              href="/admin/login"
-              className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
-            >
-              {t.staffLogin || "Staff Login"} &rarr;
-            </Link>
-
-            <span className="text-slate-700">|</span>
-
-            {/* Language Switcher Pill */}
-            <button
-              onClick={toggleLanguage}
-              className="inline-flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white px-2 py-0.5 rounded-full border border-slate-700 transition-all text-[10px] font-semibold"
-              title="Toggle Language (English / മലയാളം)"
-            >
-              <Globe className="w-3 h-3 text-cyan-400" />
-              <span>{lang === "en" ? "മലയാളം" : "English"}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. MAIN NAVIGATION BAR (Deep Aquatic Midnight connected seamlessly with Hero) */}
+      {/* MAIN NAVIGATION BAR (Deep Aquatic Midnight connected seamlessly with Hero) */}
       <div className="border-b border-slate-800/80 bg-[#07172C]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
@@ -231,8 +142,8 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Right Action Group: Desk Contact & Teal Book Now CTA */}
-            <div className="hidden md:flex items-center gap-4">
+            {/* Right Action Group: Desk Contact, Language Switcher & Teal Book Now CTA */}
+            <div className="hidden md:flex items-center gap-3 lg:gap-4">
               <a
                 href="tel:+919947714716"
                 className="hidden lg:flex flex-col text-right leading-tight group"
@@ -244,6 +155,16 @@ export default function Navbar() {
                   +91 99477 14716
                 </span>
               </a>
+
+              {/* Language Switcher Pill */}
+              <button
+                onClick={toggleLanguage}
+                className="inline-flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white px-2.5 py-1.5 rounded-lg border border-slate-700/80 transition-all text-xs font-semibold"
+                title="Toggle Language (English / മലയാളം)"
+              >
+                <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{lang === "en" ? "മലയാളം" : "English"}</span>
+              </button>
 
               <Link
                 href="/book"
@@ -284,7 +205,7 @@ export default function Navbar() {
 
       {/* 3. MOBILE NAVIGATION DRAWER (Slide-Down Surface with Quick Actions) */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 top-[110px] md:hidden">
+        <div className="fixed inset-0 z-50 top-[72px] md:hidden">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
@@ -292,7 +213,7 @@ export default function Navbar() {
           />
 
           {/* Drawer Menu Surface */}
-          <div className="relative bg-[#07172C] border-b border-slate-800 text-slate-100 shadow-2xl max-h-[calc(100vh-110px)] overflow-y-auto px-4 py-5 space-y-5">
+          <div className="relative bg-[#07172C] border-b border-slate-800 text-slate-100 shadow-2xl max-h-[calc(100vh-72px)] overflow-y-auto px-4 py-5 space-y-5">
             {/* Live Operational Status Banner */}
             <div className="bg-slate-850/80 border border-slate-700/80 rounded-xl p-3 flex items-start gap-3 text-xs">
               <div className="p-1.5 rounded-lg bg-cyan-950 text-cyan-400 shrink-0 mt-0.5">
