@@ -259,7 +259,7 @@ export default function AdminBookingsPage() {
                     <td className="px-4 py-3 font-mono font-bold text-cyan-800">{b.id}</td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{b.bookingDate}</div>
-                      <div className="text-[11px] text-slate-500 tabular-nums">{b.startTime} – {b.endTime}</div>
+                      <div className="text-[11px] text-slate-500 tabular-nums">{formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</div>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${

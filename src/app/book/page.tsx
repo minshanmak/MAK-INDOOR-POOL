@@ -573,7 +573,7 @@ function BookingContent() {
                     .filter((h) => h <= maxAllowedHours)
                     .map((h) => (
                       <option key={h} value={h}>
-                        {h} Hour{h > 1 ? "s" : ""} (until {getEndTime(startTime, h)})
+                        {h} Hour{h > 1 ? "s" : ""} (until {formatTimeSlot(getEndTime(startTime, h))})
                       </option>
                     ))}
                 </select>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { getPoolDate, formatSlotTime } from "@/lib/timezone";
+import { getPoolDate, formatPoolDate, formatSlotTime } from "@/lib/timezone";
 import {
   Search,
   CheckCircle2,
@@ -253,7 +253,7 @@ function BookingStatusContent() {
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
               <span className="text-slate-500 block">Date & Time</span>
               <strong className="text-slate-900 text-sm block mt-0.5">{bookingData.booking.bookingDate}</strong>
-              <span className="text-slate-500">{bookingData.booking.startTime} – {bookingData.booking.endTime}</span>
+              <span className="text-slate-500 tabular-nums">{formatSlotTime(bookingData.booking.startTime)} – {formatSlotTime(bookingData.booking.endTime)}</span>
             </div>
 
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
