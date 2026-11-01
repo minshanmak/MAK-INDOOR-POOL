@@ -444,7 +444,7 @@ export default function AdminBookingsPage() {
                       newBookingType === "FAMILY" ? "border-cyan-600 bg-cyan-50 text-cyan-900" : "border-slate-200"
                     }`}
                   >
-                    Family (4 PM – 11 PM)
+                    Family (9 AM – 11 PM)
                   </button>
                   <button
                     type="button"

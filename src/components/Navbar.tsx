@@ -69,7 +69,7 @@ export default function Navbar() {
         }
       } catch {
         // Fallback
-        setCurrentSessionText("Public 9 AM - 4 PM • Family 4 PM - 11 PM");
+        setCurrentSessionText("Public 9 AM - 4 PM • Family 9 AM - 11 PM");
       }
     };
 

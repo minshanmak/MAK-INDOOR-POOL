@@ -9,7 +9,7 @@ export default function FAQPage() {
   const faqs = [
     {
       q: "What is the difference between Public Swimming and Exclusive Family Booking?",
-      a: "Public swimming (9:00 AM – 4:00 PM) is open to individual visitors and charges ₹150/person/hour with shared pool access (max 25 swimmers). Exclusive family booking (4:00 PM – 11:00 PM) reserves the entire pool 100% exclusively for your group (₹1,500/hr up to 12 persons, +₹100/hr for extra guests). No strangers or outside swimmers are admitted during family slots.",
+      a: "Public swimming (9:00 AM – 4:00 PM) is open to individual visitors and charges ₹150/person/hour with shared pool access (max 25 swimmers). Exclusive family booking (9:00 AM – 11:00 PM) reserves the entire pool 100% exclusively for your group (₹1,500/hr up to 12 persons, +₹100/hr for extra guests). No strangers or outside swimmers are admitted during family slots.",
     },
     {
       q: "How much advance payment is required for family bookings?",

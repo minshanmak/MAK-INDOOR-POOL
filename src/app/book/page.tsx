@@ -446,7 +446,7 @@ function BookingContent() {
                     : "text-slate-600 hover:text-[#00838F]"
                 }`}
               >
-                Family Exclusive (4 PM – 11 PM)
+                Family Exclusive (9 AM – 11 PM)
               </button>
             </div>
           </div>

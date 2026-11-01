@@ -155,7 +155,7 @@ export default function Footer() {
               {/* Family Exclusive Slot Card */}
               <div className="border-l-2 border-emerald-500 pl-3 py-1 bg-slate-900/40 rounded-r-lg">
                 <span className="font-bold text-white block">Exclusive Family Booking</span>
-                <span className="text-emerald-300 font-mono block">4:00 PM – 11:00 PM</span>
+                <span className="text-emerald-300 font-mono block">9:00 AM – 11:00 PM</span>
                 <span className="text-slate-400 block mt-0.5">
                   ₹1,500 / hr (up to 12) • ₹750 advance
                 </span>

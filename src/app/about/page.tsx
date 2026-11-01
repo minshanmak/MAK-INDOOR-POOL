@@ -40,7 +40,7 @@ export default function AboutPage() {
               <Heart className="w-5 h-5 text-lagoon-400 shrink-0 mt-0.5" />
               <div>
                 <strong className="block text-white">Family Modesty & Privacy</strong>
-                <span className="text-ocean-200">The entire center is locked exclusively for booked family slots from 4 PM onwards.</span>
+                <span className="text-ocean-200">The entire center is locked exclusively for booked family slots (9 AM – 11 PM).</span>
               </div>
             </li>
             <li className="flex items-start gap-3">
