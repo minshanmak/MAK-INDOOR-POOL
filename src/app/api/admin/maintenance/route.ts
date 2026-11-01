@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
+import { getPoolDate, getPoolTime } from "@/lib/timezone";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -9,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getPoolDate();
 
   const readings = await prisma.waterReading.findMany({
     orderBy: { createdAt: "desc" },
@@ -51,9 +52,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { type } = body;
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  const now = new Date();
-  const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const todayStr = getPoolDate();
+  const timeStr = getPoolTime();
 
   // 1. WATER READING
   if (type === "WATER_READING") {

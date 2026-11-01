@@ -24,6 +24,7 @@ import {
   RotateCcw,
   Sparkles,
 } from "lucide-react";
+import { getPoolDate, getPoolHour } from "@/lib/timezone";
 
 function BookingContent() {
   const searchParams = useSearchParams();
@@ -56,36 +57,12 @@ function BookingContent() {
   const [copiedCode, setCopiedCode] = useState(false);
 
   // Pool Timezone helper values (Asia/Kolkata)
-  const now = useMemo(() => new Date(), []);
-  const todayIST = useMemo(() => {
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(now);
-  }, [now]);
-
+  const todayIST = useMemo(() => getPoolDate(), []);
   const tomorrowIST = useMemo(() => {
     const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(d);
+    return getPoolDate(d);
   }, []);
-
-  const currentISTHour = useMemo(() => {
-    return parseInt(
-      new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Asia/Kolkata",
-        hour: "2-digit",
-        hour12: false,
-      }).format(now),
-      10
-    );
-  }, [now]);
+  const currentISTHour = useMemo(() => getPoolHour(), []);
 
   // Synchronize with URL search parameter if changed
   useEffect(() => {

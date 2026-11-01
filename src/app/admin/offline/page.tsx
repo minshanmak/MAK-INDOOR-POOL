@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { formatPoolTime } from "@/lib/timezone";
 import {
   WifiOff,
   Wifi,
@@ -212,7 +213,7 @@ export default function AdminOfflineSyncPage() {
                     </div>
                     <div className="text-[11px] text-slate-500 flex justify-between">
                       <span>Amount: ₹{item.collectedAmount} ({item.paymentMethod})</span>
-                      <span>Queued: {new Date(item.queuedAt).toLocaleTimeString()}</span>
+                      <span>Queued: {formatPoolTime(item.queuedAt)}</span>
                     </div>
                   </div>
                 ))

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { formatPoolDate, formatSlotTime } from "@/lib/timezone";
 import {
   XCircle,
   CheckCircle2,
@@ -157,8 +158,8 @@ export default function AdminCancellationsPage() {
                   <tr key={b.id} className="hover:bg-slate-50/60">
                     <td className="px-4 py-3 font-mono font-bold text-cyan-800">{b.id}</td>
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-slate-900">{b.bookingDate}</div>
-                      <div className="text-[11px] text-slate-500 tabular-nums">{b.startTime} – {b.endTime}</div>
+                      <div className="font-semibold text-slate-900">{formatPoolDate(b.bookingDate)}</div>
+                      <div className="text-[11px] text-slate-500 tabular-nums">{formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{b.customerName}</div>

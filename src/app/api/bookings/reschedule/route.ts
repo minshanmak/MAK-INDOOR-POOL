@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { checkAvailability, timeToMinutes } from "@/lib/booking-engine";
 import { calculateBookingPrice } from "@/lib/pricing";
 import { notificationService } from "@/lib/notifications";
+import { getPoolDateTime } from "@/lib/timezone";
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     const settings = await prisma.poolSetting.findUnique({
       where: { id: "singleton_settings" },
     });
-    const bookingDateTime = new Date(`${booking.bookingDate}T${booking.startTime}:00`);
+    const bookingDateTime = getPoolDateTime(booking.bookingDate, booking.startTime);
     const hoursUntilBooking = (bookingDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
     const cutoff = settings?.rescheduleCutoffHours || 6;
 

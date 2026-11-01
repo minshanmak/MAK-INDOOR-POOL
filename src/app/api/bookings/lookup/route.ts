@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getPoolDateTime } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Check reschedule eligibility
-    const bookingDateTime = new Date(`${booking.bookingDate}T${booking.startTime}:00`);
+    const bookingDateTime = getPoolDateTime(booking.bookingDate, booking.startTime);
     const hoursUntilBooking = (bookingDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
     const canReschedule =
       booking.status === "CONFIRMED" &&

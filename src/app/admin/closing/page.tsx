@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getPoolDate } from "@/lib/timezone";
 import {
   FileCheck2,
   IndianRupee,
@@ -13,7 +14,11 @@ import {
 export default function AdminClosingPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [targetDate, setTargetDate] = useState(new Date().toISOString().split("T")[0]);
+  const [targetDate, setTargetDate] = useState("");
+
+  useEffect(() => {
+    setTargetDate(getPoolDate());
+  }, []);
 
   // Reconciliation inputs
   const [actualCash, setActualCash] = useState<number | string>("");

@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { getPoolDateTime } from "./timezone";
 
 export type NotificationChannel = "WHATSAPP" | "SMS" | "EMAIL";
 
@@ -98,7 +99,7 @@ export class NotificationService {
     });
     if (!booking) return;
 
-    const bookingDateTime = new Date(`${booking.bookingDate}T${booking.startTime}:00`);
+    const bookingDateTime = getPoolDateTime(booking.bookingDate, booking.startTime);
 
     // 1. 24h before
     const tMinus24h = new Date(bookingDateTime.getTime() - 24 * 60 * 60 * 1000);

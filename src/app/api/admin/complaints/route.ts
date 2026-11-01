@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { getPoolDate } from "@/lib/timezone";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Category, description, customer name and phone are required." }, { status: 400 });
     }
 
-    const todayClean = new Date().toISOString().split("T")[0].replace(/-/g, "");
+    const todayClean = getPoolDate().replace(/-/g, "");
     const count = await prisma.complaint.count();
     const ticketNumber = `CMP-${todayClean}-${String(count + 1).padStart(4, "0")}`;
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getPoolDate, formatSlotTime } from "@/lib/timezone";
 import {
   Calendar,
   Search,
@@ -26,7 +27,11 @@ export default function AdminBookingsPage() {
   // Create Staff Booking Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newBookingType, setNewBookingType] = useState<"PUBLIC" | "FAMILY">("FAMILY");
-  const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0]);
+  const [newDate, setNewDate] = useState("");
+
+  useEffect(() => {
+    setNewDate(getPoolDate());
+  }, []);
   const [newStartTime, setNewStartTime] = useState("17:00");
   const [newDuration, setNewDuration] = useState(2);
   const [newGuestCount, setNewGuestCount] = useState(10);

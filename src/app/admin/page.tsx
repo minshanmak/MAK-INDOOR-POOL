@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { formatSlotTime } from "@/lib/timezone";
 import {
   Users,
   Calendar,
@@ -215,7 +216,7 @@ export default function AdminOverviewPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 font-medium text-slate-800 tabular-nums">
-                      {b.startTime} – {b.endTime}
+                      {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-900">{b.customerName}</div>

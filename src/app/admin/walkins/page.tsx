@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { formatPoolTime } from "@/lib/timezone";
 import {
   Users,
   UserPlus,
@@ -350,7 +351,7 @@ export default function AdminWalkinsPage() {
                       </td>
                       <td className="px-4 py-3 font-semibold text-slate-900">{w.visitorCount} Person(s)</td>
                       <td className="px-4 py-3 font-mono text-[11px]">
-                        {new Date(w.checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {formatPoolTime(w.checkInTime)}
                       </td>
                       <td className="px-4 py-3 tabular-nums">{w.durationHours || 1} Hr(s)</td>
                       <td className="px-4 py-3 font-bold text-slate-900 tabular-nums">

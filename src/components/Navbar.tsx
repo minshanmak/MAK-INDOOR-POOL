@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 import MakLogo from "@/components/MakLogo";
+import { getPoolHour } from "@/lib/timezone";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -35,14 +36,14 @@ export default function Navbar() {
     // Determine current live session based on IST hour (Asia/Kolkata)
     const updateSessionStatus = () => {
       try {
-        const now = new Date();
-        const istHour = Number(
-          new Intl.DateTimeFormat("en-GB", {
-            timeZone: "Asia/Kolkata",
-            hour: "2-digit",
-            hour12: false,
-          }).format(now)
-        );
+        const istHour = getPoolHour();
+
+
+
+
+
+
+
 
         if (istHour >= 9 && istHour < 16) {
           setCurrentSessionText(
@@ -50,18 +51,21 @@ export default function Navbar() {
               ? "പൊതു നീന്തൽ സെഷൻ (വൈകിട്ട് 4 വരെ)"
               : "Public Swimming (Until 4:00 PM)"
           );
+  
         } else if (istHour >= 16 && istHour < 23) {
           setCurrentSessionText(
             lang === "ml"
               ? "പ്രത്യേക ഫാമിലി സെഷനുകൾ (രാത്രി 11 വരെ)"
               : "Family Exclusive Sessions (Until 11:00 PM)"
           );
+  
         } else {
           setCurrentSessionText(
             lang === "ml"
               ? "പൂൾ അടച്ചിരിക്കുന്നു (രാവിലെ 9 ന് തുറക്കും)"
               : "Pool Closed (Opens at 9:00 AM)"
           );
+  
         }
       } catch {
         // Fallback
@@ -235,6 +239,7 @@ export default function Navbar() {
                       <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#00838F] rounded-t-full shadow-xs" />
                     )}
                   </Link>
+        
                 );
               })}
             </nav>
@@ -344,6 +349,7 @@ export default function Navbar() {
                       }`}
                     />
                   </Link>
+        
                 );
               })}
             </div>

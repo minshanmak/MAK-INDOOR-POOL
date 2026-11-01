@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { formatPoolDate, formatPoolTime } from "@/lib/timezone";
 import {
   Waves,
   LayoutDashboard,
@@ -28,6 +29,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [livePoolClock, setLivePoolClock] = useState({ date: "", time: "" });
+
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      setLivePoolClock({
+        date: formatPoolDate(now),
+        time: formatPoolTime(now, true),
+      });
+    };
+    updateClock();
+    const interval = setInterval(updateClock, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (pathname === "/admin/login") {
@@ -109,12 +124,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <span className="font-bold text-sm tracking-tight">M.A.K Operations</span>
         </div>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
-        >
-          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-3">
+          {livePoolClock.time && (
+            <div className="text-right">
+              <span className="text-[10px] text-cyan-400 font-mono font-bold block">{livePoolClock.time}</span>
+              <span className="text-[9px] text-slate-400 font-mono block">{livePoolClock.date}</span>
+            </div>
+          )}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+          >
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Persistent Operations Sidebar */}
@@ -138,6 +161,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </span>
             </div>
           </div>
+
+          {/* Live IST Pool Clock */}
+          {livePoolClock.time && (
+            <div className="mx-3 mt-3 px-2.5 py-1.5 rounded-md bg-slate-900/90 border border-slate-800/90 flex items-center justify-between text-[11px] font-mono">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-cyan-400 text-[10px] font-sans font-bold uppercase tracking-wider">Pool Clock</span>
+              </div>
+              <div className="text-right">
+                <div className="text-white font-bold tabular-nums text-xs leading-none">{livePoolClock.time}</div>
+                <div className="text-[9px] text-slate-400 leading-tight mt-0.5">{livePoolClock.date}</div>
+              </div>
+            </div>
+          )}
 
           {/* Navigation Links */}
           <nav className="p-2 space-y-0.5">

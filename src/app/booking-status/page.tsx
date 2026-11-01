@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { getPoolDate, formatSlotTime } from "@/lib/timezone";
 import {
   Search,
   CheckCircle2,
@@ -34,6 +35,11 @@ function BookingStatusContent() {
   const [showCancel, setShowCancel] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelMsg, setCancelMsg] = useState<string | null>(null);
+  const [todayDateStr, setTodayDateStr] = useState("");
+
+  useEffect(() => {
+    setTodayDateStr(getPoolDate());
+  }, []);
 
   useEffect(() => {
     const idParam = searchParams.get("id");
@@ -308,7 +314,7 @@ function BookingStatusContent() {
                     type="date"
                     required
                     value={newDate}
-                    min={new Date().toISOString().split("T")[0]}
+                    min={todayDateStr || undefined}
                     onChange={(e) => setNewDate(e.target.value)}
                     className="w-full px-2.5 py-1.5 bg-white border border-ocean-200 rounded text-xs"
                   />
