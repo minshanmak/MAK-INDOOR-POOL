@@ -93,11 +93,11 @@ export async function GET(req: NextRequest) {
   // CSV EXPORT - FINANCIAL PAYMENTS LEDGER
   if (exportFormat === "payments-csv") {
     const headers =
-      "Payment ID,Booking/WalkIn ID,Timestamp (IST),Method,Type,Amount (INR),Status,Reference\n";
+      "Payment ID,Booking/WalkIn ID,Timestamp (IST),Method,Amount (INR),Status,Reference\n";
     const rows = payments
       .map(
         (p) =>
-          `"${p.id}","${p.bookingId || p.walkInId || "N/A"}","${formatPoolDateTime(p.createdAt)}","${p.method}","${p.type}",${p.amount},"${p.status}","${p.referenceNumber || ""}"`
+          `"${p.id}","${p.bookingId || p.walkInId || "N/A"}","${formatPoolDateTime(p.createdAt)}","${p.method}",${p.amount},"${p.status}","${p.transactionRef || ""}"`
       )
       .join("\n");
 

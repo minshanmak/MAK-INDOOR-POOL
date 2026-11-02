@@ -8,10 +8,13 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
+  Zap,
   CreditCard,
-  IndianRupee,
+  Minus,
+  Plus,
+  ArrowRight,
   LogOut,
-  ShieldAlert,
+  Sparkles,
 } from "lucide-react";
 
 export default function AdminWalkinsPage() {
@@ -19,16 +22,26 @@ export default function AdminWalkinsPage() {
   const [currentOccupancy, setCurrentOccupancy] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const [visitorCount, setVisitorCount] = useState(1);
+  // Mode: "FULL" (Track entry, exit, duration) vs "QUICK" (Record visit & payment quickly)
+  const [entryMode, setEntryMode] = useState<"FULL" | "QUICK">("FULL");
+
+  // Form states
+  const [visitorCount, setVisitorCount] = useState(4);
   const [durationHours, setDurationHours] = useState(1);
   const [ratePerHour, setRatePerHour] = useState(150);
+  const [entryTime, setEntryTime] = useState("");
   const [overrideCharge, setOverrideCharge] = useState<string>("");
   const [overrideReason, setOverrideReason] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "UPI">("CASH");
+  const [paymentMethod, setPaymentMethod] = useState<"UPI" | "CASH">("UPI");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const now = new Date();
+    setEntryTime(now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }));
+  }, []);
 
   const fetchWalkIns = async () => {
     setLoading(true);
@@ -68,7 +81,7 @@ export default function AdminWalkinsPage() {
         body: JSON.stringify({
           action: "CHECK_IN",
           visitorCount,
-          durationHours,
+          durationHours: entryMode === "QUICK" ? 1 : durationHours,
           ratePerHour,
           overrideCharge: isOverridden ? Number(overrideCharge) : null,
           overrideReason: isOverridden ? overrideReason : null,
@@ -83,7 +96,7 @@ export default function AdminWalkinsPage() {
         throw new Error(data.error || "Failed to log walk-in.");
       }
 
-      setVisitorCount(1);
+      setVisitorCount(4);
       setDurationHours(1);
       setOverrideCharge("");
       setOverrideReason("");
@@ -119,131 +132,249 @@ export default function AdminWalkinsPage() {
   const isNearCapacity = currentOccupancy >= maxCapacity * 0.8;
 
   return (
-    <div className="space-y-6">
-      {/* Header & Live Capacity Status */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Page Title & Subtitle */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Walk-in Counter & Occupancy</h1>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Walk-ins</h1>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Public swimmer admission, live pool capacity control, and quick fee collection
+            Record and manage walk-in visitors
           </p>
         </div>
 
-        <div className={`px-4 py-2.5 rounded-2xl border flex items-center gap-3.5 transition-all ${
-          isNearCapacity
-            ? "bg-amber-50/90 border-amber-300 text-amber-950 shadow-xs"
-            : "bg-white border-black/[0.04] shadow-[0_2px_16px_rgba(0,0,0,0.03)]"
-        }`}>
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs ${
-            isNearCapacity ? "bg-amber-500" : "bg-gradient-to-br from-cyan-500 to-blue-600"
-          }`}>
+        {/* Live Swimmers Status Indicator */}
+        <div
+          className={`px-4 py-2 rounded-2xl border flex items-center gap-3 transition-all ${
+            isNearCapacity
+              ? "bg-amber-50/90 border-amber-300 text-amber-950 shadow-xs"
+              : "bg-white border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)]"
+          }`}
+        >
+          <div
+            className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white shadow-xs ${
+              isNearCapacity ? "bg-amber-500" : "bg-[#1D68BD]"
+            }`}
+          >
             <Users className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Current Swimmers</span>
-            <span className="text-xl font-black text-slate-900 tabular-nums tracking-tight">
-              {currentOccupancy} <span className="text-xs font-medium text-slate-400">/ {maxCapacity} Max</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+              Current Swimmers
+            </span>
+            <span className="text-sm font-black text-slate-900 tabular-nums">
+              {currentOccupancy} <span className="text-xs font-semibold text-slate-400">/ {maxCapacity} Max</span>
             </span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Walk-in Admission Card (iOS Inset Card) */}
-        <div className="lg:col-span-4 bg-white rounded-3xl border border-black/[0.04] shadow-[0_2px_16px_rgba(0,0,0,0.03)] p-5 space-y-4">
-          <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-            <div>
-              <h2 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                <UserPlus className="w-4 h-4 text-[#007AFF]" />
-                Admit Walk-in Swimmer
-              </h2>
-              <p className="text-[11px] text-slate-400 mt-0.5">Quick ticketing & auto-timed entry</p>
+      {/* Top 2 Mode Selection Cards (Exact Mockup Match) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Mode 1: Full Check-in / Check-out */}
+        <button
+          type="button"
+          onClick={() => setEntryMode("FULL")}
+          className={`relative p-5 rounded-3xl text-left transition-all border ${
+            entryMode === "FULL"
+              ? "bg-[#F0F6FF] border-[#2563EB] shadow-[0_8px_25px_rgba(37,99,235,0.12)] ring-1 ring-[#2563EB]"
+              : "bg-white border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] hover:border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <div
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${
+                entryMode === "FULL" ? "bg-[#1D68BD] text-white" : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              <Users className="w-6 h-6" />
             </div>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-              Auto-Release
+            <div className="flex-1">
+              <h3 className="font-extrabold text-sm text-slate-900 leading-tight">
+                Full Check-in / Check-out
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">Track entry, exit and duration</p>
+            </div>
+            {entryMode === "FULL" && (
+              <div className="w-6 h-6 rounded-full bg-[#1D68BD] text-white flex items-center justify-center shadow-xs">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+            )}
+          </div>
+        </button>
+
+        {/* Mode 2: Quick Entry */}
+        <button
+          type="button"
+          onClick={() => setEntryMode("QUICK")}
+          className={`relative p-5 rounded-3xl text-left transition-all border ${
+            entryMode === "QUICK"
+              ? "bg-[#FAF5FF] border-[#9333EA] shadow-[0_8px_25px_rgba(147,51,234,0.12)] ring-1 ring-[#9333EA]"
+              : "bg-white border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] hover:border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <div
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${
+                entryMode === "QUICK" ? "bg-[#9333EA] text-white" : "bg-purple-50 text-[#9333EA]"
+              }`}
+            >
+              <Zap className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-extrabold text-sm text-slate-900 leading-tight">Quick Entry</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Record visit and payment quickly</p>
+            </div>
+            {entryMode === "QUICK" && (
+              <div className="w-6 h-6 rounded-full bg-[#9333EA] text-white flex items-center justify-center shadow-xs">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+            )}
+          </div>
+        </button>
+      </div>
+
+      {/* Main Two-Column Admission Form (Exact Mockup Match) */}
+      <form onSubmit={handleEntrySubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Left Column: Visitor Details Card */}
+        <div className="bg-white rounded-3xl p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-5">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <h2 className="font-bold text-slate-900 text-sm">Visitor Details</h2>
+            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+              ₹150 / hr / person
             </span>
           </div>
 
-          <div className="text-[11px] text-slate-600 bg-slate-50/80 border border-slate-200/80 rounded-2xl px-3 py-2 flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
-            <span>Swimmers stay active for {durationHours} hr, then auto-release. Early checkout available anytime.</span>
+          {/* Stepper: No. of Visitors */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700">
+              No. of Visitors <span className="text-rose-500">*</span>
+            </label>
+            <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-2xl p-1.5">
+              <button
+                type="button"
+                onClick={() => setVisitorCount(Math.max(1, visitorCount - 1))}
+                className="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 active:scale-95 text-slate-700 font-bold flex items-center justify-center shadow-xs transition"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="font-black text-lg text-slate-900 tabular-nums">
+                {visitorCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => setVisitorCount(visitorCount + 1)}
+                className="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 active:scale-95 text-slate-700 font-bold flex items-center justify-center shadow-xs transition"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          {formError && (
-            <div className="p-3 bg-red-50 text-red-700 rounded-2xl text-xs flex items-start gap-1.5 border border-red-200/60">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
-              <span>{formError}</span>
+          {/* Entry Time */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700">
+              Entry Time <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={entryTime}
+                onChange={(e) => setEntryTime(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition"
+              />
+              <Clock className="w-4 h-4 text-slate-400 absolute right-3.5 top-3 pointer-events-none" />
             </div>
-          )}
+          </div>
 
-          <form onSubmit={handleEntrySubmit} className="space-y-3.5 text-xs">
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Swimmer Count *</label>
-                <input
-                  type="number"
-                  min={1}
-                  required
-                  value={visitorCount}
-                  onChange={(e) => setVisitorCount(Math.max(1, Number(e.target.value)))}
-                  className="w-full px-3 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Duration *</label>
-                <select
-                  value={durationHours}
-                  onChange={(e) => setDurationHours(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
-                >
-                  <option value={1}>1 Hour</option>
-                  <option value={1.5}>1.5 Hours</option>
-                  <option value={2}>2 Hours</option>
-                  <option value={3}>3 Hours</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Name (Optional)</label>
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Visitor"
-                  className="w-full px-3 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Phone (Optional)</label>
-                <input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="Optional"
-                  className="w-full px-3 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Calculated Rate Box (iOS Inset Pill) */}
-            <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/80 text-xs space-y-1">
-              <div className="flex justify-between text-slate-500 font-medium">
-                <span>Standard Rate:</span>
-                <span>₹{ratePerHour}/person/hr</span>
-              </div>
-              <div className="flex justify-between font-bold text-slate-900 text-sm pt-0.5">
-                <span>Calculated Charge:</span>
-                <span className="text-[#007AFF]">₹{calculatedCharge}</span>
-              </div>
-            </div>
-
-            {/* Override Option */}
+          {/* Duration & Contact Fields */}
+          <div className="grid grid-cols-2 gap-3 pt-1">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                Duration (Hours)
+              </label>
+              <select
+                value={durationHours}
+                onChange={(e) => setDurationHours(Number(e.target.value))}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800"
+              >
+                <option value={1}>1 Hour</option>
+                <option value={1.5}>1.5 Hours</option>
+                <option value={2}>2 Hours</option>
+                <option value={3}>3 Hours</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                Visitor Phone (Optional)
+              </label>
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                placeholder="+91..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800"
+              />
+            </div>
+          </div>
+
+          <div className="text-[11px] text-slate-500 bg-slate-50/80 p-3 rounded-2xl border border-slate-100 flex items-center gap-2">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>
+              Real-time auto-checkout active. Slot releases automatically once duration expires.
+            </span>
+          </div>
+        </div>
+
+        {/* Right Column: Payment Details Card */}
+        <div className="bg-white rounded-3xl p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-5 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <h2 className="font-bold text-slate-900 text-sm">Payment Details</h2>
+              <span className="text-[10px] font-bold text-slate-400">Auto Computed</span>
+            </div>
+
+            {formError && (
+              <div className="p-3 bg-red-50 text-red-700 rounded-2xl text-xs flex items-start gap-1.5 border border-red-200/60">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <span>{formError}</span>
+              </div>
+            )}
+
+            {/* Amount (Auto) */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
+                <label className="block text-xs font-bold text-slate-700">Amount (Auto)</label>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {visitorCount} × ₹{ratePerHour} × {durationHours} hr
+                </span>
+              </div>
+              <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-xl font-black text-slate-900 tracking-tight flex items-center justify-between">
+                <span>₹{calculatedCharge.toFixed(2)}</span>
+                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  Standard Rate
+                </span>
+              </div>
+            </div>
+
+            {/* Payment Method Dropdown */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700">
+                Payment Method <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value as "UPI" | "CASH")}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition"
+              >
+                <option value="UPI">UPI</option>
+                <option value="CASH">Cash</option>
+              </select>
+            </div>
+
+            {/* Optional Authorized Override */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-500 mb-1">
                 Authorized Override Fee (Optional)
               </label>
               <input
@@ -252,140 +383,123 @@ export default function AdminWalkinsPage() {
                 value={overrideCharge}
                 onChange={(e) => setOverrideCharge(e.target.value)}
                 placeholder="Leave blank for standard charge"
-                className="w-full px-3 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800"
               />
             </div>
 
             {isOverridden && (
               <div className="space-y-1">
-                <label className="block font-bold text-amber-900 mb-0.5">
-                  Mandatory Audit Reason for Override *
+                <label className="block text-[10px] font-bold text-amber-900">
+                  Mandatory Audit Reason *
                 </label>
-                <textarea
+                <input
+                  type="text"
                   required
-                  rows={2}
                   value={overrideReason}
                   onChange={(e) => setOverrideReason(e.target.value)}
-                  placeholder="e.g. Coach pass / owner approval / group package"
-                  className="w-full px-3 py-2 border border-amber-300 bg-amber-50/60 rounded-xl text-xs"
+                  placeholder="e.g. Owner guest, tournament"
+                  className="w-full px-3 py-2 border border-amber-300 bg-amber-50 rounded-xl text-xs"
                 />
               </div>
             )}
+          </div>
 
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1.5">Payment Method</label>
-              {/* iOS Segmented Switcher */}
-              <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-2xl">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("CASH")}
-                  className={`py-2 rounded-xl text-center font-bold text-xs transition-all active:scale-95 ${
-                    paymentMethod === "CASH"
-                      ? "bg-white text-slate-900 shadow-xs ring-1 ring-black/5"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  Cash
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("UPI")}
-                  className={`py-2 rounded-xl text-center font-bold text-xs transition-all active:scale-95 ${
-                    paymentMethod === "UPI"
-                      ? "bg-white text-[#007AFF] shadow-xs ring-1 ring-black/5"
-                      : "text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  UPI QR
-                </button>
-              </div>
-            </div>
+          {/* Big Blue Check In Button */}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-[#1D68BD] hover:bg-[#155299] active:scale-[0.99] text-white font-extrabold py-3.5 rounded-2xl shadow-md shadow-blue-700/20 transition-all flex items-center justify-center gap-2 text-sm mt-4"
+          >
+            <UserPlus className="w-4 h-4" />
+            {submitting ? "Processing Check In..." : "Check In"}
+          </button>
+        </div>
+      </form>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-[#007AFF] hover:bg-[#0066DD] active:scale-[0.98] text-white font-bold py-3 rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 text-xs"
-            >
-              <UserPlus className="w-4 h-4" />
-              {submitting
-                ? "Admitting Swimmer..."
-                : `Admit Swimmer & Collect ₹${isOverridden ? overrideCharge : calculatedCharge}`}
-            </button>
-          </form>
+      {/* Today's Walk-in Swimmers Ledger Card (Matching Mockup Table Style) */}
+      <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] overflow-hidden">
+        <div className="p-5 border-b border-slate-100 flex justify-between items-center">
+          <div>
+            <h2 className="font-extrabold text-sm text-slate-900">Today's Walk-in Visitors</h2>
+            <p className="text-[11px] text-slate-400 mt-0.5">Live occupancy and checkout records</p>
+          </div>
+          <span className="text-[10px] font-bold text-[#1D68BD] bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200/60">
+            Real-time Status
+          </span>
         </div>
 
-        {/* Walk-in Records Table (iOS Inset Grouped Table) */}
-        <div className="lg:col-span-8 bg-white rounded-3xl border border-black/[0.04] shadow-[0_2px_16px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
-          <div className="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center text-xs">
-            <h2 className="font-bold text-slate-900 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center">
-                <Clock className="w-3.5 h-3.5" />
-              </div>
-              Today's Walk-in Swimmers Log
-            </h2>
-            <span className="text-[11px] text-slate-400 font-medium">Auto-refreshing</span>
-          </div>
-
-          <div className="flex-1 overflow-x-auto">
-            {loading ? (
-              <div className="p-8 text-center text-slate-400 text-xs">Loading records...</div>
-            ) : walkIns.length > 0 ? (
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-50/80 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  <tr>
-                    <th className="px-5 py-3">Status</th>
-                    <th className="px-5 py-3">Swimmers</th>
-                    <th className="px-5 py-3">Entry Time</th>
-                    <th className="px-5 py-3">Duration</th>
-                    <th className="px-5 py-3">Amount</th>
-                    <th className="px-5 py-3">Mode</th>
-                    <th className="px-5 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100/80">
-                  {walkIns.map((w) => (
-                    <tr key={w.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="px-5 py-3.5">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="p-8 text-center text-slate-400 text-xs">Loading walk-in entries...</div>
+          ) : walkIns.length > 0 ? (
+            <table className="w-full text-left text-xs text-slate-700">
+              <thead className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <tr>
+                  <th className="px-5 py-3.5">Status</th>
+                  <th className="px-5 py-3.5">Swimmers</th>
+                  <th className="px-5 py-3.5">Entry Time</th>
+                  <th className="px-5 py-3.5">Duration</th>
+                  <th className="px-5 py-3.5">Amount</th>
+                  <th className="px-5 py-3.5">Payment</th>
+                  <th className="px-5 py-3.5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {walkIns.map((w) => (
+                  <tr key={w.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <span
+                        className={`px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wide ${
                           w.status === "ACTIVE"
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
-                            : "bg-slate-100 text-slate-600"
-                        }`}>
-                          {w.status}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 font-semibold text-slate-900">{w.visitorCount} Person(s)</td>
-                      <td className="px-5 py-3.5 font-mono text-[11px]">
-                        {formatPoolTime(w.checkInTime)}
-                      </td>
-                      <td className="px-5 py-3.5 tabular-nums">{w.durationHours || 1} Hr(s)</td>
-                      <td className="px-5 py-3.5 font-bold text-slate-900 tabular-nums">
-                        ₹{w.collectedAmount}
-                        {w.overrideReason && (
-                          <span className="block text-[10px] text-amber-700 font-normal">
-                            (Override: {w.overrideReason})
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5 font-semibold uppercase">{w.paymentMethod}</td>
-                      <td className="px-5 py-3.5 text-right">
-                        {w.status === "ACTIVE" && (
-                          <button
-                            onClick={() => handleCheckOut(w.id)}
-                            className="bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow-xs active:scale-95 transition"
-                          >
-                            Check Out
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="p-8 text-center text-slate-400 text-xs">No walk-in visitors recorded yet today.</div>
-            )}
-          </div>
+                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                        }`}
+                      >
+                        {w.status === "ACTIVE" ? "In Pool" : "Checked Out"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 font-bold text-slate-900">
+                      {w.visitorCount} {w.visitorCount === 1 ? "Swimmer" : "Swimmers"}
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-slate-600">
+                      {formatPoolTime(new Date(w.checkInTime), true)}
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-600">{w.durationHours || 1} hr</td>
+                    <td className="px-5 py-3.5 font-extrabold text-slate-900 tabular-nums">
+                      ₹{w.collectedAmount}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          w.paymentMethod === "UPI"
+                            ? "bg-purple-50 text-purple-700 border border-purple-200/80"
+                            : "bg-blue-50 text-blue-700 border border-blue-200/80"
+                        }`}
+                      >
+                        {w.paymentMethod}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      {w.status === "ACTIVE" ? (
+                        <button
+                          onClick={() => handleCheckOut(w.id)}
+                          className="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-[11px] font-bold px-3 py-1 rounded-xl transition"
+                        >
+                          Check Out
+                        </button>
+                      ) : (
+                        <span className="text-slate-400 text-[10px] font-medium">Completed</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="p-8 text-center text-slate-400 text-xs">
+              No walk-in visitors recorded yet today.
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -110,6 +110,12 @@ export async function GET() {
     where: { date: todayStr },
   });
 
+  // 11. Recent Audit Activities
+  const recentActivities = await prisma.auditLog.findMany({
+    take: 6,
+    orderBy: { createdAt: "desc" },
+  });
+
   return NextResponse.json({
     metrics: {
       todayBookingsCount: todayBookings.length,
@@ -140,5 +146,6 @@ export async function GET() {
     todayBookings,
     upcomingBookings,
     pendingCancellations,
+    recentActivities,
   });
 }
