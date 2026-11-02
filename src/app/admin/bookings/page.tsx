@@ -183,7 +183,7 @@ export default function AdminBookingsPage() {
           className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-3.5 py-2 rounded-lg text-xs shadow-xs transition flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
-          + Create Staff Booking
+          Create Staff Booking
         </button>
       </div>
 
