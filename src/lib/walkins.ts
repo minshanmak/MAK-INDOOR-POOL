@@ -42,3 +42,4 @@ export async function autoCheckoutExpiredWalkIns(db: any = defaultPrisma): Promi
 
   return expiredIds.length;
 }
+
