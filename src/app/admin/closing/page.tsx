@@ -101,10 +101,10 @@ export default function AdminClosingPage() {
   return (
     <div className="space-y-6">
       {/* Title & Date Selector */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">End-of-Day Closing & Audit</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">End-of-Day Closing & Audit</h1>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             Reconcile physical cash drawer and UPI statements against authoritative system bookings
           </p>
         </div>
@@ -115,13 +115,13 @@ export default function AdminClosingPage() {
             type="date"
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
-            className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs"
+            className="px-3.5 py-1.5 bg-white border border-slate-200/80 rounded-full text-xs font-semibold shadow-2xs"
           />
         </div>
       </div>
 
       {feedback && (
-        <div className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${
+        <div className={`p-4 rounded-2xl text-xs flex items-center gap-2.5 shadow-xs ${
           feedback.type === "success"
             ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
             : "bg-red-50 border border-red-200 text-red-700"
@@ -135,8 +135,8 @@ export default function AdminClosingPage() {
         <div className="p-8 text-center text-slate-400 text-xs">Calculating daily financial totals...</div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Main Reconciliation Sheet */}
-          <div className="lg:col-span-8 bg-white rounded-xl border border-slate-200/80 shadow-xs p-6 space-y-6">
+          {/* Main Reconciliation Sheet (Apple Inset Card) */}
+          <div className="lg:col-span-8 bg-white rounded-3xl border border-black/[0.04] shadow-[0_2px_16px_rgba(0,0,0,0.03)] p-6 space-y-6">
             <div className="border-b border-slate-100 pb-3 flex justify-between items-center text-xs">
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <FileCheck2 className="w-4 h-4 text-cyan-700" />
@@ -241,7 +241,7 @@ export default function AdminClosingPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-xs"
+                className="w-full bg-[#007AFF] hover:bg-[#0066DD] active:scale-[0.98] text-white font-bold py-3 rounded-2xl text-xs transition shadow-sm"
               >
                 {submitting ? "Submitting..." : "Submit & Sign Off Daily Closing"}
               </button>
@@ -249,7 +249,7 @@ export default function AdminClosingPage() {
           </div>
 
           {/* Operational Day Summary */}
-          <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200/80 shadow-xs p-5 space-y-4 text-xs">
+          <div className="lg:col-span-4 bg-white rounded-3xl border border-black/[0.04] shadow-[0_2px_16px_rgba(0,0,0,0.03)] p-5 space-y-4 text-xs">
             <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">
               Operational Statistics ({targetDate})
             </h3>
