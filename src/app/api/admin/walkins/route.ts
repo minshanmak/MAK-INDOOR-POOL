@@ -83,13 +83,13 @@ export async function POST(req: NextRequest) {
   const collected = collectedAmount !== undefined && collectedAmount !== null ? Number(collectedAmount) : finalCharge;
 
   if (action === "QUICK_ENTRY" || action === "CHECK_IN") {
-    // Check if pool is currently reserved for a private family booking
     const now = new Date();
     const todayStr = getPoolDate(now);
     const currentTimeStr = getPoolTime(now);
     const endMinutes = timeToMinutes(currentTimeStr) + duration * 60;
     const targetEndTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
 
+    // 1. Check if pool is currently reserved for a private family booking
     const activeFamilyBookings = await prisma.booking.findMany({
       where: {
         bookingDate: todayStr,
@@ -107,6 +107,40 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+    }
+
+    // 2. Check maximum concurrent public capacity (max 25 swimmers)
+    const settings = await prisma.poolSetting.findUnique({
+      where: { id: "singleton_settings" },
+    });
+    const maxCapacity = settings?.maxCapacity || 25;
+
+    const activeWalkIns = await prisma.walkIn.findMany({
+      where: { status: "ACTIVE" },
+    });
+    const currentActiveWalkIns = activeWalkIns.reduce((sum, w) => sum + w.visitorCount, 0);
+
+    const overlappingPublicBookings = await prisma.booking.findMany({
+      where: {
+        bookingDate: todayStr,
+        type: "PUBLIC",
+        status: "CONFIRMED",
+      },
+    });
+    const overlappingPublicGuests = overlappingPublicBookings
+      .filter((b) => isTimeOverlapping(currentTimeStr, targetEndTime, b.startTime, b.endTime))
+      .reduce((sum, b) => sum + b.guestCount, 0);
+
+    const currentTotalOccupancy = currentActiveWalkIns + overlappingPublicGuests;
+
+    if (currentTotalOccupancy + count > maxCapacity) {
+      const remainingSpots = Math.max(0, maxCapacity - currentTotalOccupancy);
+      return NextResponse.json(
+        {
+          error: `Capacity limit reached: Pool currently has ${currentTotalOccupancy} swimmers (${overlappingPublicGuests} online bookings + ${currentActiveWalkIns} active walk-ins) out of ${maxCapacity} maximum. Only ${remainingSpots} spot(s) remaining.`,
+        },
+        { status: 400 }
+      );
     }
 
     const walkIn = await prisma.$transaction(async (tx) => {

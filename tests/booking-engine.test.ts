@@ -20,6 +20,12 @@ describe("Booking Engine & Concurrency Safety", () => {
     await prisma.auditLog.deleteMany();
     await prisma.booking.deleteMany();
     await prisma.slotHold.deleteMany();
+    await prisma.walkIn.deleteMany();
+    await prisma.poolSetting.upsert({
+      where: { id: "singleton_settings" },
+      update: { maxCapacity: 25 },
+      create: { id: "singleton_settings", maxCapacity: 25 },
+    });
   });
 
   describe("Time Range & Operating Hours", () => {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { getPoolDate, getPoolDayBounds } from "@/lib/timezone";
+import { getPoolDate, getPoolTime, getPoolDayBounds } from "@/lib/timezone";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -10,6 +10,7 @@ export async function GET() {
   }
 
   const todayStr = getPoolDate();
+  const currentTimeStr = getPoolTime();
   const { startOfDay: todayStart } = getPoolDayBounds(todayStr);
 
   // 1. Today's Bookings
@@ -60,11 +61,21 @@ export async function GET() {
   });
   const totalOutstanding = activeBookings.reduce((s, b) => s + b.balanceAmount, 0);
 
-  // 6. Current Live Public Occupancy (active walk-ins + today's ongoing public bookings)
+  // 6. Current Live Pool Occupancy:
+  // Active walk-in swimmers + confirmed online bookings currently in the pool right now
   const activeWalkIns = await prisma.walkIn.findMany({
     where: { status: "ACTIVE" },
   });
   const activeWalkInGuests = activeWalkIns.reduce((s, w) => s + w.visitorCount, 0);
+
+  const ongoingBookings = todayBookings.filter(
+    (b) =>
+      b.status === "CONFIRMED" &&
+      currentTimeStr >= b.startTime &&
+      currentTimeStr < b.endTime
+  );
+  const ongoingBookingGuests = ongoingBookings.reduce((s, b) => s + b.guestCount, 0);
+  const currentTotalSwimmers = activeWalkInGuests + ongoingBookingGuests;
 
   const settings = await prisma.poolSetting.findUnique({
     where: { id: "singleton_settings" },
@@ -102,9 +113,12 @@ export async function GET() {
       monthlyRevenue,
       totalOutstanding,
       liveOccupancy: {
-        current: activeWalkInGuests,
+        current: currentTotalSwimmers,
+        onlineBookingsGuests: ongoingBookingGuests,
+        walkInGuests: activeWalkInGuests,
         maxCapacity,
-        percentage: Math.min(100, Math.round((activeWalkInGuests / maxCapacity) * 100)),
+        percentage: Math.min(100, Math.round((currentTotalSwimmers / maxCapacity) * 100)),
+        isFamilySessionActive: ongoingBookings.some((b) => b.type === "FAMILY"),
       },
       pendingCancellationsCount: pendingCancellations.length,
       pendingRefundsCount: pendingRefunds.length,
@@ -124,4 +138,3 @@ export async function GET() {
     pendingCancellations,
   });
 }
-

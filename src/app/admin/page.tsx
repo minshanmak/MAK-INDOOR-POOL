@@ -110,6 +110,13 @@ export default function AdminOverviewPage() {
               style={{ width: `${metrics?.liveOccupancy?.percentage || 0}%` }}
             />
           </div>
+          <div className="text-[11px] text-slate-500 flex justify-between pt-1 border-t border-slate-100">
+            <span>Online: {metrics?.liveOccupancy?.onlineBookingsGuests || 0}</span>
+            <span>Walk-in: {metrics?.liveOccupancy?.walkInGuests || 0}</span>
+            <span className="font-semibold text-emerald-700">
+              {Math.max(0, (metrics?.liveOccupancy?.maxCapacity || 25) - (metrics?.liveOccupancy?.current || 0))} open
+            </span>
+          </div>
         </div>
 
         {/* Metric 3: Outstanding Balances */}
