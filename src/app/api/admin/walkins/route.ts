@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
 import { getPoolDate, getPoolTime } from "@/lib/timezone";
 import { isTimeOverlapping, timeToMinutes } from "@/lib/booking-engine";
+import { autoCheckoutExpiredWalkIns } from "@/lib/walkins";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,9 @@ export async function GET(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // 1. Automatically release swimmers whose booked duration has finished
+  await autoCheckoutExpiredWalkIns();
 
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status"); // ACTIVE | CHECKED_OUT | all
@@ -109,7 +113,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Check maximum concurrent public capacity (max 25 swimmers)
+    // 2. Automatically release expired walk-ins before checking capacity
+    await autoCheckoutExpiredWalkIns();
+
     const settings = await prisma.poolSetting.findUnique({
       where: { id: "singleton_settings" },
     });
@@ -154,7 +160,7 @@ export async function POST(req: NextRequest) {
           overrideReason: overrideReason || null,
           collectedAmount: collected,
           paymentMethod,
-          status: action === "QUICK_ENTRY" ? "CHECKED_OUT" : "ACTIVE",
+          status: "ACTIVE", // Always ACTIVE during duration so live occupancy and capacity are 100% accurate!
           customerName: customerName || null,
           customerPhone: customerPhone || null,
           staffUserId: user.userId,

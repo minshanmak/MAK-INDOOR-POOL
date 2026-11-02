@@ -146,6 +146,24 @@ export default function AdminBookingsPage() {
     }
   };
 
+  const handleAdmitBooking = async (bookingId: string) => {
+    try {
+      const res = await fetch("/api/admin/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "CHECK_IN_ONLINE",
+          bookingId,
+        }),
+      });
+      if (res.ok) {
+        fetchBookings();
+      }
+    } catch (err) {
+      console.error("Failed to admit booking", err);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Title & Primary Action */}
@@ -288,20 +306,36 @@ export default function AdminBookingsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {b.balanceAmount > 0 && b.status === "CONFIRMED" ? (
-                        <button
-                          onClick={() => {
-                            setCollectingBooking(b);
-                            setCollectAmount(b.balanceAmount);
-                            setCollectError(null);
-                          }}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-xs"
-                        >
-                          Collect ₹{b.balanceAmount}
-                        </button>
-                      ) : (
-                        <span className="text-slate-400 text-[11px]">Paid</span>
-                      )}
+                      <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                        {b.notes?.includes("Checked in at") ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            Admitted
+                          </span>
+                        ) : b.status === "CONFIRMED" ? (
+                          <button
+                            onClick={() => handleAdmitBooking(b.id)}
+                            className="bg-cyan-700 hover:bg-cyan-600 text-white text-[11px] font-bold px-2 py-1 rounded shadow-xs transition"
+                          >
+                            Admit Guest
+                          </button>
+                        ) : null}
+
+                        {b.balanceAmount > 0 && b.status === "CONFIRMED" ? (
+                          <button
+                            onClick={() => {
+                              setCollectingBooking(b);
+                              setCollectAmount(b.balanceAmount);
+                              setCollectError(null);
+                            }}
+                            className="bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-xs transition"
+                          >
+                            Collect ₹{b.balanceAmount}
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">Paid</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

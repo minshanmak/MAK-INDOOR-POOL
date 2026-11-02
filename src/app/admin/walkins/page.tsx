@@ -174,6 +174,11 @@ export default function AdminWalkinsPage() {
             </div>
           </div>
 
+          <div className="text-[11px] text-slate-600 bg-cyan-50/50 border border-cyan-100 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
+            <span>Auto-releases after {durationHours} hr. Staff can also check out early anytime.</span>
+          </div>
+
           {formError && (
             <div className="p-3 bg-red-50 text-red-700 rounded-lg text-xs flex items-start gap-1.5">
               <AlertTriangle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />

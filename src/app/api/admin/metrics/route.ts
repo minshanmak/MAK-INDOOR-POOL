@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { getPoolDate, getPoolTime, getPoolDayBounds } from "@/lib/timezone";
+import { autoCheckoutExpiredWalkIns } from "@/lib/walkins";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -62,6 +63,9 @@ export async function GET() {
   const totalOutstanding = activeBookings.reduce((s, b) => s + b.balanceAmount, 0);
 
   // 6. Current Live Pool Occupancy:
+  // Auto-release expired walk-ins before calculating live occupancy
+  await autoCheckoutExpiredWalkIns();
+
   // Active walk-in swimmers + confirmed online bookings currently in the pool right now
   const activeWalkIns = await prisma.walkIn.findMany({
     where: { status: "ACTIVE" },

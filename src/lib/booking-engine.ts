@@ -3,6 +3,7 @@ import { calculateBookingPrice, calculateRemainingBalance, DEFAULT_PRICING, Pric
 import { hasPermission, PERMISSIONS } from "./permissions";
 import { getPoolDate, getPoolHour } from "./timezone";
 import { notificationService } from "./notifications";
+import { autoCheckoutExpiredWalkIns } from "./walkins";
 
 export interface SlotAvailabilityQuery {
   bookingType: "PUBLIC" | "FAMILY";
@@ -204,6 +205,7 @@ export async function checkAvailability(
     // E) Check active walk-in visitors if query is for today
     const todayStr = getPoolDate(now);
     if (query.date === todayStr) {
+      await autoCheckoutExpiredWalkIns(db);
       const activeWalkIns = await db.walkIn.findMany({
         where: { status: "ACTIVE" },
       });
@@ -291,6 +293,7 @@ export async function checkAvailability(
   // Add active walk-ins for today if query.date is today
   const todayStr = getPoolDate(now);
   if (query.date === todayStr) {
+    await autoCheckoutExpiredWalkIns(db);
     const activeWalkIns = await db.walkIn.findMany({
       where: { status: "ACTIVE" },
     });
@@ -375,6 +378,7 @@ export async function getDaySlotsAvailability(
 
   let activeWalkInGuests = 0;
   if (date === todayStr) {
+    await autoCheckoutExpiredWalkIns(db);
     const activeWalkIns = await db.walkIn.findMany({
       where: { status: "ACTIVE" },
     });

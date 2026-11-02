@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
+import { getPoolTime } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +123,43 @@ export async function POST(req: NextRequest) {
       });
 
       return updatedBooking;
+    });
+
+    return NextResponse.json({ success: true, booking: updated });
+  }
+
+  if (action === "CHECK_IN_ONLINE") {
+    if (!bookingId) {
+      return NextResponse.json({ error: "bookingId is required" }, { status: 400 });
+    }
+
+    const b = await prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+    if (!b) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
+
+    const checkInTimeStr = getPoolTime(new Date());
+    const existingNotes = b.notes ? `${b.notes} | ` : "";
+    const updatedNotes = `${existingNotes}Checked in at ${checkInTimeStr}`;
+
+    const updated = await prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        notes: updatedNotes,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        entityType: "BOOKING",
+        entityId: b.id,
+        action: "UPDATE",
+        performedByUserId: user.userId,
+        userRole: user.role,
+        details: `Online guest for booking ${b.id} arrived and checked in at ${checkInTimeStr}.`,
+      },
     });
 
     return NextResponse.json({ success: true, booking: updated });

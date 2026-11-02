@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { autoCheckoutExpiredWalkIns } from "@/lib/walkins";
 import {
   checkAvailability,
   createTemporaryHold,
@@ -296,7 +297,55 @@ describe("Booking Engine & Concurrency Safety", () => {
       expect(daySlots["16:00"].status).toBe("AVAILABLE");
       expect(daySlots["19:00"].status).toBe("AVAILABLE");
     });
+  
+  describe("Walk-in Auto-Checkout & Occupancy Engine", () => {
+    it("automatically checks out expired walk-in swimmers after their duration", async () => {
+      // Create a walk-in from 2 hours ago with 1 hour duration
+      const twoHoursAgo = new Date(Date.now() - 2 * 3600 * 1000);
+      const expiredEntry = await prisma.walkIn.create({
+        data: {
+          visitorCount: 3,
+          durationHours: 1,
+          ratePerHour: 150,
+          calculatedCharge: 450,
+          collectedAmount: 450,
+          paymentMethod: "CASH",
+          status: "ACTIVE",
+          checkInTime: twoHoursAgo,
+        },
+      });
+
+      // Create an active walk-in from 10 minutes ago with 1 hour duration
+      const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const activeEntry = await prisma.walkIn.create({
+        data: {
+          visitorCount: 2,
+          durationHours: 1,
+          ratePerHour: 150,
+          calculatedCharge: 300,
+          collectedAmount: 300,
+          paymentMethod: "UPI",
+          status: "ACTIVE",
+          checkInTime: tenMinsAgo,
+        },
+      });
+
+      // Run auto-checkout
+      const checkedOutCount = await autoCheckoutExpiredWalkIns(prisma);
+      expect(checkedOutCount).toBe(1);
+
+      // Verify the 2-hour-old walk-in is now CHECKED_OUT
+      const refreshedExpired = await prisma.walkIn.findUnique({
+        where: { id: expiredEntry.id },
+      });
+      expect(refreshedExpired?.status).toBe("CHECKED_OUT");
+      expect(refreshedExpired?.checkOutTime).toBeDefined();
+
+      // Verify the 10-minute-old walk-in is still ACTIVE
+      const refreshedActive = await prisma.walkIn.findUnique({
+        where: { id: activeEntry.id },
+      });
+      expect(refreshedActive?.status).toBe("ACTIVE");
+    });
   });
-
-
-
+});
