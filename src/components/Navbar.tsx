@@ -122,8 +122,8 @@ export default function Navbar() {
     };
   }, [pathname]);
 
-  // Do not render public header on admin management routes
-  if (pathname.startsWith("/admin")) {
+  // Do not render public header on admin or booking wizard routes
+  if (pathname.startsWith("/admin") || pathname.startsWith("/book")) {
     return null;
   }
 

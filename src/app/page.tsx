@@ -185,31 +185,31 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/30" />
         <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/55" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-auto space-y-6 w-full flex flex-col items-center">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-auto space-y-5 sm:space-y-6 w-full flex flex-col items-center">
           {/* Top Pill Badge (Operating Hours & Location - Haven "We just raised 20M" style) */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 hover:bg-white/20 backdrop-blur-xl border border-white/30 text-xs font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.4)] transition hover:scale-105">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Open Daily: 9:00 AM – 11:00 PM</span>
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/25 backdrop-blur-xl border border-white/35 text-[11px] sm:text-xs font-semibold text-white shadow-xs transition hover:scale-105 max-w-[94vw]">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="whitespace-nowrap">Open Daily: 9 AM – 11 PM</span>
             <span className="text-white/40">•</span>
-            <span className="text-cyan-200">Moonniyur, Kerala</span>
+            <span className="text-cyan-200 truncate">Moonniyur, Kerala</span>
           </div>
 
           {/* Main Headline (Haven Typography: Centered, Massive, Confident, Clean) */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.8)] max-w-3xl">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.8)] max-w-3xl px-2">
             Swim in peace.
           </h1>
 
           {/* Subtitle (Haven Style: 2 relaxed, poetic lines) */}
-          <p className="text-sm sm:text-base lg:text-lg text-white/95 font-medium leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
+          <p className="text-xs sm:text-base lg:text-lg text-white/95 font-medium leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] px-3">
             A clean, private and temperature-controlled indoor pool. <br className="hidden sm:inline" />
             Designed for peaceful morning laps and exclusive evening family moments.
           </p>
 
-          {/* Centered CTA Buttons (Haven Style: "Get Started ->" + "Watch Demo") */}
-          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+          {/* Centered CTA Buttons (Thumb-friendly mobile column, desktop row) */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3.5 pt-2 w-full max-w-xs sm:max-w-none">
             <Link
               href="/book"
-              className="bg-white hover:bg-slate-100 active:scale-95 text-slate-950 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-[0_4px_24px_rgba(255,255,255,0.35),inset_0_1px_1px_rgba(255,255,255,0.9)] transition flex items-center gap-2 group"
+              className="w-full sm:w-auto bg-white hover:bg-slate-100 active:scale-95 text-slate-950 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-[0_4px_24px_rgba(255,255,255,0.35),inset_0_1px_1px_rgba(255,255,255,0.9)] transition flex items-center justify-center gap-2 group"
             >
               <span>Book Your Slot</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -218,7 +218,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setIsPlayingVideo(true)}
-              className="bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur-xl border border-white/30 text-white font-bold px-6 py-3 rounded-full text-xs sm:text-sm transition flex items-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
+              className="w-full sm:w-auto bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur-xl border border-white/30 text-white font-bold px-6 py-3 rounded-full text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
             >
               <Play className="w-3.5 h-3.5 fill-white" />
               <span>Watch Tour</span>
@@ -226,24 +226,24 @@ export default function HomePage() {
           </div>
 
           {/* Subtle Feature Badges Row */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-3 text-xs font-semibold text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-6 pt-2 sm:pt-3 text-[11px] sm:text-xs font-semibold text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)] px-2">
             <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-cyan-300" />
+              <ShieldCheck className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
               <span>Clean &amp; Safe</span>
             </div>
-            <span className="text-white/30">•</span>
+            <span className="text-white/30 hidden sm:inline">•</span>
             <div className="flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-cyan-300" />
+              <Users className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
               <span>Family Friendly</span>
             </div>
-            <span className="text-white/30">•</span>
+            <span className="text-white/30 hidden sm:inline">•</span>
             <div className="flex items-center gap-1.5">
-              <Droplets className="w-3.5 h-3.5 text-cyan-300" />
+              <Droplets className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
               <span>Well Maintained</span>
             </div>
-            <span className="text-white/30">•</span>
+            <span className="text-white/30 hidden sm:inline">•</span>
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-cyan-300" />
+              <Calendar className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
               <span>Flexible Booking</span>
             </div>
           </div>
