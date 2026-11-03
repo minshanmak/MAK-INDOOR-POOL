@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ArrowRight } from "lucide-react";
@@ -9,21 +9,74 @@ import MakLogo from "@/components/MakLogo";
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
+
+  // Nav items in exact order matching reference mockup
+  const navItems = [
+    { id: "home", label: "Home" },
+    { id: "pricing", label: "Pricing" },
+    { id: "gallery", label: "Gallery" },
+    { id: "about", label: "About" },
+    { id: "policies", label: "Policies" },
+    { id: "faq", label: "FAQ" },
+    { id: "contact", label: "Contact" },
+  ];
+
+  // Scroll-Spy: Highlight active navbar pill as user scrolls
+  useEffect(() => {
+    if (pathname !== "/") return;
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 140; // offset buffer for navbar
+      // Check sections from bottom up
+      const sectionOrder = [
+        "contact",
+        "faq",
+        "policies",
+        "gallery",
+        "pricing",
+        "about",
+        "home",
+      ];
+
+      for (const id of sectionOrder) {
+        const element = document.getElementById(id);
+        if (element) {
+          const top = element.offsetTop;
+          if (scrollPosition >= top) {
+            setActiveSection(id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [pathname]);
 
   // Do not render public header on admin management routes
   if (pathname.startsWith("/admin")) {
     return null;
   }
 
-  const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/gallery", label: "Gallery" },
-    { href: "/about", label: "About" },
-    { href: "/policies", label: "Policies" },
-    { href: "/faq", label: "FAQ" },
-    { href: "/contact", label: "Contact" },
-  ];
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    id: string
+  ) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        window.history.pushState(null, "", `#${id}`);
+        setActiveSection(id);
+      }
+    }
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-[#061426]/95 backdrop-blur-md border-b border-white/10 text-white shadow-md">
@@ -32,6 +85,7 @@ export default function Navbar() {
           {/* Brand Logo */}
           <Link
             href="/"
+            onClick={(e) => handleNavClick(e, "home")}
             className="flex items-center group py-2"
             aria-label="M.A.K Indoor Pool - Home"
           >
@@ -40,24 +94,23 @@ export default function Navbar() {
 
           {/* Desktop Navigation Links (Pill Style - Exact Mockup Match) */}
           <nav className="hidden lg:flex items-center gap-1 bg-[#0E2849]/70 border border-white/10 p-1.5 rounded-full shadow-inner backdrop-blur-md">
-            {navLinks.map((link) => {
-              const isActive =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href);
+            {navItems.map((item) => {
+              const isActive = pathname === "/" && activeSection === item.id;
+              const targetHref = pathname === "/" ? `#${item.id}` : `/#${item.id}`;
 
               return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 ${
+                <a
+                  key={item.id}
+                  href={targetHref}
+                  onClick={(e) => handleNavClick(e, item.id)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 cursor-pointer ${
                     isActive
                       ? "bg-[#0284C7] text-white font-bold shadow-sm"
                       : "text-slate-300 hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  {link.label}
-                </Link>
+                  {item.label}
+                </a>
               );
             })}
           </nav>
@@ -105,25 +158,23 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="sm:hidden bg-[#061426] border-b border-white/10 px-4 pt-3 pb-6 space-y-2">
           <nav className="flex flex-col space-y-1">
-            {navLinks.map((link) => {
-              const isActive =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href);
+            {navItems.map((item) => {
+              const isActive = pathname === "/" && activeSection === item.id;
+              const targetHref = pathname === "/" ? `#${item.id}` : `/#${item.id}`;
 
               return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`px-3 py-2 rounded-xl text-xs font-semibold ${
+                <a
+                  key={item.id}
+                  href={targetHref}
+                  onClick={(e) => handleNavClick(e, item.id)}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer ${
                     isActive
                       ? "bg-[#0284C7] text-white font-bold"
                       : "text-slate-300 hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  {link.label}
-                </Link>
+                  {item.label}
+                </a>
               );
             })}
           </nav>

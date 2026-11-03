@@ -40,9 +40,12 @@ export default function Footer() {
             <h4 className="text-white font-bold text-sm tracking-tight">Quick Links</h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/" className="hover:text-white transition-colors">
+                <a
+                  href={pathname === "/" ? "#home" : "/#home"}
+                  className="hover:text-white transition-colors"
+                >
                   Home
-                </Link>
+                </a>
               </li>
               <li>
                 <Link href="/book" className="hover:text-white transition-colors">
@@ -50,14 +53,20 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="hover:text-white transition-colors">
+                <a
+                  href={pathname === "/" ? "#pricing" : "/#pricing"}
+                  className="hover:text-white transition-colors"
+                >
                   Pricing
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/gallery" className="hover:text-white transition-colors">
+                <a
+                  href={pathname === "/" ? "#gallery" : "/#gallery"}
+                  className="hover:text-white transition-colors"
+                >
                   Gallery
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -67,24 +76,36 @@ export default function Footer() {
             <h4 className="text-white font-bold text-sm tracking-tight">Information</h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
+                <a
+                  href={pathname === "/" ? "#about" : "/#about"}
+                  className="hover:text-white transition-colors"
+                >
                   About Us
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/policies" className="hover:text-white transition-colors">
+                <a
+                  href={pathname === "/" ? "#policies" : "/#policies"}
+                  className="hover:text-white transition-colors"
+                >
                   Policies
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-white transition-colors">
+                <a
+                  href={pathname === "/" ? "#faq" : "/#faq"}
+                  className="hover:text-white transition-colors"
+                >
                   FAQ
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <a
+                  href={pathname === "/" ? "#contact" : "/#contact"}
+                  className="hover:text-white transition-colors"
+                >
                   Contact
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
