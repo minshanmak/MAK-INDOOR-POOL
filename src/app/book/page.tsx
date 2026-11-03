@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useMemo } from "react";
+import React, { useState, useEffect, Suspense, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
-  Calendar,
+  Calendar as CalendarIcon,
   Clock,
   Users,
   CheckCircle2,
@@ -23,13 +23,22 @@ import {
   Info,
   RotateCcw,
   Sparkles,
+  Share2,
+  Navigation,
+  MessageCircle,
+  User,
+  Mail,
+  Waves,
+  Heart,
+  ChevronDown,
 } from "lucide-react";
-import { getPoolDate, getPoolHour } from "@/lib/timezone";
+import { getPoolDate, getPoolHour, POOL_TIMEZONE } from "@/lib/timezone";
 
 function BookingContent() {
   const searchParams = useSearchParams();
   const paramType = searchParams.get("type")?.toUpperCase();
-  const initialType: "PUBLIC" | "FAMILY" = paramType === "PUBLIC" ? "PUBLIC" : "FAMILY";
+  const initialType: "PUBLIC" | "FAMILY" =
+    paramType === "PUBLIC" ? "PUBLIC" : "FAMILY";
 
   const [bookingType, setBookingType] = useState<"PUBLIC" | "FAMILY">(initialType);
   const [date, setDate] = useState<string>("");
@@ -43,19 +52,25 @@ function BookingContent() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [notes, setNotes] = useState("");
 
-  // Step Tracker: 1 = Form & Summary, 2 = Checkout & Hold Timer, 3 = Receipt
+  // Payment method selection in Step 2
+  const [paymentOption, setPaymentOption] = useState<"UPI" | "CARD" | "NETBANKING">("UPI");
+
+  // Step Tracker: 1 = Form & Summary, 2 = Checkout & Hold Timer, 3 = Receipt Pass
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Server-Authoritative State
   const [availResult, setAvailResult] = useState<any>(null);
-  const [daySlots, setDaySlots] = useState<Record<string, { status: string; reason?: string; remainingCapacity?: number }>>({});
+  const [daySlots, setDaySlots] = useState<
+    Record<string, { status: string; reason?: string; remainingCapacity?: number }>
+  >({});
   const [holdToken, setHoldToken] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [customDatePickerOpen, setCustomDatePickerOpen] = useState(false);
 
   // Pool Timezone helper values (Asia/Kolkata)
   const todayIST = useMemo(() => getPoolDate(), []);
@@ -65,6 +80,32 @@ function BookingContent() {
   }, []);
   const currentISTHour = useMemo(() => getPoolHour(), []);
 
+  // Quick Date Chips (Mobile friendly 1-tap selectors)
+  const quickDateChips = useMemo(() => {
+    const chips = [];
+    const now = new Date();
+    for (let i = 0; i < 4; i++) {
+      const d = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
+      const dateStr = getPoolDate(d);
+      const label =
+        i === 0
+          ? "Today"
+          : i === 1
+          ? "Tomorrow"
+          : new Intl.DateTimeFormat("en-IN", {
+              timeZone: POOL_TIMEZONE,
+              weekday: "short",
+            }).format(d);
+      const subLabel = new Intl.DateTimeFormat("en-IN", {
+        timeZone: POOL_TIMEZONE,
+        day: "numeric",
+        month: "short",
+      }).format(d);
+      chips.push({ dateStr, label, subLabel });
+    }
+    return chips;
+  }, []);
+
   // Synchronize with URL search parameter if changed
   useEffect(() => {
     if (paramType === "PUBLIC" || paramType === "FAMILY") {
@@ -72,14 +113,52 @@ function BookingContent() {
     }
   }, [paramType]);
 
-  // Fetch authoritative slot availability for the selected date and session type
+  // Handle switching between PUBLIC and FAMILY with sensible smart defaults
+  useEffect(() => {
+    if (bookingType === "PUBLIC") {
+      if (currentISTHour >= 16) {
+        setDate(tomorrowIST);
+        setStartTime("09:00");
+      } else {
+        setDate(todayIST);
+        if (currentISTHour >= 9 && currentISTHour < 15) {
+          setStartTime(`${String(currentISTHour + 1).padStart(2, "0")}:00`);
+        } else {
+          setStartTime("09:00");
+        }
+      }
+      setGuestCount(2);
+      setDurationHours(1);
+    } else {
+      // FAMILY
+      if (currentISTHour >= 22) {
+        setDate(tomorrowIST);
+        setStartTime("16:00");
+      } else {
+        setDate(todayIST);
+        if (currentISTHour >= 9 && currentISTHour < 22) {
+          setStartTime(`${String(currentISTHour + 1).padStart(2, "0")}:00`);
+        } else {
+          setStartTime("16:00");
+        }
+      }
+      setGuestCount(8);
+      setDurationHours(1);
+    }
+  }, [bookingType, todayIST, tomorrowIST, currentISTHour]);
+
+  // Fetch slot availability for selected date and session type
   useEffect(() => {
     if (!date) return;
     let isCancelled = false;
 
     const fetchDaySlots = async () => {
       try {
-        const res = await fetch(`/api/availability?date=${encodeURIComponent(date)}&type=${encodeURIComponent(bookingType)}`);
+        const res = await fetch(
+          `/api/availability?date=${encodeURIComponent(
+            date
+          )}&type=${encodeURIComponent(bookingType)}`
+        );
         const json = await res.json();
         if (!isCancelled && json.slots) {
           setDaySlots(json.slots);
@@ -95,44 +174,7 @@ function BookingContent() {
     };
   }, [date, bookingType]);
 
-  // Handle switching between PUBLIC and FAMILY
-  useEffect(() => {
-    if (bookingType === "PUBLIC") {
-      // If today and daytime public hours (09:00 - 16:00) have finished, default date to tomorrow
-      if (currentISTHour >= 16) {
-        setDate(tomorrowIST);
-        setStartTime("09:00");
-      } else {
-        setDate(todayIST);
-        // If current hour is between 9 and 15, choose next hour; else start at 09:00
-        if (currentISTHour >= 9 && currentISTHour < 15) {
-          setStartTime(`${String(currentISTHour + 1).padStart(2, "0")}:00`);
-        } else {
-          setStartTime("09:00");
-        }
-      }
-      setGuestCount(2);
-      setDurationHours(1);
-    } else {
-      // FAMILY
-      // If current hour is >= 23, exclusive sessions finished for today
-      if (currentISTHour >= 23) {
-        setDate(tomorrowIST);
-        setStartTime("09:00");
-      } else {
-        setDate(todayIST);
-        if (currentISTHour >= 9 && currentISTHour < 22) {
-          setStartTime(`${String(currentISTHour + 1).padStart(2, "0")}:00`);
-        } else {
-          setStartTime("09:00");
-        }
-      }
-      setGuestCount(8);
-      setDurationHours(1);
-    }
-  }, [bookingType, todayIST, tomorrowIST, currentISTHour]);
-
-  // Real-time countdown for the 15-minute slot hold
+  // Real-time countdown for 15-minute slot hold
   useEffect(() => {
     if (!holdExpiresAt || step !== 2) {
       setSecondsRemaining(null);
@@ -175,7 +217,6 @@ function BookingContent() {
     }
     return false;
   };
-
 
   const getEndTime = (start: string, duration: number): string => {
     const [h, m] = start.split(":").map(Number);
@@ -237,43 +278,61 @@ function BookingContent() {
 
   // Available Slot Choices
   const publicSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"];
-  const familySlots = [
-    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
-    "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"
+  const familyDaySlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"];
+  const familyEveningSlots = [
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+    "21:00",
+    "22:00",
   ];
-  const activeSlots = bookingType === "PUBLIC" ? publicSlots : familySlots;
+  const activeSlots =
+    bookingType === "PUBLIC" ? publicSlots : [...familyDaySlots, ...familyEveningSlots];
 
-  // Check if slot has already concluded today
+  // Check if slot has already concluded today in IST
   const isSlotPastToday = (slot: string) => {
     if (date !== todayIST) return false;
     const [slotH] = slot.split(":").map(Number);
     return slotH <= currentISTHour;
   };
 
-  // If currently selected slot is booked/held/past on newly loaded date, auto-select first available slot
+  // Auto-select first available slot if currently selected is invalid on date change
   useEffect(() => {
     if (!daySlots || Object.keys(daySlots).length === 0) return;
     const currentStatus = daySlots[startTime]?.status;
-    if (currentStatus === "BOOKED" || currentStatus === "HELD" || currentStatus === "PAST") {
-      const firstAvail = activeSlots.find((s) => daySlots[s]?.status === "AVAILABLE");
+    if (
+      currentStatus === "BOOKED" ||
+      currentStatus === "HELD" ||
+      currentStatus === "PAST"
+    ) {
+      const firstAvail = activeSlots.find(
+        (s) => daySlots[s]?.status === "AVAILABLE" && !isSlotPastToday(s)
+      );
       if (firstAvail) {
         setStartTime(firstAvail);
       }
     }
-  }, [daySlots, startTime, activeSlots]);
+  }, [daySlots, startTime, activeSlots, date]);
 
   // Step 1 to Step 2: Request 15-Minute Slot Hold
-  const handleProceedToPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleProceedToPayment = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!availResult?.available) {
-      setError(availResult?.reason || "This slot is not available. Please choose another time.");
+      setError(
+        availResult?.reason || "This slot is not available. Please choose another time."
+      );
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     if (!customerName.trim() || !customerPhone.trim()) {
       setError("Please provide your Name and 10-digit Mobile Number.");
+      window.scrollTo({ top: 300, behavior: "smooth" });
       return;
     }
-    if (customerPhone.replace(/\D/g, "").length < 10) {
+    const cleanPhone = customerPhone.replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
       setError("Please enter a valid 10-digit Indian phone number.");
       return;
     }
@@ -297,12 +356,15 @@ function BookingContent() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to hold slot. It may have just been booked.");
+        throw new Error(
+          data.error || "Failed to hold slot. It may have just been booked by another guest."
+        );
       }
 
       setHoldToken(data.holdToken);
       setHoldExpiresAt(new Date(data.expiresAt));
       setStep(2);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       setError(err.message || "Could not reserve slot.");
     } finally {
@@ -314,7 +376,9 @@ function BookingContent() {
   const isFamily = bookingType === "FAMILY";
   const extraGuests = isFamily ? Math.max(0, guestCount - 12) : 0;
   const extraGuestFee = isFamily ? extraGuests * 100 * durationHours : 0;
-  const clientBaseTotal = isFamily ? 1500 * durationHours : 150 * guestCount * durationHours;
+  const clientBaseTotal = isFamily
+    ? 1500 * durationHours
+    : 150 * guestCount * durationHours;
   const clientComputedTotal = clientBaseTotal + extraGuestFee;
 
   // Authoritative server total or client fallback
@@ -323,7 +387,7 @@ function BookingContent() {
   // Business Rule: Public swimming requires 100% full online payment.
   // Family booking requires configured advance (default ₹750).
   const requiredPaymentAmount = isFamily
-    ? (availResult?.pricing?.advanceRequired ?? 750)
+    ? availResult?.pricing?.advanceRequired ?? 750
     : computedTotal;
 
   const remainingArrivalBalance = isFamily
@@ -352,9 +416,9 @@ function BookingContent() {
           guestCount,
           notes,
           isStaffCreated: false,
-          paymentMethod: "GATEWAY",
+          paymentMethod: paymentOption === "UPI" ? "UPI" : "GATEWAY",
           initialAmount: requiredPaymentAmount,
-          transactionRef: `TRX-${Date.now()}`,
+          transactionRef: `MAK-TRX-${Date.now()}`,
         }),
       });
 
@@ -365,8 +429,9 @@ function BookingContent() {
 
       setConfirmedBooking(data.booking);
       setStep(3);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
-      setError(err.message || "Payment verification failed.");
+      setError(err.message || "Payment verification failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -385,216 +450,459 @@ function BookingContent() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
+  // Generate WhatsApp ticket text for sharing
+  const getWhatsAppShareUrl = () => {
+    if (!confirmedBooking) return "#";
+    const text = `🏊 *M.A.K Indoor Pool - Booking Confirmed!*\n\n` +
+      `🎟️ *Reference ID:* ${confirmedBooking.id}\n` +
+      `👤 *Guest Name:* ${confirmedBooking.customerName}\n` +
+      `📅 *Date:* ${confirmedBooking.bookingDate}\n` +
+      `⏰ *Time Slot:* ${formatTimeSlot(confirmedBooking.startTime)} – ${formatTimeSlot(confirmedBooking.endTime)}\n` +
+      `👥 *Guests:* ${confirmedBooking.guestCount} (${confirmedBooking.type === "FAMILY" ? "Family Exclusive" : "Public Swimming"})\n` +
+      `💳 *Paid Online:* ₹${confirmedBooking.totalPaid}\n` +
+      `💵 *Balance on Arrival:* ₹${confirmedBooking.balanceAmount}\n\n` +
+      `📍 *Location:* M.A.K Indoor Pool, Kalathingalpara, Moonniyur, Kerala\n` +
+      `🗺️ *Google Maps:* https://maps.google.com/?q=M.A.K+Indoor+Pool+Moonniyur`;
+    return `https://wa.me/?text=${encodeURIComponent(text)}`;
+  };
+
   return (
-    <div className="min-h-screen bg-[#F0F5FA] py-10 sm:py-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Step Progress Indicator */}
-        <div className="max-w-md mx-auto flex items-center justify-between text-xs font-semibold text-slate-500">
-          <div className={`flex items-center gap-2 ${step >= 1 ? "text-[#1D68BD] font-bold" : "text-slate-400"}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 1 ? "bg-[#1D68BD] text-white" : "bg-slate-200 text-slate-600"}`}>
-              1
-            </span>
-            <span>Configure</span>
-          </div>
-          <span className="h-0.5 w-12 bg-slate-200" />
-          <div className={`flex items-center gap-2 ${step >= 2 ? "text-[#1D68BD] font-bold" : "text-slate-400"}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 2 ? "bg-[#1D68BD] text-white" : "bg-slate-200 text-slate-600"}`}>
-              2
-            </span>
-            <span>Secure Hold</span>
-          </div>
-          <span className="h-0.5 w-12 bg-slate-200" />
-          <div className={`flex items-center gap-2 ${step >= 3 ? "text-emerald-700 font-bold" : "text-slate-400"}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 3 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600"}`}>
-              3
-            </span>
-            <span>Receipt</span>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#F0F5FA] text-slate-800 pb-32 sm:pb-24">
+      {/* Top Banner / Mobile Nav Anchor */}
+      <div className="bg-white/70 backdrop-blur-xl border-b border-slate-200/80 sticky top-[70px] z-30 transition-all">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Home</span>
+          </Link>
 
-        {/* Title & Subtitle */}
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0A192F] tracking-tight">
-            Book Your Swimming Slot
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Choose between daytime public swimming or an exclusive evening family booking.
-          </p>
-        </div>
-
-        {/* Top Segmented Session Toggle */}
-        {step === 1 && (
-          <div className="flex justify-center">
-            <div className="inline-flex p-1.5 bg-slate-100/90 border border-slate-200/90 rounded-2xl shadow-xs">
-              <button
-                type="button"
-                onClick={() => setBookingType("PUBLIC")}
-                className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 ${
-                  bookingType === "PUBLIC"
-                    ? "bg-[#1D68BD] text-white shadow-xs scale-[1.02]"
-                    : "text-slate-600 hover:text-[#1D68BD]"
-                }`}
-              >
-                Public Swimming (9 AM – 4 PM)
-              </button>
-              <button
-                type="button"
-                onClick={() => setBookingType("FAMILY")}
-                className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 ${
-                  bookingType === "FAMILY"
-                    ? "bg-[#1D68BD] text-white shadow-xs scale-[1.02]"
-                    : "text-slate-600 hover:text-[#1D68BD]"
-                }`}
-              >
-                Family Exclusive (9 AM – 11 PM)
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Error / Warning Alert */}
-        {error && (
-          <div className="max-w-3xl mx-auto p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3 text-xs">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
-            <div className="leading-relaxed">{error}</div>
-          </div>
-        )}
-
-        {/* Unavailability Alert */}
-        {step === 1 && availResult && !availResult.available && !error && (
-          <div className="max-w-3xl mx-auto p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 text-xs">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
-            <div className="leading-relaxed">
-              <strong>Slot Unavailable:</strong> {availResult.reason}
-            </div>
-          </div>
-        )}
-
-        {/* Capacity Warning for Public Swimming */}
-        {step === 1 && bookingType === "PUBLIC" && availResult?.isCapacityWarning && (
-          <div className="max-w-3xl mx-auto p-3.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-sky-700" />
-              <span>
-                Occupancy: <strong>{availResult.currentGuests} / {availResult.maxCapacity}</strong> swimmers booked.
+          {/* 3-Step Guided Progress Pill */}
+          <div className="flex items-center gap-2 text-[11px] font-bold">
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
+                step === 1
+                  ? "bg-slate-950 text-white shadow-xs"
+                  : "text-slate-400 bg-slate-100"
+              }`}
+            >
+              <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
+                1
               </span>
+              <span className="hidden sm:inline">Select Slot</span>
+              <span className="sm:hidden">Slot</span>
             </div>
-            <span className="font-semibold text-sky-700">
-              {Math.max(0, availResult.maxCapacity - availResult.currentGuests)} spots remaining
-            </span>
+
+            <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
+                step === 2
+                  ? "bg-slate-950 text-white shadow-xs"
+                  : step > 2
+                  ? "text-emerald-700 bg-emerald-50"
+                  : "text-slate-400 bg-slate-100"
+              }`}
+            >
+              <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
+                2
+              </span>
+              <span>Checkout</span>
+            </div>
+
+            <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
+                step === 3
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-slate-400 bg-slate-100"
+              }`}
+            >
+              <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
+                3
+              </span>
+              <span>Pass</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 space-y-6 sm:space-y-8">
+        {/* Error / Alert Banner */}
+        {error && (
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-3 text-xs shadow-xs animate-shake">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+            <div className="leading-relaxed font-medium">{error}</div>
           </div>
         )}
 
-        {/* STEP 1: Two-Column Form & Summary */}
+        {/* =========================================================================
+            STEP 1: INTUITIVE MOBILE-FIRST SLOT & DETAILS SELECTION
+           ========================================================================= */}
         {step === 1 && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Form Configuration */}
-            <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
-              {/* 1. Select Date */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="block text-xs font-bold text-[#0A192F]">
-                    1. Select Date
-                  </label>
-                  {date === tomorrowIST && currentISTHour >= 16 && bookingType === "PUBLIC" && (
-                    <span className="text-[10px] text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded font-medium">
-                      Today&apos;s public hours ended • Showing tomorrow
-                    </span>
-                  )}
-                </div>
-                <div className="relative">
-                  <input
-                    type="date"
-                    min={todayIST}
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1D68BD]"
-                  />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            {/* Left Column: Mobile Guided Experience */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Header Title & Pitch */}
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-600">
+                  Instant Online Booking
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+                  Book Your Swimming Slot
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Select your session type, pick your date, and reserve your pool time instantly.
+                </p>
+              </div>
+
+              {/* 1. INTERACTIVE EXPERIENCE CARDS (Mobile-First 2-Option Card Grid) */}
+              <div className="space-y-2.5">
+                <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Step 1 • Choose Experience
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Option A: Family Exclusive */}
+                  <button
+                    type="button"
+                    onClick={() => setBookingType("FAMILY")}
+                    className={`relative p-4 rounded-2xl text-left border-2 transition-all duration-200 active:scale-[0.99] flex flex-col justify-between ${
+                      bookingType === "FAMILY"
+                        ? "border-slate-950 bg-white shadow-md ring-2 ring-slate-950/5"
+                        : "border-slate-200 bg-white/70 hover:border-slate-300 hover:bg-white shadow-xs"
+                    }`}
+                  >
+                    {bookingType === "FAMILY" && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-slate-950 text-white flex items-center justify-center">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold">
+                          👨‍👩‍👧‍👦
+                        </span>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-slate-900">
+                            Family Exclusive
+                          </h3>
+                          <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">
+                            100% Private Pool
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-2.5 leading-relaxed">
+                        Entire pool locked exclusively for your family. Zero outside visitors.
+                      </p>
+                    </div>
+
+                    <div className="pt-3 mt-3 border-t border-slate-100 flex items-baseline justify-between">
+                      <div>
+                        <span className="text-base font-black text-slate-950 font-mono">
+                          ₹1,500
+                        </span>
+                        <span className="text-[11px] text-slate-500"> / hour</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        ₹750 Advance to book
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Option B: Public Swimming */}
+                  <button
+                    type="button"
+                    onClick={() => setBookingType("PUBLIC")}
+                    className={`relative p-4 rounded-2xl text-left border-2 transition-all duration-200 active:scale-[0.99] flex flex-col justify-between ${
+                      bookingType === "PUBLIC"
+                        ? "border-slate-950 bg-white shadow-md ring-2 ring-slate-950/5"
+                        : "border-slate-200 bg-white/70 hover:border-slate-300 hover:bg-white shadow-xs"
+                    }`}
+                  >
+                    {bookingType === "PUBLIC" && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-slate-950 text-white flex items-center justify-center">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-xl bg-sky-100 text-[#0284C7] flex items-center justify-center text-sm font-bold">
+                          🏊
+                        </span>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-slate-900">
+                            Public Swimming
+                          </h3>
+                          <span className="text-[10px] font-semibold text-[#0284C7] bg-sky-50 px-1.5 py-0.5 rounded">
+                            Daytime (9 AM – 4 PM)
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-2.5 leading-relaxed">
+                        Individual &amp; group shared swimming. Capped at 25 swimmers max.
+                      </p>
+                    </div>
+
+                    <div className="pt-3 mt-3 border-t border-slate-100 flex items-baseline justify-between">
+                      <div>
+                        <span className="text-base font-black text-slate-950 font-mono">
+                          ₹150
+                        </span>
+                        <span className="text-[11px] text-slate-500"> / person / hr</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-full">
+                        Full online payment
+                      </span>
+                    </div>
+                  </button>
                 </div>
               </div>
 
-              {/* 2. Select Time */}
-              <div className="space-y-2">
+              {/* 2. QUICK DATE CHIPS (Instant 1-Tap Mobile Selection) */}
+              <div className="space-y-2.5 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
                 <div className="flex justify-between items-center">
-                  <label className="block text-xs font-bold text-[#0A192F]">
-                    2. Select Start Time
+                  <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    Step 2 • Select Date
                   </label>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    {isFamily ? "Full Day & Evening Exclusive (09:00 AM – 11:00 PM)" : "Daytime Public (09:00 AM – 04:00 PM)"}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCustomDatePickerOpen(!customDatePickerOpen)}
+                    className="text-[11px] font-semibold text-[#1D68BD] hover:underline flex items-center gap-1"
+                  >
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                    <span>{customDatePickerOpen ? "Hide Calendar" : "Pick Other Date"}</span>
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {activeSlots.map((slot) => {
-                    const slotInfo = daySlots[slot];
-                    const isPast = isSlotPastToday(slot) || slotInfo?.status === "PAST";
-                    const isBooked = slotInfo?.status === "BOOKED";
-                    const isHeld = slotInfo?.status === "HELD";
-                    const isDisabled = isPast || isBooked || isHeld;
-                    const isSelected = startTime === slot && !isDisabled;
-
+                {/* 4 Quick Date Chips */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {quickDateChips.map((chip) => {
+                    const isSelected = date === chip.dateStr;
                     return (
                       <button
-                        key={slot}
+                        key={chip.dateStr}
                         type="button"
-                        disabled={isDisabled}
-                        title={slotInfo?.reason || undefined}
                         onClick={() => {
-                          if (isDisabled) return;
-                          setStartTime(slot);
-                          // Auto clamp duration if slot is near closing
-                          const [sH] = slot.split(":").map(Number);
-                          const allowed = Math.max(1, Math.min(4, sessionEndHour - sH));
-                          if (durationHours > allowed) {
-                            setDurationHours(allowed);
-                          }
+                          setDate(chip.dateStr);
+                          setCustomDatePickerOpen(false);
                         }}
-                        className={`p-2.5 rounded-lg border text-center transition ${
-                          isPast
-                            ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-60"
-                            : isBooked
-                            ? "border-rose-200 bg-rose-50 text-rose-700 cursor-not-allowed"
-                            : isHeld
-                            ? "border-amber-200 bg-amber-50 text-amber-700 cursor-not-allowed"
-                            : isSelected
-                            ? "border-[#1D68BD] bg-[#1D68BD]/5 text-[#1D68BD] ring-1 ring-[#1D68BD]"
-                            : "border-slate-200 bg-white hover:border-[#1D68BD]/40 text-slate-800"
+                        className={`p-2.5 rounded-xl border text-center transition-all duration-150 active:scale-95 ${
+                          isSelected
+                            ? "bg-slate-950 text-white border-slate-950 shadow-sm"
+                            : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200/90"
                         }`}
                       >
-                        <div className={`font-bold text-xs font-mono ${isBooked ? "text-rose-900" : ""}`}>
-                          {formatTimeSlot(slot)}
-                        </div>
                         <div
-                          className={`text-[10px] font-semibold mt-0.5 ${
-                            isPast
-                              ? "text-slate-400"
-                              : isBooked
-                              ? "text-rose-700 font-bold"
-                              : isHeld
-                              ? "text-amber-700 font-bold"
-                              : isSelected
-                              ? "text-[#1D68BD] font-bold"
-                              : "text-emerald-700"
+                          className={`text-xs font-extrabold ${
+                            isSelected ? "text-white" : "text-slate-900"
                           }`}
                         >
-                          {isPast
-                            ? "Past"
-                            : isBooked
-                            ? "Booked"
-                            : isHeld
-                            ? "In Checkout"
-                            : isSelected
-                            ? "Selected"
-                            : bookingType === "PUBLIC" && slotInfo?.remainingCapacity !== undefined && slotInfo.remainingCapacity < 10
-                            ? `${slotInfo.remainingCapacity} Left`
-                            : "Available"}
+                          {chip.label}
+                        </div>
+                        <div
+                          className={`text-[10px] font-medium mt-0.5 ${
+                            isSelected ? "text-cyan-300" : "text-slate-500"
+                          }`}
+                        >
+                          {chip.subLabel}
                         </div>
                       </button>
                     );
                   })}
                 </div>
+
+                {/* Custom Native Date Picker Dropdown */}
+                {customDatePickerOpen && (
+                  <div className="pt-2 animate-fadeIn">
+                    <input
+                      type="date"
+                      min={todayIST}
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 3. GROUPED TIME SLOT SELECTOR */}
+              <div className="space-y-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    Step 3 • Select Start Time
+                  </label>
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    Selected: <strong className="text-slate-950">{formatTimeSlot(startTime)}</strong>
+                  </span>
+                </div>
+
+                {/* Slot Helper Badge */}
+                {isFamily && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 text-[11px] font-bold">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                    <span>Exclusive pool sessions available from 9 AM to 11 PM</span>
+                  </div>
+                )}
+
+                {/* Family Evening Group */}
+                {isFamily && (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
+                      <span className="flex items-center gap-1.5 text-purple-900">
+                        <span>🌙 Evening &amp; Night Sessions (4 PM – 11 PM)</span>
+                        <span className="bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded text-[9px]">
+                          ⭐ Popular
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {familyEveningSlots.map((slot) => {
+                        const slotInfo = daySlots[slot];
+                        const isPast = isSlotPastToday(slot) || slotInfo?.status === "PAST";
+                        const isBooked = slotInfo?.status === "BOOKED";
+                        const isHeld = slotInfo?.status === "HELD";
+                        const isDisabled = isPast || isBooked || isHeld;
+                        const isSelected = startTime === slot && !isDisabled;
+
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => {
+                              if (isDisabled) return;
+                              setStartTime(slot);
+                              const [sH] = slot.split(":").map(Number);
+                              const allowed = Math.max(1, Math.min(4, sessionEndHour - sH));
+                              if (durationHours > allowed) {
+                                setDurationHours(allowed);
+                              }
+                            }}
+                            className={`min-h-[50px] p-2 rounded-xl border text-center transition-all duration-150 active:scale-95 flex flex-col justify-center items-center ${
+                              isPast
+                                ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-50"
+                                : isBooked
+                                ? "border-rose-200 bg-rose-50/80 text-rose-800 cursor-not-allowed"
+                                : isHeld
+                                ? "border-amber-200 bg-amber-50 text-amber-800 cursor-not-allowed"
+                                : isSelected
+                                ? "border-slate-950 bg-slate-950 text-white shadow-md ring-2 ring-slate-950/20"
+                                : "border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-400 text-slate-800"
+                            }`}
+                          >
+                            <span className="text-xs font-bold font-mono">
+                              {formatTimeSlot(slot)}
+                            </span>
+                            <span
+                              className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${
+                                isSelected
+                                  ? "text-cyan-300"
+                                  : isBooked
+                                  ? "text-rose-600"
+                                  : isHeld
+                                  ? "text-amber-600"
+                                  : "text-emerald-700"
+                              }`}
+                            >
+                              {isPast
+                                ? "Past"
+                                : isBooked
+                                ? "Booked"
+                                : isHeld
+                                ? "In Checkout"
+                                : isSelected
+                                ? "Selected"
+                                : "Available"}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Daytime Group */}
+                <div className="space-y-1.5 pt-2">
+                  <span className="text-[11px] font-bold text-slate-600">
+                    ☀️ Daytime Sessions (9 AM – 4 PM)
+                  </span>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {(isFamily ? familyDaySlots : publicSlots).map((slot) => {
+                      const slotInfo = daySlots[slot];
+                      const isPast = isSlotPastToday(slot) || slotInfo?.status === "PAST";
+                      const isBooked = slotInfo?.status === "BOOKED";
+                      const isHeld = slotInfo?.status === "HELD";
+                      const isDisabled = isPast || isBooked || isHeld;
+                      const isSelected = startTime === slot && !isDisabled;
+
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          disabled={isDisabled}
+                          onClick={() => {
+                            if (isDisabled) return;
+                            setStartTime(slot);
+                            const [sH] = slot.split(":").map(Number);
+                            const allowed = Math.max(1, Math.min(4, sessionEndHour - sH));
+                            if (durationHours > allowed) {
+                              setDurationHours(allowed);
+                            }
+                          }}
+                          className={`min-h-[50px] p-2 rounded-xl border text-center transition-all duration-150 active:scale-95 flex flex-col justify-center items-center ${
+                            isPast
+                              ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-50"
+                              : isBooked
+                              ? "border-rose-200 bg-rose-50/80 text-rose-800 cursor-not-allowed"
+                              : isHeld
+                              ? "border-amber-200 bg-amber-50 text-amber-800 cursor-not-allowed"
+                              : isSelected
+                              ? "border-slate-950 bg-slate-950 text-white shadow-md ring-2 ring-slate-950/20"
+                              : "border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-400 text-slate-800"
+                          }`}
+                        >
+                          <span className="text-xs font-bold font-mono">
+                            {formatTimeSlot(slot)}
+                          </span>
+                          <span
+                            className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${
+                              isSelected
+                                ? "text-cyan-300"
+                                : isBooked
+                                ? "text-rose-600"
+                                : isHeld
+                                ? "text-amber-600"
+                                : "text-emerald-700"
+                            }`}
+                          >
+                            {isPast
+                              ? "Past"
+                              : isBooked
+                              ? "Booked"
+                              : isHeld
+                              ? "In Checkout"
+                              : isSelected
+                              ? "Selected"
+                              : bookingType === "PUBLIC" &&
+                                slotInfo?.remainingCapacity !== undefined &&
+                                slotInfo.remainingCapacity < 10
+                              ? `${slotInfo.remainingCapacity} Left`
+                              : "Available"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Visual Legend */}
-                <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1">
+                <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" /> Available
                   </span>
@@ -610,333 +918,437 @@ function BookingContent() {
                 </div>
               </div>
 
-              {/* 3. Number of Guests */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="block text-xs font-bold text-[#0A192F]">
-                    3. Number of Guests / Swimmers
-                  </label>
-                  <span className="text-[10px] text-slate-400">
-                    {isFamily ? "Max 30 guests" : "Max 25 swimmers (Capacity Cap)"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 p-1">
+              {/* 4. GUESTS & DURATION (Thumb-Friendly Controls) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Guest Counter */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      Guests / Swimmers
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-semibold">
+                      {isFamily ? "Max 30" : "Max 25"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between border border-slate-200 rounded-xl bg-slate-50 p-1.5">
                     <button
                       type="button"
                       onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
-                      className="w-8 h-8 rounded-md bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-100 flex items-center justify-center text-sm"
+                      className="w-10 h-10 rounded-lg bg-white border border-slate-200 text-slate-800 font-black hover:bg-slate-100 flex items-center justify-center text-lg active:scale-90 transition"
+                      aria-label="Decrease guest count"
                     >
                       –
                     </button>
-                    <span className="w-12 text-center font-bold text-sm text-[#0A192F] font-mono">
-                      {guestCount}
-                    </span>
+                    <div className="text-center">
+                      <span className="text-lg font-black text-slate-950 font-mono">
+                        {guestCount}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block font-semibold">
+                        {guestCount === 1 ? "Swimmer" : "Swimmers"}
+                      </span>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setGuestCount(Math.min(isFamily ? 30 : 25, guestCount + 1))}
-                      className="w-8 h-8 rounded-md bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-100 flex items-center justify-center text-sm"
+                      onClick={() =>
+                        setGuestCount(Math.min(isFamily ? 30 : 25, guestCount + 1))
+                      }
+                      className="w-10 h-10 rounded-lg bg-white border border-slate-200 text-slate-800 font-black hover:bg-slate-100 flex items-center justify-center text-lg active:scale-90 transition"
+                      aria-label="Increase guest count"
                     >
                       +
                     </button>
                   </div>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-[10px] text-slate-500 block">
                     {isFamily
-                      ? "Up to 12 people included in base rate (₹1,500/hr)"
-                      : "₹150 per person per hour (full online payment required)"}
+                      ? "12 guests included in base rate. ₹100/extra guest."
+                      : "₹150 per person per hour."}
                   </span>
+                </div>
+
+                {/* Duration Pills */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      Duration
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-semibold">
+                      Ends at {formatTimeSlot(endTime)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {[1, 2, 3]
+                      .filter((h) => h <= maxAllowedHours && !isDurationColliding(startTime, h))
+                      .map((h) => {
+                        const isSelected = durationHours === h;
+                        return (
+                          <button
+                            key={h}
+                            type="button"
+                            onClick={() => setDurationHours(h)}
+                            className={`p-2.5 rounded-xl border text-center transition-all duration-150 active:scale-95 ${
+                              isSelected
+                                ? "bg-slate-950 text-white border-slate-950 shadow-sm"
+                                : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
+                            }`}
+                          >
+                            <span className="block text-xs font-extrabold font-mono">
+                              {h} Hr{h > 1 ? "s" : ""}
+                            </span>
+                            <span
+                              className={`text-[9px] block ${
+                                isSelected ? "text-cyan-300" : "text-slate-500"
+                              }`}
+                            >
+                              until {formatTimeSlot(getEndTime(startTime, h))}
+                            </span>
+                          </button>
+                        );
+                      })}
+                  </div>
                 </div>
               </div>
 
-              {/* 4. Duration */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="block text-xs font-bold text-[#0A192F]">
-                    4. Duration
-                  </label>
-                  <span className="text-[10px] text-slate-400">
-                    {isFamily ? "Closes at 11:00 PM" : "Public sessions end at 4:00 PM"}
-                  </span>
-                </div>
-                <select
-                  value={durationHours}
-                  onChange={(e) => setDurationHours(Number(e.target.value))}
-                  className="w-full sm:w-64 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1D68BD]"
-                >
-                  {[1, 2, 3, 4]
-                    .filter((h) => h <= maxAllowedHours && !isDurationColliding(startTime, h))
-                    .map((h) => (
-                      <option key={h} value={h}>
-                        {h} Hour{h > 1 ? "s" : ""} (until {formatTimeSlot(getEndTime(startTime, h))})
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              {/* 5. Contact Details */}
-              <div className="pt-4 border-t border-slate-100 space-y-3">
-                <label className="block text-xs font-bold text-[#0A192F]">
-                  5. Contact &amp; Swimmer Details
+              {/* 5. GUEST CONTACT DETAILS (iOS Friendly Input Fields) */}
+              <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+                <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Step 4 • Contact Information
                 </label>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] text-slate-600 mb-1">Full Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Rahul Sharma"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800"
-                    />
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                      Full Name *
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Minshad K"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:bg-white transition"
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <label className="block text-[11px] text-slate-600 mb-1">Mobile Number *</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="98470XXXXX"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 font-mono"
-                    />
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                      10-Digit Mobile Number *
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        required
+                        placeholder="98470XXXXX"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-slate-950 focus:bg-white transition"
+                      />
+                    </div>
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-[11px] text-slate-600 mb-1">Email Address (Optional)</label>
-                  <input
-                    type="email"
-                    placeholder="name@example.com"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800"
-                  />
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    Email Address (Optional, for ticket copy)
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                    <input
+                      type="email"
+                      placeholder="name@example.com"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:bg-white transition"
+                    />
+                  </div>
                 </div>
               </div>
-
-              {/* Context-Aware Session Rules Box */}
-              {isFamily ? (
-                <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-100 space-y-2 text-xs text-slate-700">
-                  <div className="flex items-center gap-2 text-[#1D68BD] font-bold">
-                    <Info className="w-4 h-4" />
-                    <span>Family Exclusive Booking Rules</span>
-                  </div>
-                  <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
-                    <li>Private exclusive sessions can be booked anytime between 9:00 AM and 11:00 PM.</li>
-                    <li>100% Private Pool: Once booked, public swimming is completely closed for your confirmed slot.</li>
-                    <li>Base rate is ₹1,500 per hour for up to 12 guests (100% private pool).</li>
-                    <li>Additional guests above 12 add ₹100 per person per hour across duration.</li>
-                    <li>₹750 online advance required to hold and confirm your exclusive slot.</li>
-                    <li>Remaining balance payable at facility arrival (Cash / UPI).</li>
-                  </ul>
-                </div>
-              ) : (
-                <div className="p-4 rounded-xl bg-cyan-50/70 border border-cyan-100 space-y-2 text-xs text-slate-700">
-                  <div className="flex items-center gap-2 text-[#1D68BD] font-bold">
-                    <Info className="w-4 h-4" />
-                    <span>Public Swimming Session Rules</span>
-                  </div>
-                  <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
-                    <li>Daytime public swimming operates between 9:00 AM and 4:00 PM.</li>
-                    <li>Rate is ₹150 per person per hour with access to main heated pool.</li>
-                    <li>Shared pool session strictly capped at 25 swimmers max capacity.</li>
-                    <li>Full online payment is required at checkout to confirm admission.</li>
-                    <li>Zero balance due on arrival — show your confirmation at reception.</li>
-                  </ul>
-                </div>
-              )}
             </div>
 
-            {/* Right Column: Authoritative Booking Summary Card */}
-            <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200/90 p-6 sm:p-7 shadow-xs space-y-5 sticky top-24">
-              <h2 className="text-sm font-bold text-[#0A192F] tracking-tight pb-3 border-b border-slate-100">
-                Booking Summary
-              </h2>
-
-              <div className="space-y-2.5 text-xs">
-                <div className="flex justify-between text-slate-600">
-                  <span>Booking Type</span>
-                  <span className="font-bold text-slate-900">
-                    {isFamily ? "Family Exclusive (Private)" : "Daily Public Swimming (Shared)"}
+            {/* Right Column: Desktop Sticky Glass Summary Card */}
+            <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-24">
+              <div className="bg-white/90 backdrop-blur-2xl rounded-3xl border border-white p-5 sm:p-6 shadow-[0_8px_30px_rgba(20,60,110,0.06)] space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <h2 className="text-sm font-extrabold text-slate-950">
+                    Booking Summary
+                  </h2>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full">
+                    Live Calculation
                   </span>
                 </div>
 
-                <div className="flex justify-between text-slate-600">
-                  <span>Date</span>
-                  <span className="font-semibold text-slate-900 font-mono">
-                    {date}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-slate-600">
-                  <span>Time Slot</span>
-                  <span className="font-semibold text-slate-900 font-mono">
-                    {formatTimeSlot(startTime)} – {formatTimeSlot(endTime)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-slate-600">
-                  <span>Duration</span>
-                  <span className="font-semibold text-slate-900">
-                    {durationHours} Hour{durationHours > 1 ? "s" : ""}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-slate-600">
-                  <span>Swimmers / Guests</span>
-                  <span className="font-semibold text-slate-900">
-                    {guestCount} {isFamily && guestCount <= 12 ? "(up to 12 included)" : ""}
-                  </span>
-                </div>
-              </div>
-
-              {/* Price Details Divider */}
-              <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
-                <span className="block font-bold text-slate-900 text-xs uppercase tracking-wider">
-                  Price Calculation
-                </span>
-
-                {isFamily ? (
-                  <>
-                    <div className="flex justify-between text-slate-600">
-                      <span>Base Rate ({durationHours} hr{durationHours > 1 ? "s" : ""}, up to 12)</span>
-                      <span className="font-mono text-slate-900">₹{1500 * durationHours}</span>
-                    </div>
-
-                    {extraGuests > 0 && (
-                      <div className="flex justify-between text-slate-600">
-                        <span>Extra Guests ({extraGuests} &times; ₹100/hr)</span>
-                        <span className="font-mono text-slate-900">₹{extraGuestFee}</span>
-                      </div>
-                    )}
-                  </>
-                ) : (
+                {/* Clean Key-Value Pairs */}
+                <div className="space-y-2.5 text-xs">
                   <div className="flex justify-between text-slate-600">
-                    <span>
-                      Public Swimming ({guestCount} guest{guestCount > 1 ? "s" : ""} &times; {durationHours} hr{durationHours > 1 ? "s" : ""})
+                    <span>Experience:</span>
+                    <span className="font-bold text-slate-900">
+                      {isFamily ? "Family Exclusive (Private)" : "Public Swimming"}
                     </span>
-                    <span className="font-mono text-slate-900">₹{computedTotal}</span>
+                  </div>
+
+                  <div className="flex justify-between text-slate-600">
+                    <span>Date:</span>
+                    <span className="font-bold text-slate-900 font-mono">
+                      {date}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-slate-600">
+                    <span>Time:</span>
+                    <span className="font-bold text-slate-900 font-mono">
+                      {formatTimeSlot(startTime)} – {formatTimeSlot(endTime)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-slate-600">
+                    <span>Duration &amp; Swimmers:</span>
+                    <span className="font-bold text-slate-900">
+                      {durationHours} Hr{durationHours > 1 ? "s" : ""} • {guestCount} Guests
+                    </span>
+                  </div>
+                </div>
+
+                {/* Price Breakdown */}
+                <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+                  {isFamily ? (
+                    <>
+                      <div className="flex justify-between text-slate-600">
+                        <span>
+                          Base Rate ({durationHours} hr{durationHours > 1 ? "s" : ""}, up to 12)
+                        </span>
+                        <span className="font-mono font-semibold text-slate-900">
+                          ₹{1500 * durationHours}
+                        </span>
+                      </div>
+                      {extraGuests > 0 && (
+                        <div className="flex justify-between text-slate-600">
+                          <span>
+                            Extra Guests ({extraGuests} &times; ₹100/hr)
+                          </span>
+                          <span className="font-mono font-semibold text-slate-900">
+                            ₹{extraGuestFee}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex justify-between text-slate-600">
+                      <span>
+                        Public Swimming ({guestCount} swimmers &times; {durationHours} hr)
+                      </span>
+                      <span className="font-mono font-semibold text-slate-900">
+                        ₹{computedTotal}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-baseline font-black text-sm text-slate-950 pt-2 border-t border-slate-100">
+                    <span>Total Session Value</span>
+                    <span className="font-mono text-base">₹{computedTotal}</span>
+                  </div>
+                </div>
+
+                {/* Advance vs Counter Balance Box */}
+                {isFamily ? (
+                  <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/80 space-y-1 text-xs">
+                    <div className="flex items-center justify-between font-black text-amber-950">
+                      <span>Payable Online (Advance):</span>
+                      <span className="text-lg font-mono">₹{requiredPaymentAmount}</span>
+                    </div>
+                    <p className="text-[11px] text-amber-800 leading-tight">
+                      Remaining ₹{remainingArrivalBalance} payable upon arrival at counter (Cash / UPI).
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 space-y-1 text-xs">
+                    <div className="flex items-center justify-between font-black text-emerald-950">
+                      <span>Payable Online (Full):</span>
+                      <span className="text-lg font-mono">₹{requiredPaymentAmount}</span>
+                    </div>
+                    <p className="text-[11px] text-emerald-800 leading-tight">
+                      100% online admission. Zero balance due on arrival.
+                    </p>
                   </div>
                 )}
 
-                <div className="flex justify-between font-bold text-sm text-[#0A192F] pt-2 border-t border-slate-100">
-                  <span>Total Amount</span>
-                  <span className="font-mono">₹{computedTotal}</span>
-                </div>
+                {/* Desktop Action Button */}
+                <button
+                  type="button"
+                  disabled={loading || (availResult && !availResult.available)}
+                  onClick={() => handleProceedToPayment()}
+                  className={`w-full font-black py-4 rounded-full text-xs shadow-md transition flex items-center justify-center gap-2 active:scale-98 ${
+                    availResult && !availResult.available
+                      ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                      : "bg-slate-950 hover:bg-slate-800 text-white shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
+                  }`}
+                >
+                  {loading ? (
+                    <span>Holding Slot...</span>
+                  ) : availResult && !availResult.available ? (
+                    <span>Slot Unavailable</span>
+                  ) : (
+                    <>
+                      <span>Proceed to Hold &amp; Pay (₹{requiredPaymentAmount})</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+
+                <p className="text-[11px] text-slate-400 text-center leading-tight">
+                  🔒 Holds your slot exclusively for 15 minutes while completing payment.
+                </p>
               </div>
 
-              {/* Payment Highlight Box */}
-              {isFamily ? (
-                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-1.5 text-xs text-amber-950">
-                  <div className="font-bold flex items-center justify-between">
-                    <span>Advance Payment (Required Online)</span>
-                    <span className="text-base font-black font-mono">₹{requiredPaymentAmount}</span>
-                  </div>
-                  <p className="text-[11px] text-amber-800 leading-tight">
-                    Pay ₹{requiredPaymentAmount} now to reserve slot. Remaining ₹{remainingArrivalBalance} to be paid on arrival (Cash / UPI).
-                  </p>
+              {/* Guarantees Box */}
+              <div className="p-4 rounded-2xl bg-white border border-slate-200/70 text-xs text-slate-600 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-slate-900">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Pool Safety &amp; Cancellation Assurance</span>
                 </div>
-              ) : (
-                <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 space-y-1.5 text-xs text-emerald-950">
-                  <div className="font-bold flex items-center justify-between">
-                    <span>Online Admission Fee (100% Full Payment)</span>
-                    <span className="text-base font-black font-mono">₹{requiredPaymentAmount}</span>
-                  </div>
-                  <p className="text-[11px] text-emerald-800 leading-tight">
-                    Website public bookings require full advance payment. Zero balance due on arrival.
-                  </p>
-                </div>
-              )}
-
-              {/* CTA Button */}
-              <button
-                type="button"
-                disabled={loading || (availResult && !availResult.available)}
-                onClick={handleProceedToPayment}
-                className={`w-full font-bold py-3.5 rounded-lg text-xs shadow-xs transition duration-150 flex items-center justify-center gap-2 ${
-                  availResult && !availResult.available
-                    ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                    : "bg-[#1D68BD] hover:bg-[#155299] text-white"
-                }`}
-              >
-                {loading
-                  ? "Holding Slot..."
-                  : availResult && !availResult.available
-                  ? "Slot Unavailable — Choose Another Time"
-                  : `Proceed to Payment (₹${requiredPaymentAmount})`}
-              </button>
-
-              <p className="text-[11px] text-slate-400 text-center leading-tight">
-                Locks slot for 15 minutes while completing secure checkout.
-              </p>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Cancel up to 2 hours prior for a full instant refund. 100% sanitized hospital-grade water.
+                </p>
+              </div>
             </div>
           </div>
         )}
 
-        {/* STEP 2: 15-Minute Slot Hold Checkout & Payment Simulation */}
+        {/* =========================================================================
+            STEP 2: 15-MINUTE HOLD CHECKOUT & INSTANT PAYMENT SIMULATION
+           ========================================================================= */}
         {step === 2 && (
-          <div className="max-w-xl mx-auto bg-white rounded-xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="max-w-xl mx-auto bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 animate-fadeIn">
             <div className="text-center space-y-2">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#1D68BD] bg-teal-50 px-2.5 py-1 rounded">
-                SLOT TEMPORARILY LOCKED
+              <span className="text-[10px] uppercase font-black tracking-wider text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full">
+                Slot Temporarily Reserved
               </span>
-              <h2 className="text-xl font-black text-[#0A192F]">
-                {isFamily ? "Complete Advance Payment" : "Complete Online Admission Payment"}
+              <h2 className="text-xl sm:text-2xl font-black text-slate-950">
+                {isFamily ? "Pay Advance to Confirm" : "Complete Online Admission"}
               </h2>
-              <p className="text-xs text-slate-500">
-                Your selected slot is reserved for 15 minutes while you complete payment verification.
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Your pool slot is held exclusively for you. Complete payment verification before the timer ends.
               </p>
             </div>
 
-            {/* Countdown Clock */}
-            <div className="p-4 rounded-xl bg-slate-900 text-white text-center space-y-1">
+            {/* Glowing 15-Minute Countdown Timer */}
+            <div className="p-5 rounded-2xl bg-slate-950 text-white text-center space-y-1 shadow-md">
               <span className="text-[10px] font-mono uppercase text-slate-400 tracking-wider">
                 Holding Time Remaining
               </span>
-              <div className="text-3xl font-black font-mono tracking-widest text-cyan-400">
+              <div className="text-4xl font-black font-mono tracking-widest text-cyan-400 animate-pulse">
                 {formatTimer(secondsRemaining)}
               </div>
               <span className="text-[10px] text-slate-400 block">
-                Slot auto-releases if payment is not confirmed within 15:00
+                Slot auto-releases if transaction is not confirmed within 15:00
               </span>
             </div>
 
-            {/* Payment Summary */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
+            {/* Review Summary */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-xs space-y-2">
               <div className="flex justify-between text-slate-600">
-                <span>Customer:</span>
-                <span className="font-bold text-slate-900">{customerName} ({customerPhone})</span>
+                <span>Guest:</span>
+                <span className="font-bold text-slate-900">
+                  {customerName} ({customerPhone})
+                </span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Session:</span>
-                <span className="font-mono text-slate-900">{date} • {formatTimeSlot(startTime)} – {formatTimeSlot(endTime)}</span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Booking Type:</span>
-                <span className="font-bold text-slate-900">{isFamily ? "Family Exclusive" : "Public Swimming"}</span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>{isFamily ? "Required Advance Online:" : "Admission Total Due Now:"}</span>
-                <span className="font-bold text-emerald-700 text-sm font-mono">₹{requiredPaymentAmount}</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
-                <span>Counter Balance Due on Arrival:</span>
-                <span className="font-mono text-slate-900">
-                  {remainingArrivalBalance > 0 ? `₹${remainingArrivalBalance}` : "₹0 (Paid in Full)"}
+                <span className="font-mono font-bold text-slate-900">
+                  {date} • {formatTimeSlot(startTime)} – {formatTimeSlot(endTime)}
                 </span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Type &amp; Guests:</span>
+                <span className="font-bold text-slate-900">
+                  {isFamily ? "Family Exclusive" : "Public Swimming"} ({guestCount} Guests)
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-200">
+                <span className="font-bold text-slate-900">Payable Now Online:</span>
+                <span className="font-mono font-black text-emerald-700 text-base">
+                  ₹{requiredPaymentAmount}
+                </span>
+              </div>
+              {isFamily && remainingArrivalBalance > 0 && (
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Balance Due on Arrival:</span>
+                  <span className="font-mono font-bold text-slate-800">
+                    ₹{remainingArrivalBalance}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Payment Method Selector */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Select Payment Mode
+              </label>
+
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentOption("UPI")}
+                  className={`p-3 rounded-xl border text-center transition ${
+                    paymentOption === "UPI"
+                      ? "border-slate-950 bg-slate-950 text-white font-bold"
+                      : "border-slate-200 bg-slate-50 text-slate-700 font-semibold"
+                  }`}
+                >
+                  <span className="block text-xs">UPI / QR</span>
+                  <span className="text-[9px] opacity-75">GPay • PhonePe</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentOption("CARD")}
+                  className={`p-3 rounded-xl border text-center transition ${
+                    paymentOption === "CARD"
+                      ? "border-slate-950 bg-slate-950 text-white font-bold"
+                      : "border-slate-200 bg-slate-50 text-slate-700 font-semibold"
+                  }`}
+                >
+                  <span className="block text-xs">Card</span>
+                  <span className="text-[9px] opacity-75">Debit • Credit</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentOption("NETBANKING")}
+                  className={`p-3 rounded-xl border text-center transition ${
+                    paymentOption === "NETBANKING"
+                      ? "border-slate-950 bg-slate-950 text-white font-bold"
+                      : "border-slate-200 bg-slate-50 text-slate-700 font-semibold"
+                  }`}
+                >
+                  <span className="block text-xs">NetBanking</span>
+                  <span className="text-[9px] opacity-75">All Banks</span>
+                </button>
               </div>
             </div>
 
-            <div className="space-y-3">
+            {/* Pay Button */}
+            <div className="space-y-3 pt-2">
               <button
                 type="button"
                 disabled={loading}
                 onClick={handleCompletePayment}
-                className="w-full bg-[#1D68BD] hover:bg-[#155299] text-white font-bold py-3.5 rounded-lg text-xs shadow-xs transition"
+                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-black py-4 rounded-full text-xs shadow-md transition active:scale-98 flex items-center justify-center gap-2"
               >
-                {loading
-                  ? "Confirming Gateway Transaction..."
-                  : `Pay ₹${requiredPaymentAmount} & Confirm Booking`}
+                {loading ? (
+                  <span>Authorizing Gateway Payment...</span>
+                ) : (
+                  <>
+                    <span>Pay ₹{requiredPaymentAmount} &amp; Confirm Booking</span>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  </>
+                )}
               </button>
 
               <button
@@ -944,101 +1356,235 @@ function BookingContent() {
                 onClick={() => setStep(1)}
                 className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
               >
-                &larr; Back to Slot Configuration
+                &larr; Modify Slot Configuration
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 3: Printable Booking Confirmation & Receipt */}
+        {/* =========================================================================
+            STEP 3: PRINTABLE DIGITAL TICKET PASS & WHATSAPP SHARE
+           ========================================================================= */}
         {step === 3 && confirmedBooking && (
-          <div className="max-w-2xl mx-auto bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="max-w-xl mx-auto space-y-6 animate-fadeIn">
+            {/* Success Celebration Card */}
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
+              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-md animate-bounce">
+                <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
               </div>
-              <h2 className="text-xl font-black text-[#0A192F]">Booking Confirmed!</h2>
-              <p className="text-xs text-slate-500">
-                Your pool reservation has been authoritatively locked in the system.
+              <h2 className="text-2xl font-black text-slate-950">
+                Booking Confirmed!
+              </h2>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Your pool slot has been permanently locked in our system. Show this pass on arrival.
               </p>
             </div>
 
-            {/* Booking Code Banner */}
-            <div className="p-4 rounded-xl bg-slate-900 text-white flex items-center justify-between">
-              <div>
-                <span className="text-[10px] uppercase font-mono text-cyan-400 tracking-wider block">
-                  Booking Reference ID
-                </span>
-                <span className="text-xl font-mono font-black">{confirmedBooking.id}</span>
+            {/* Digital Passbook Ticket Card */}
+            <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-lg">
+              {/* Ticket Top Rim */}
+              <div className="bg-slate-950 text-white p-5 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400 block">
+                    Confirmed Reservation ID
+                  </span>
+                  <span className="text-xl font-mono font-black">
+                    {confirmedBooking.id}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopyCode(confirmedBooking.id)}
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-mono font-bold flex items-center gap-1.5 transition active:scale-95"
+                >
+                  {copiedCode ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                  <span>{copiedCode ? "Copied" : "Copy"}</span>
+                </button>
               </div>
-              <button
-                onClick={() => handleCopyCode(confirmedBooking.id)}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition"
-              >
-                {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedCode ? "Copied" : "Copy"}</span>
-              </button>
+
+              {/* Ticket Body */}
+              <div className="p-5 sm:p-6 space-y-4 text-xs">
+                <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-100">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Customer
+                    </span>
+                    <span className="font-bold text-slate-900 text-sm">
+                      {confirmedBooking.customerName}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Session Type
+                    </span>
+                    <span className="font-bold text-slate-900 text-sm">
+                      {confirmedBooking.type === "FAMILY"
+                        ? "Exclusive Family"
+                        : "Public Swimming"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-100">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Date
+                    </span>
+                    <span className="font-bold text-slate-900 font-mono text-sm">
+                      {confirmedBooking.bookingDate}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Time Slot
+                    </span>
+                    <span className="font-bold text-slate-900 font-mono text-sm">
+                      {formatTimeSlot(confirmedBooking.startTime)} –{" "}
+                      {formatTimeSlot(confirmedBooking.endTime)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-100">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Paid Online
+                    </span>
+                    <span className="font-bold text-emerald-700 font-mono text-sm">
+                      ₹{confirmedBooking.totalPaid}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Balance on Arrival
+                    </span>
+                    <span className="font-bold text-slate-900 font-mono text-sm">
+                      {confirmedBooking.balanceAmount > 0
+                        ? `₹${confirmedBooking.balanceAmount}`
+                        : "₹0 (Paid in Full)"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-slate-50 flex items-start gap-2.5 text-[11px] text-slate-600">
+                  <MapPin className="w-4 h-4 text-cyan-700 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>M.A.K Indoor Swimming Pool</strong>, Kalathingalpara, Moonniyur, Malappuram, Kerala.
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons inside Ticket */}
+              <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-2.5">
+                <a
+                  href={getWhatsAppShareUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-full text-xs text-center flex items-center justify-center gap-2 shadow-xs transition active:scale-98"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Share via WhatsApp</span>
+                </a>
+
+                <a
+                  href="https://maps.google.com/?q=M.A.K+Indoor+Pool+Moonniyur"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-slate-950 hover:bg-slate-800 text-white font-bold py-3 rounded-full text-xs text-center flex items-center justify-center gap-2 shadow-xs transition active:scale-98"
+                >
+                  <Navigation className="w-4 h-4" />
+                  <span>Directions (Google Maps)</span>
+                </a>
+              </div>
             </div>
 
-            {/* Receipt Summary */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
-              <div className="flex justify-between text-slate-600">
-                <span>Customer:</span>
-                <span className="font-bold text-slate-900">{confirmedBooking.customerName}</span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Booking Type:</span>
-                <span className="font-bold text-slate-900">
-                  {confirmedBooking.type === "FAMILY" ? "Exclusive Family Booking" : "Public Swimming"}
-                </span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Session Date &amp; Time:</span>
-                <span className="font-mono text-slate-900">
-                  {confirmedBooking.bookingDate} ({formatTimeSlot(confirmedBooking.startTime)} – {formatTimeSlot(confirmedBooking.endTime)})
-                </span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Swimmers / Guests:</span>
-                <span className="font-bold text-slate-900">{confirmedBooking.guestCount}</span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Paid Online:</span>
-                <span className="font-bold text-emerald-700 font-mono">₹{confirmedBooking.totalPaid}</span>
-              </div>
-              <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
-                <span>Balance Due at Counter:</span>
-                <span className="font-bold text-slate-900 font-mono">
-                  {confirmedBooking.balanceAmount > 0 ? `₹${confirmedBooking.balanceAmount}` : "₹0 (Fully Paid)"}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
+            {/* Secondary Controls */}
+            <div className="flex gap-3">
               <button
+                type="button"
                 onClick={() => window.print()}
-                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-1.5 transition"
+                className="flex-1 border border-slate-300 hover:bg-white text-slate-800 font-bold py-3 rounded-full text-xs text-center flex items-center justify-center gap-2 transition"
               >
                 <Printer className="w-4 h-4" />
-                <span>Print Official Receipt</span>
+                <span>Print Ticket</span>
               </button>
+
               <Link
-                href={`/booking-status?ref=${confirmedBooking.id}&phone=${customerPhone}`}
-                className="flex-1 border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold py-2.5 rounded-lg text-xs text-center transition"
+                href="/"
+                className="flex-1 border border-slate-300 hover:bg-white text-slate-800 font-bold py-3 rounded-full text-xs text-center transition flex items-center justify-center"
               >
-                Manage Booking Self-Service
+                <span>Return to Home</span>
               </Link>
             </div>
           </div>
         )}
       </div>
+
+      {/* =========================================================================
+          MOBILE STICKY BOTTOM ACTION BAR (Thumb-Friendly Instant Booking)
+         ========================================================================= */}
+      {step === 1 && (
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-2xl border-t border-slate-200/90 p-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+          <div className="max-w-md mx-auto flex items-center justify-between gap-3">
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                {isFamily ? "Advance Payable" : "Admission Total"}
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xl font-black text-slate-950 font-mono">
+                  ₹{requiredPaymentAmount}
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  • {durationHours} hr • {formatTimeSlot(startTime)}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={loading || (availResult && !availResult.available)}
+              onClick={() => handleProceedToPayment()}
+              className={`px-6 py-3.5 rounded-full font-black text-xs shadow-md transition flex items-center gap-1.5 active:scale-95 ${
+                availResult && !availResult.available
+                  ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                  : "bg-slate-950 text-white shadow-[0_4px_16px_rgba(0,0,0,0.2)]"
+              }`}
+            >
+              {loading ? (
+                <span>Holding...</span>
+              ) : availResult && !availResult.available ? (
+                <span>Unavailable</span>
+              ) : (
+                <>
+                  <span>Book Now</span>
+                  <ChevronRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function BookNowPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500 font-mono text-xs">Loading booking engine...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-slate-500 font-mono text-xs">
+          Loading booking engine...
+        </div>
+      }
+    >
       <BookingContent />
     </Suspense>
   );
