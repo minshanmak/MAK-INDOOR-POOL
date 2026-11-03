@@ -580,6 +580,7 @@ export interface ConfirmBookingInput {
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
+  customerPlace?: string;
   notes?: string;
   isStaffCreated?: boolean;
   createdByUserId?: string;
@@ -660,6 +661,7 @@ export async function confirmBooking(input: ConfirmBookingInput) {
           name: input.customerName,
           phone: input.customerPhone,
           email: input.customerEmail || null,
+          place: input.customerPlace || null,
         },
       });
     }
@@ -703,6 +705,7 @@ export async function confirmBooking(input: ConfirmBookingInput) {
         customerName: input.customerName,
         customerPhone: input.customerPhone,
         customerEmail: input.customerEmail || null,
+        customerPlace: input.customerPlace || null,
         notes: input.notes || null,
         isStaffCreated: !!input.isStaffCreated,
         createdByUserId: input.createdByUserId || null,

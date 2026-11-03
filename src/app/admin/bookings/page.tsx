@@ -39,6 +39,7 @@ export default function AdminBookingsPage() {
   const [newGuestCount, setNewGuestCount] = useState(10);
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
+  const [newCustomerPlace, setNewCustomerPlace] = useState("");
   const [newPaymentMethod, setNewPaymentMethod] = useState<"CASH" | "UPI">("CASH");
   const [newAdvancePaid, setNewAdvancePaid] = useState(750);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -101,6 +102,7 @@ export default function AdminBookingsPage() {
           guestCount: newGuestCount,
           customerName: newCustomerName,
           customerPhone: newCustomerPhone,
+          customerPlace: newCustomerPlace.trim() || undefined,
           isStaffCreated: true,
           paymentMethod: newPaymentMethod,
           initialAmount: newAdvancePaid,
@@ -339,7 +341,14 @@ export default function AdminBookingsPage() {
                       {/* Customer */}
                       <td className="px-5 py-3.5">
                         <div className="font-bold text-slate-900">{b.customerName}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">{b.customerPhone}</div>
+                        <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                          <span>{b.customerPhone}</span>
+                          {b.customerPlace && (
+                            <span className="text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded font-sans font-semibold">
+                              📍 {b.customerPlace}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Payment */}
@@ -586,7 +595,7 @@ export default function AdminBookingsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Customer Name</label>
                   <input
@@ -607,6 +616,17 @@ export default function AdminBookingsPage() {
                     value={newCustomerPhone}
                     onChange={(e) => setNewCustomerPhone(e.target.value)}
                     placeholder="10-digit number"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Place / Town</label>
+                  <input
+                    type="text"
+                    value={newCustomerPlace}
+                    onChange={(e) => setNewCustomerPlace(e.target.value)}
+                    placeholder="e.g. Moonniyur, Chelari"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
                   />
                 </div>

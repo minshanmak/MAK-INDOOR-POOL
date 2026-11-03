@@ -62,6 +62,7 @@ function BookingContent() {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPlace, setCustomerPlace] = useState("");
   const [notes, setNotes] = useState("");
 
   // Payment Method choice in Step 5 (Simulated)
@@ -340,8 +341,8 @@ function BookingContent() {
 
   // Step 4 to Step 5: Request 15-Minute Slot Hold and proceed to payment
   const handleProceedToPayment = async () => {
-    if (!customerName.trim() || !customerPhone.trim()) {
-      setError("Please enter your Full Name and 10-digit Mobile Number.");
+    if (!customerName.trim() || !customerPhone.trim() || !customerPlace.trim()) {
+      setError("Please enter your Full Name, 10-digit Mobile Number, and Place / Town.");
       return;
     }
     if (customerPhone.replace(/\D/g, "").length < 10) {
@@ -395,6 +396,7 @@ function BookingContent() {
           customerName,
           customerPhone,
           customerEmail,
+          customerPlace,
           bookingType,
           date,
           bookingDate: date,
@@ -436,6 +438,7 @@ function BookingContent() {
       `*Date:* ${booking.bookingDate}\n` +
       `*Time:* ${formatTimeSlot(booking.startTime)} – ${formatTimeSlot(booking.endTime)}\n` +
       `*Swimmers:* ${booking.guestCount} Guests\n` +
+      (booking.customerPlace ? `*Place:* ${booking.customerPlace}\n` : "") +
       `*Paid Online:* ₹${booking.totalPaid}\n` +
       (booking.balanceAmount > 0 ? `*Balance Due at Arrival:* ₹${booking.balanceAmount}\n` : `*Status:* Paid in Full\n`) +
       `\n📍 Location: Kalathingalpara, Moonniyur, Malappuram, Kerala\n` +
@@ -1136,6 +1139,46 @@ function BookingContent() {
                   </div>
                 </div>
 
+                {/* Place / Town Field with Quick Suggestions */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-bold text-slate-700">
+                      Place / Town / City <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium">e.g. Moonniyur, Tirurangadi</span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter your town / locality (e.g. Moonniyur)"
+                      value={customerPlace}
+                      onChange={(e) => setCustomerPlace(e.target.value)}
+                      className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition"
+                    />
+                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                  </div>
+
+                  {/* Quick Nearby Town Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Nearby:</span>
+                    {["Moonniyur", "Tirurangadi", "Chelari", "Calicut", "Kondotty", "Parappanangadi", "Kottakkal", "Tanur"].map((town) => (
+                      <button
+                        key={town}
+                        type="button"
+                        onClick={() => setCustomerPlace(town)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition active:scale-95 ${
+                          customerPlace.toLowerCase() === town.toLowerCase()
+                            ? "bg-slate-950 text-white shadow-2xs"
+                            : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                        }`}
+                      >
+                        {town}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
                     Special Requests <span className="text-slate-400 text-[10px] font-normal">(Optional)</span>
@@ -1383,8 +1426,10 @@ function BookingContent() {
 
                 <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-100">
                   <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Guest Name</span>
-                    <span className="font-bold text-slate-900">{confirmedBooking.customerName}</span>
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Guest Name &amp; Place</span>
+                    <span className="font-bold text-slate-900">
+                      {confirmedBooking.customerName} {confirmedBooking.customerPlace ? `(${confirmedBooking.customerPlace})` : ""}
+                    </span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 uppercase font-semibold block">Swimmer Count</span>

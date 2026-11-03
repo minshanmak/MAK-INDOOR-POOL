@@ -74,11 +74,11 @@ export async function GET(req: NextRequest) {
   // CSV EXPORT - BOOKINGS
   if (exportFormat === "csv") {
     const headers =
-      "Booking ID,Date,Start Time,End Time,Duration (Hrs),Type,Status,Guests,Total (INR),Paid (INR),Balance (INR),Payment Status,Customer Name,Phone\n";
+      "Booking ID,Date,Start Time,End Time,Duration (Hrs),Type,Status,Guests,Total (INR),Paid (INR),Balance (INR),Payment Status,Customer Name,Phone,Place\n";
     const rows = bookings
       .map(
         (b) =>
-          `"${b.id}","${b.bookingDate}","${formatSlotTime(b.startTime)}","${formatSlotTime(b.endTime)}",${b.durationHours},"${b.type}","${b.status}",${b.guestCount},${b.totalAmount},${b.totalPaid},${b.balanceAmount},"${b.paymentStatus}","${b.customerName}","${b.customerPhone}"`
+          `"${b.id}","${b.bookingDate}","${formatSlotTime(b.startTime)}","${formatSlotTime(b.endTime)}",${b.durationHours},"${b.type}","${b.status}",${b.guestCount},${b.totalAmount},${b.totalPaid},${b.balanceAmount},"${b.paymentStatus}","${b.customerName}","${b.customerPhone}","${b.customerPlace || "Unspecified"}"`
       )
       .join("\n");
 
@@ -387,6 +387,62 @@ export async function GET(req: NextRequest) {
     ),
   };
 
+  // 7. PLACE / REGIONAL GEOGRAPHIC ANALYSIS
+  const placeMap: Record<
+    string,
+    {
+      place: string;
+      bookingsCount: number;
+      swimmersCount: number;
+      revenue: number;
+      familyCount: number;
+      publicCount: number;
+    }
+  > = {};
+
+  for (const b of bookings) {
+    const rawPlace = (b as any).customerPlace?.trim();
+    const placeKey = rawPlace
+      ? rawPlace.charAt(0).toUpperCase() + rawPlace.slice(1).toLowerCase()
+      : "Unspecified";
+
+    if (!placeMap[placeKey]) {
+      placeMap[placeKey] = {
+        place: placeKey,
+        bookingsCount: 0,
+        swimmersCount: 0,
+        revenue: 0,
+        familyCount: 0,
+        publicCount: 0,
+      };
+    }
+
+    placeMap[placeKey].bookingsCount += 1;
+    placeMap[placeKey].swimmersCount += b.guestCount;
+    placeMap[placeKey].revenue += b.totalPaid;
+    if (b.type === "FAMILY") {
+      placeMap[placeKey].familyCount += 1;
+    } else {
+      placeMap[placeKey].publicCount += 1;
+    }
+  }
+
+  const placeDistribution = Object.values(placeMap)
+    .sort((a, b) => b.bookingsCount - a.bookingsCount)
+    .map((p) => ({
+      ...p,
+      percentage:
+        bookings.length > 0
+          ? Math.round((p.bookingsCount / bookings.length) * 100)
+          : 0,
+      avgBookingValue:
+        p.bookingsCount > 0 ? Math.round(p.revenue / p.bookingsCount) : 0,
+    }));
+
+  const maxPlaceBookings = Math.max(1, ...placeDistribution.map((p) => p.bookingsCount));
+  const topPlace = placeDistribution.length > 0 ? placeDistribution[0] : null;
+  const uniquePlacesCount = Object.keys(placeMap).filter((k) => k !== "Unspecified").length;
+
   return NextResponse.json({
     summary: {
       totalRevenue,
@@ -407,6 +463,8 @@ export async function GET(req: NextRequest) {
       avgBookingValue,
       avgSwimmerValue,
       walkInsCount: walkIns.length,
+      topPlace,
+      uniquePlacesCount,
     },
     dailyTrends,
     maxDayRevenue,
@@ -417,6 +475,10 @@ export async function GET(req: NextRequest) {
     sessionMix,
     paymentMethods,
     statusBreakdown,
+    placeDistribution,
+    maxPlaceBookings,
+    topPlace,
+    uniquePlacesCount,
     bookings,
     payments: payments.slice(0, 50),
     walkIns: walkIns.slice(0, 50),

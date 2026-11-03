@@ -24,10 +24,11 @@ import {
   Moon,
   ChevronRight,
   ArrowRight,
+  MapPin,
 } from "lucide-react";
 import { formatSlotTime } from "@/lib/timezone";
 
-type ActiveTab = "timeline" | "peak-hours" | "day-of-week" | "mix";
+type ActiveTab = "timeline" | "peak-hours" | "day-of-week" | "mix" | "places";
 type TableFilter = "ALL" | "FAMILY" | "PUBLIC" | "PENDING_BALANCE" | "CANCELLED";
 
 export default function AdminReportsPage() {
@@ -133,6 +134,7 @@ export default function AdminReportsPage() {
     sessionMix = {},
     paymentMethods = {},
     statusBreakdown = {},
+    placeDistribution = [],
     bookings = [],
   } = data || {};
 
@@ -150,7 +152,8 @@ export default function AdminReportsPage() {
         const matchId = b.id?.toLowerCase().includes(q);
         const matchName = b.customerName?.toLowerCase().includes(q);
         const matchPhone = b.customerPhone?.includes(q);
-        if (!matchId && !matchName && !matchPhone) return false;
+        const matchPlace = b.customerPlace?.toLowerCase().includes(q);
+        if (!matchId && !matchName && !matchPhone && !matchPlace) return false;
       }
 
       return true;
@@ -475,6 +478,7 @@ export default function AdminReportsPage() {
                   { id: "peak-hours", label: "Peak Hours & Slot Occupancy", icon: Clock },
                   { id: "day-of-week", label: "Day of Week Curve", icon: BarChart3 },
                   { id: "mix", label: "Payment & Session Mix", icon: PieChart },
+                  { id: "places", label: "Places & Regional Reach", icon: MapPin },
                 ].map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeAnalyticsTab === tab.id;
@@ -1084,6 +1088,168 @@ export default function AdminReportsPage() {
                 </div>
               </div>
             )}
+
+            {/* TAB 5: GEOGRAPHIC & CUSTOMER PLACES ANALYSIS */}
+            {activeAnalyticsTab === "places" && (
+              <div className="p-5 sm:p-6 space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-[#00838F]" />
+                      <span>Customer Geographic &amp; Regional Origin</span>
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      Geographic distribution of pool visitors across Moonniyur, Tirurangadi, Chelari, Calicut, and surrounding towns.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3 Executive Regional KPI Widgets */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Top Origin Town */}
+                  <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-200/80 space-y-1.5">
+                    <span className="text-[11px] font-bold text-teal-800 uppercase tracking-wider block">
+                      Primary Catchment Town
+                    </span>
+                    <div className="text-2xl font-black text-teal-950">
+                      {summary.topPlace?.place || "None Recorded"}
+                    </div>
+                    <div className="text-xs text-teal-700 font-medium">
+                      {summary.topPlace?.bookingsCount || 0} bookings • ₹{summary.topPlace?.revenue?.toLocaleString("en-IN") || 0} collected
+                    </div>
+                  </div>
+
+                  {/* Total Towns Reached */}
+                  <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200/80 space-y-1.5">
+                    <span className="text-[11px] font-bold text-sky-800 uppercase tracking-wider block">
+                      Unique Towns Reached
+                    </span>
+                    <div className="text-2xl font-black text-sky-950 font-mono">
+                      {summary.uniquePlacesCount || 0}
+                    </div>
+                    <div className="text-xs text-sky-700 font-medium">
+                      Distinct towns &amp; localities booking sessions
+                    </div>
+                  </div>
+
+                  {/* Top Location Share */}
+                  <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 space-y-1.5">
+                    <span className="text-[11px] font-bold text-indigo-800 uppercase tracking-wider block">
+                      Top Catchment Concentration
+                    </span>
+                    <div className="text-2xl font-black text-indigo-950 font-mono">
+                      {summary.topPlace?.percentage || 0}%
+                    </div>
+                    <div className="text-xs text-indigo-700 font-medium">
+                      Of all bookings originate from {summary.topPlace?.place || "local area"}
+                    </div>
+                  </div>
+                </div>
+
+                {placeDistribution.length === 0 ? (
+                  <div className="py-12 text-center text-slate-400 text-xs">
+                    No customer location data recorded for this date range.
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Visual Progress Bar Ranking */}
+                    <div className="p-5 rounded-2xl border border-slate-200/90 bg-slate-50/40 space-y-4">
+                      <h3 className="font-bold text-xs text-slate-900 uppercase tracking-wider">
+                        Town Ranking by Bookings Volume
+                      </h3>
+                      <div className="space-y-3.5">
+                        {placeDistribution.map((item: any, idx: number) => (
+                          <div key={item.place} className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-black">
+                                  {idx + 1}
+                                </span>
+                                <span className="font-bold text-slate-900">{item.place}</span>
+                                <span className="text-[10px] text-slate-500">
+                                  ({item.familyCount} Family • {item.publicCount} Public)
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="font-mono text-slate-600">
+                                  {item.swimmersCount} swimmers
+                                </span>
+                                <span className="font-mono font-bold text-slate-900">
+                                  ₹{item.revenue.toLocaleString("en-IN")} ({item.percentage}%)
+                                </span>
+                              </div>
+                            </div>
+                            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-500 ${
+                                  idx === 0
+                                    ? "bg-gradient-to-r from-teal-500 to-emerald-600"
+                                    : idx === 1
+                                    ? "bg-gradient-to-r from-cyan-500 to-blue-600"
+                                    : "bg-gradient-to-r from-indigo-500 to-purple-600"
+                                }`}
+                                style={{ width: `${Math.max(4, item.percentage)}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Detailed Geographic Data Table */}
+                    <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-100/90 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200">
+                          <tr>
+                            <th className="px-4 py-3">Town / Location</th>
+                            <th className="px-4 py-3">Total Bookings</th>
+                            <th className="px-4 py-3">Family Sessions</th>
+                            <th className="px-4 py-3">Public Sessions</th>
+                            <th className="px-4 py-3">Total Swimmers</th>
+                            <th className="px-4 py-3">Collected Revenue</th>
+                            <th className="px-4 py-3">Avg Spend / Booking</th>
+                            <th className="px-4 py-3">Market Share</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 bg-white">
+                          {placeDistribution.map((item: any) => (
+                            <tr key={item.place} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="px-4 py-3 font-bold text-slate-900 flex items-center gap-1.5">
+                                <MapPin className="w-3.5 h-3.5 text-[#00838F]" />
+                                <span>{item.place}</span>
+                              </td>
+                              <td className="px-4 py-3 font-mono font-bold text-slate-800">
+                                {item.bookingsCount}
+                              </td>
+                              <td className="px-4 py-3 font-mono text-teal-700 font-semibold">
+                                {item.familyCount}
+                              </td>
+                              <td className="px-4 py-3 font-mono text-sky-700 font-semibold">
+                                {item.publicCount}
+                              </td>
+                              <td className="px-4 py-3 font-mono text-slate-800">
+                                {item.swimmersCount}
+                              </td>
+                              <td className="px-4 py-3 font-mono font-bold text-emerald-700">
+                                ₹{item.revenue.toLocaleString("en-IN")}
+                              </td>
+                              <td className="px-4 py-3 font-mono text-slate-700">
+                                ₹{item.avgBookingValue.toLocaleString("en-IN")}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 font-mono">
+                                  {item.percentage}%
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* 4. COMPREHENSIVE BOOKINGS AUDIT LEDGER */}
@@ -1176,8 +1342,13 @@ export default function AdminReportsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="font-semibold text-slate-900">{b.customerName}</div>
-                          <div className="text-[11px] text-slate-500 font-mono">
-                            {b.customerPhone}
+                          <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1.5 flex-wrap">
+                            <span>{b.customerPhone}</span>
+                            {b.customerPlace && (
+                              <span className="text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded font-sans font-semibold text-[10px]">
+                                📍 {b.customerPlace}
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3 font-mono font-bold text-slate-800">

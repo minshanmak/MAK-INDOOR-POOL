@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
       { id: { contains: search } },
       { customerName: { contains: search } },
       { customerPhone: { contains: search } },
+      { customerPlace: { contains: search } },
     ];
   }
 
