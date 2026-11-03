@@ -6,7 +6,6 @@ import { formatSlotTime } from "@/lib/timezone";
 import {
   Users,
   Calendar,
-  IndianRupee,
   Clock,
   Droplets,
   Coins,
@@ -16,9 +15,7 @@ import {
   Activity,
   ChevronRight,
   ShieldAlert,
-  ArrowUpRight,
   Users2,
-  Sparkles,
 } from "lucide-react";
 
 export default function AdminOverviewPage() {
@@ -43,14 +40,14 @@ export default function AdminOverviewPage() {
 
   if (loading) {
     return (
-      <div className="p-16 text-center text-slate-400 bg-white/80 rounded-3xl border border-white flex flex-col items-center justify-center gap-3 shadow-xs">
-        <div className="w-8 h-8 border-3 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
+      <div className="p-16 text-center text-slate-400 bg-white/90 rounded-3xl border border-white flex flex-col items-center justify-center gap-3 shadow-[0_4px_20px_rgba(20,60,110,0.04)]">
+        <div className="w-8 h-8 border-3 border-[#1D68BD] border-t-transparent rounded-full animate-spin" />
         <span className="text-xs font-semibold text-slate-600">Loading operations dashboard...</span>
       </div>
     );
   }
 
-  const { metrics, todayBookings = [], pendingCancellations = [], recentActivities = [] } = data || {};
+  const { metrics, todayBookings = [], pendingCancellations = [] } = data || {};
 
   const publicBookings = todayBookings.filter((b: any) => b.type === "PUBLIC");
   const familyBookings = todayBookings.filter((b: any) => b.type === "FAMILY");
@@ -76,7 +73,7 @@ export default function AdminOverviewPage() {
   return (
     <div className="space-y-4 text-slate-800">
       {/* 1. HERO WELCOME BANNER (Exact match to Mockup Image 1) */}
-      <div className="relative rounded-3xl overflow-hidden min-h-[175px] shadow-sm border border-white/60">
+      <div className="relative rounded-3xl overflow-hidden min-h-[175px] shadow-[0_4px_25px_rgba(20,60,110,0.08)] border border-white/60">
         {/* Background Pool Photograph */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -84,12 +81,12 @@ export default function AdminOverviewPage() {
             backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=85')`,
           }}
         />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C3B68]/95 via-[#135992]/80 to-[#1A6BA8]/40" />
+        {/* Subtle Aquatic Gradient Overlay: Navy fading to reveal crystal water & ladder on the right */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C3B68]/95 via-[#135992]/80 to-[#1A6BA8]/35" />
 
         <div className="relative z-10 p-6 lg:p-7 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 h-full">
           <div className="max-w-xl text-white">
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
               Welcome to M.A.K Indoor Pool
             </h2>
             <p className="text-cyan-100 text-xs sm:text-sm mt-1.5 font-normal leading-relaxed">
@@ -97,149 +94,165 @@ export default function AdminOverviewPage() {
             </p>
           </div>
 
-          {/* Frosted Glass Operating Hours Widget inside Hero */}
-          <div className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 text-white text-xs space-y-2 shadow-lg w-full sm:w-auto">
-            <div className="flex items-center gap-2 font-bold text-xs">
-              <Clock className="w-4 h-4 text-cyan-200 shrink-0" />
-              <span>Operating Hours: 9:00 AM – 11:00 PM</span>
+          {/* Frosted Glass Operating Hours Widget (Exact match to Mockup Image 1) */}
+          <div className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 text-white text-xs space-y-2 shadow-lg w-full sm:w-auto shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <span className="text-[10px] text-cyan-200 uppercase tracking-wider font-semibold block leading-tight">
+                  Operating Hours
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-white block leading-tight">
+                  9:00 AM – 11:00 PM
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-cyan-100">
-              <Users className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
-              <span>Public Swimming: 9:00 AM – 4:00 PM</span>
-            </div>
-            <div className="flex items-center gap-2 text-[11px] text-cyan-100">
-              <Users2 className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
-              <span>Family Bookings: 4:00 PM – 11:00 PM</span>
+            <div className="pt-1 space-y-1">
+              <div className="flex items-center gap-2 text-[11px] text-cyan-100">
+                <Users className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
+                <span>Public Swimming: 9:00 AM – 4:00 PM</span>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] text-cyan-100">
+                <Users2 className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
+                <span>Family Bookings: 4:00 PM – 11:00 PM</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. TOP 5 KPI METRICS CARDS (Exact match to Mockup Image 1) */}
+      {/* 2. TOP 5 KPI METRICS CARDS (Pastel iOS Tinted Cards - Exact match to Mockup Image 1) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-        {/* Metric 1: Today's Bookings */}
-        <div className="bg-white rounded-2xl p-4 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-2.5">
+        {/* Metric 1: Today's Bookings (Soft Blue Tint) */}
+        <div className="bg-[#F0F6FE] rounded-3xl p-4 border border-[#DBEAFE]/80 shadow-[0_4px_20px_rgba(30,70,120,0.04)] space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#EBF2FC] text-[#2563EB] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#DBEAFE] text-[#1D68BD] flex items-center justify-center shrink-0 shadow-xs">
               <Calendar className="w-4 h-4" />
             </div>
-            <span className="text-xs font-semibold text-slate-500">Today's Bookings</span>
+            <span className="text-xs font-semibold text-slate-600">Today's Bookings</span>
           </div>
           <div className="text-2xl font-black text-slate-900 tabular-nums">
             {metrics?.todayBookingsCount || 12}
           </div>
-          <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+          <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
             <span>↑ +3 vs yesterday</span>
           </div>
         </div>
 
-        {/* Metric 2: Today's Collections */}
-        <div className="bg-white rounded-2xl p-4 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-2.5">
+        {/* Metric 2: Today's Collections (Soft Amber/Cream Tint) */}
+        <div className="bg-[#FEF9EE] rounded-3xl p-4 border border-[#FEEBC8]/80 shadow-[0_4px_20px_rgba(30,70,120,0.04)] space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#FEF6E6] text-[#D97706] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0 shadow-xs">
               <Coins className="w-4 h-4" />
             </div>
-            <span className="text-xs font-semibold text-slate-500">Today's Collections</span>
+            <span className="text-xs font-semibold text-slate-600">Today's Collections</span>
           </div>
           <div className="text-2xl font-black text-slate-900 tabular-nums">
             ₹{((metrics?.todayCollections?.total || 12750)).toLocaleString("en-IN")}
           </div>
-          <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+          <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
             <span>↑ +18% vs yesterday</span>
           </div>
         </div>
 
-        {/* Metric 3: Monthly Revenue */}
-        <div className="bg-white rounded-2xl p-4 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-2.5">
+        {/* Metric 3: Monthly Revenue (Soft Purple Tint) */}
+        <div className="bg-[#FAF5FF] rounded-3xl p-4 border border-[#F3E8FF]/80 shadow-[0_4px_20px_rgba(30,70,120,0.04)] space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center shrink-0 shadow-xs">
               <BarChart3 className="w-4 h-4" />
             </div>
-            <span className="text-xs font-semibold text-slate-500">Monthly Revenue</span>
+            <span className="text-xs font-semibold text-slate-600">Monthly Revenue</span>
           </div>
           <div className="text-2xl font-black text-slate-900 tabular-nums">
             ₹{((metrics?.monthlyRevenue || 384500)).toLocaleString("en-IN")}
           </div>
-          <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+          <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
             <span>↑ +12% vs last month</span>
           </div>
         </div>
 
-        {/* Metric 4: Outstanding Balances */}
-        <div className="bg-white rounded-2xl p-4 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-2.5">
+        {/* Metric 4: Outstanding Balances (Soft Red/Rose Tint) */}
+        <div className="bg-[#FEF2F2] rounded-3xl p-4 border border-[#FEE2E2]/80 shadow-[0_4px_20px_rgba(30,70,120,0.04)] space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#FEE2E2] text-[#DC2626] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#FEE2E2] text-[#DC2626] flex items-center justify-center shrink-0 shadow-xs">
               <Wallet className="w-4 h-4" />
             </div>
-            <span className="text-xs font-semibold text-slate-500">Outstanding Balances</span>
+            <span className="text-xs font-semibold text-slate-600">Outstanding Balances</span>
           </div>
           <div className="text-2xl font-black text-[#DC2626] tabular-nums">
             ₹{((metrics?.totalOutstanding || 22500)).toLocaleString("en-IN")}
           </div>
-          <div className="text-[11px] text-slate-500">
-            5 bookings
+          <div className="text-[11px] text-slate-500 font-medium">
+            {pendingCancellations?.length ? `${pendingCancellations.length} bookings` : "5 bookings"}
           </div>
         </div>
 
-        {/* Metric 5: Public Occupancy */}
-        <div className="bg-white rounded-2xl p-4 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-2.5">
+        {/* Metric 5: Public Occupancy (Soft Emerald/Mint Tint) */}
+        <div className="bg-[#F0FDF8] rounded-3xl p-4 border border-[#DCFCE7]/80 shadow-[0_4px_20px_rgba(30,70,120,0.04)] space-y-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#DCFCE7] text-[#059669] flex items-center justify-center shrink-0 shadow-xs">
               <Users className="w-4 h-4" />
             </div>
-            <span className="text-xs font-semibold text-slate-500">Public Occupancy</span>
+            <span className="text-xs font-semibold text-slate-600">Public Occupancy</span>
           </div>
           <div className="text-2xl font-black text-slate-900 tabular-nums">
             {metrics?.liveOccupancy?.current || 18} <span className="text-sm font-normal text-slate-400">/ {metrics?.liveOccupancy?.maxCapacity || 30}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div className="flex items-center gap-2 pt-0.5">
+            <div className="flex-1 bg-slate-200/80 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-[#10B981] h-full rounded-full transition-all duration-500"
                 style={{ width: `${metrics?.liveOccupancy?.percentage || 60}%` }}
               />
             </div>
-            <span className="text-[11px] font-bold text-slate-600 tabular-nums">{metrics?.liveOccupancy?.percentage || 60}%</span>
+            <span className="text-[11px] font-bold text-slate-700 tabular-nums">
+              {metrics?.liveOccupancy?.percentage || 60}%
+            </span>
           </div>
         </div>
       </div>
 
       {/* 3. MIDDLE ROW: SCHEDULE, FAMILY SLOTS, MAINTENANCE (Exact match to Mockup Image 1) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Card 1: Today's Schedule */}
-        <div className="lg:col-span-5 bg-white rounded-2xl p-5 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-4">
+        {/* Card 1: Today's Schedule (lg:col-span-5) */}
+        <div className="lg:col-span-5 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-              <Clock className="w-4 h-4 text-[#2563EB]" />
+              <Clock className="w-4 h-4 text-[#1D68BD]" />
               <span>Today's Schedule</span>
             </div>
-            <Link href="/admin/bookings" className="text-xs font-semibold text-[#2563EB] hover:underline">
+            <Link href="/admin/bookings" className="text-xs font-bold text-[#1D68BD] hover:underline">
               View Calendar
             </Link>
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl text-xs font-semibold">
             <button
+              type="button"
               onClick={() => setScheduleFilter("ALL")}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                scheduleFilter === "ALL" ? "bg-[#2563EB] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+              className={`px-3 py-1 rounded-xl transition-all ${
+                scheduleFilter === "ALL" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               All ({todayBookings.length || 12})
             </button>
             <button
+              type="button"
               onClick={() => setScheduleFilter("PUBLIC")}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                scheduleFilter === "PUBLIC" ? "bg-[#2563EB] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+              className={`px-3 py-1 rounded-xl transition-all ${
+                scheduleFilter === "PUBLIC" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Public ({publicBookings.length || 8})
             </button>
             <button
+              type="button"
               onClick={() => setScheduleFilter("FAMILY")}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                scheduleFilter === "FAMILY" ? "bg-[#2563EB] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+              className={`px-3 py-1 rounded-xl transition-all ${
+                scheduleFilter === "FAMILY" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Family ({familyBookings.length || 4})
@@ -250,7 +263,10 @@ export default function AdminOverviewPage() {
           <div className="space-y-2 text-xs">
             {filteredSchedule.length > 0 ? (
               filteredSchedule.slice(0, 5).map((b: any, i: number) => {
-                const isOngoing = b.status === "CONFIRMED" && nowHour >= Number(b.startTime?.split(":")[0]) && nowHour < Number(b.endTime?.split(":")[0]);
+                const isOngoing =
+                  b.status === "CONFIRMED" &&
+                  nowHour >= Number(b.startTime?.split(":")[0]) &&
+                  nowHour < Number(b.endTime?.split(":")[0]);
                 return (
                   <div key={b.id || i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition">
                     <div className="font-semibold text-slate-900 tabular-nums">
@@ -262,14 +278,14 @@ export default function AdminOverviewPage() {
                     </div>
                     <div>
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                        b.type === "FAMILY" ? "bg-purple-100 text-purple-700" : "bg-sky-100 text-sky-700"
+                        b.type === "FAMILY" ? "bg-[#F3E8FF] text-[#7E22CE]" : "bg-[#E0F2FE] text-[#0369A1]"
                       }`}>
                         {b.type === "FAMILY" ? "Family (Exclusive)" : "Public"}
                       </span>
                     </div>
                     <div>
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                        isOngoing ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                        isOngoing ? "bg-[#DCFCE7] text-[#15803D]" : "bg-[#FEF3C7] text-[#B45309]"
                       }`}>
                         {isOngoing ? "Ongoing" : "Upcoming"}
                       </span>
@@ -282,51 +298,51 @@ export default function AdminOverviewPage() {
               <>
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
                   <span className="font-semibold text-slate-900 tabular-nums">09:00 AM – 10:00 AM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5" /> 5</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-700">Public</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700">Ongoing</span>
+                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 5</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#E0F2FE] text-[#0369A1]">Public</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#DCFCE7] text-[#15803D]">Ongoing</span>
                 </div>
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
                   <span className="font-semibold text-slate-900 tabular-nums">10:00 AM – 11:00 AM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5" /> 8</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-700">Public</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700">Ongoing</span>
+                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 8</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#E0F2FE] text-[#0369A1]">Public</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#DCFCE7] text-[#15803D]">Ongoing</span>
                 </div>
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
                   <span className="font-semibold text-slate-900 tabular-nums">11:00 AM – 12:00 PM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5" /> 6</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-700">Public</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">Upcoming</span>
+                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 6</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#E0F2FE] text-[#0369A1]">Public</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF3C7] text-[#B45309]">Upcoming</span>
                 </div>
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
                   <span className="font-semibold text-slate-900 tabular-nums">04:00 PM – 06:00 PM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5" /> 12</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-700">Family (Exclusive)</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">Upcoming</span>
+                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 12</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#F3E8FF] text-[#7E22CE]">Family (Exclusive)</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF3C7] text-[#B45309]">Upcoming</span>
                 </div>
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
                   <span className="font-semibold text-slate-900 tabular-nums">07:00 PM – 09:00 PM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5" /> 15</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-700">Family (Exclusive)</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">Upcoming</span>
+                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 15</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#F3E8FF] text-[#7E22CE]">Family (Exclusive)</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF3C7] text-[#B45309]">Upcoming</span>
                 </div>
               </>
             )}
           </div>
         </div>
 
-        {/* Card 2: Available Family Booking Periods */}
-        <div className="lg:col-span-4 bg-white rounded-2xl p-5 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-4">
+        {/* Card 2: Available Family Booking Periods (lg:col-span-4) */}
+        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
           <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-            <Calendar className="w-4 h-4 text-[#2563EB]" />
+            <Calendar className="w-4 h-4 text-[#1D68BD]" />
             <span>Available Family Booking Periods</span>
           </div>
 
           <div className="space-y-2 text-xs pt-1">
             {familySlotTimes.map((slot, i) => (
-              <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition">
-                <span className="font-semibold text-slate-900 tabular-nums">{slot.label}</span>
-                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700">
+              <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition font-semibold text-slate-800">
+                <span className="tabular-nums">{slot.label}</span>
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[#DCFCE7] text-[#15803D]">
                   Available
                 </span>
               </div>
@@ -334,11 +350,11 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 3: Maintenance & Water Check */}
-        <div className="lg:col-span-3 bg-white rounded-2xl p-5 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] flex flex-col justify-between space-y-4">
+        {/* Card 3: Maintenance & Water Check (lg:col-span-3) */}
+        <div className="lg:col-span-3 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center gap-2 font-bold text-slate-900 text-sm mb-3">
-              <Droplets className="w-4 h-4 text-[#2563EB]" />
+              <Droplets className="w-4 h-4 text-[#1D68BD]" />
               <span>Maintenance &amp; Water Check</span>
             </div>
 
@@ -346,41 +362,41 @@ export default function AdminOverviewPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span className="text-slate-700">Daily Cleaning</span>
+                  <span className="text-slate-700 font-medium">Daily Cleaning</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">Completed (8:30 AM)</span>
+                <span className="text-[11px] text-slate-500 font-semibold">Completed (8:30 AM)</span>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span className="text-slate-700">Chlorine Level</span>
+                  <span className="text-slate-700 font-medium">Chlorine Level</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">Within range (2.0 ppm)</span>
+                <span className="text-[11px] text-slate-500 font-semibold">Within range (2.0 ppm)</span>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span className="text-slate-700">pH Level</span>
+                  <span className="text-slate-700 font-medium">pH Level</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">Within range (7.4)</span>
+                <span className="text-[11px] text-slate-500 font-semibold">Within range (7.4)</span>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span className="text-slate-700">Filter &amp; Pump</span>
+                  <span className="text-slate-700 font-medium">Filter &amp; Pump</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">OK</span>
+                <span className="text-[11px] text-slate-500 font-semibold">OK</span>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span className="text-slate-700">Safety Equipment</span>
+                  <span className="text-slate-700 font-medium">Safety Equipment</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">OK</span>
+                <span className="text-[11px] text-slate-500 font-semibold">OK</span>
               </div>
             </div>
           </div>
@@ -388,7 +404,7 @@ export default function AdminOverviewPage() {
           <div className="pt-2 border-t border-slate-100 text-right">
             <Link
               href="/admin/maintenance"
-              className="text-xs font-semibold text-[#2563EB] hover:underline inline-flex items-center gap-1"
+              className="text-xs font-bold text-[#1D68BD] hover:underline inline-flex items-center gap-1"
             >
               <span>View Details</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -399,71 +415,76 @@ export default function AdminOverviewPage() {
 
       {/* 4. BOTTOM ROW: REVENUE CHART, BOOKINGS DONUT, RECENT ACTIVITY (Exact match to Mockup Image 1) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Card 1: Revenue Overview Bar Chart */}
-        <div className="lg:col-span-5 bg-white rounded-2xl p-5 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-4">
+        {/* Card 1: Revenue Overview Bar Chart (lg:col-span-5) */}
+        <div className="lg:col-span-5 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-              <BarChart3 className="w-4 h-4 text-[#2563EB]" />
+              <BarChart3 className="w-4 h-4 text-[#1D68BD]" />
               <span>Revenue Overview</span>
             </div>
-            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+            <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-xl">
               This Month ▾
             </span>
           </div>
 
-          {/* Clean Visual Bar Chart (Mockup representation) */}
-          <div className="space-y-2 pt-2">
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>₹1,00,000</span>
-            </div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>₹80,000</span>
-            </div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>₹60,000</span>
-            </div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>₹40,000</span>
-            </div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>₹20,000</span>
-            </div>
+          {/* Clean Visual Bar Chart with Exact Y-Axis Ticks */}
+          <div className="pt-1">
+            <div className="flex items-stretch gap-2 h-40">
+              {/* Y-axis labels */}
+              <div className="flex flex-col justify-between text-[10px] text-slate-400 font-mono text-right pr-1 select-none">
+                <span>₹1,00,000</span>
+                <span>₹80,000</span>
+                <span>₹60,000</span>
+                <span>₹40,000</span>
+                <span>₹20,000</span>
+                <span>₹0</span>
+              </div>
 
-            {/* Bars container */}
-            <div className="flex items-end justify-between gap-1.5 h-32 pt-2 border-b border-slate-200">
-              {[
-                { hPub: 40, hFam: 20 },
-                { hPub: 35, hFam: 25 },
-                { hPub: 50, hFam: 30 },
-                { hPub: 45, hFam: 35 },
-                { hPub: 60, hFam: 40 },
-                { hPub: 55, hFam: 30 },
-                { hPub: 70, hFam: 45 },
-                { hPub: 65, hFam: 35 },
-                { hPub: 80, hFam: 50 },
-                { hPub: 75, hFam: 45 },
-                { hPub: 90, hFam: 60 },
-                { hPub: 85, hFam: 50 },
-                { hPub: 95, hFam: 65 },
-                { hPub: 70, hFam: 40 },
-              ].map((bar, i) => (
-                <div key={i} className="flex-1 flex flex-col justify-end gap-0.5 h-full items-center">
-                  <div
-                    className="w-full bg-[#C084FC] rounded-t-xs"
-                    style={{ height: `${bar.hFam}%` }}
-                    title="Family Booking"
-                  />
-                  <div
-                    className="w-full bg-[#38BDF8]"
-                    style={{ height: `${bar.hPub}%` }}
-                    title="Public Swimming"
-                  />
+              {/* Bars container with grid lines */}
+              <div className="flex-1 relative flex items-end justify-between gap-1 pb-1 border-b border-slate-200">
+                {/* Background horizontal guidelines */}
+                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-40">
+                  <div className="border-b border-dashed border-slate-200 w-full" />
+                  <div className="border-b border-dashed border-slate-200 w-full" />
+                  <div className="border-b border-dashed border-slate-200 w-full" />
+                  <div className="border-b border-dashed border-slate-200 w-full" />
+                  <div className="border-b border-dashed border-slate-200 w-full" />
                 </div>
-              ))}
+
+                {[
+                  { hPub: 40, hFam: 20 },
+                  { hPub: 35, hFam: 25 },
+                  { hPub: 50, hFam: 30 },
+                  { hPub: 45, hFam: 35 },
+                  { hPub: 60, hFam: 40 },
+                  { hPub: 55, hFam: 30 },
+                  { hPub: 70, hFam: 45 },
+                  { hPub: 65, hFam: 35 },
+                  { hPub: 80, hFam: 50 },
+                  { hPub: 75, hFam: 45 },
+                  { hPub: 90, hFam: 60 },
+                  { hPub: 85, hFam: 50 },
+                  { hPub: 95, hFam: 65 },
+                  { hPub: 70, hFam: 40 },
+                ].map((bar, i) => (
+                  <div key={i} className="flex-1 z-10 flex flex-col justify-end gap-0.5 h-full items-center">
+                    <div
+                      className="w-full bg-[#C084FC] rounded-t-xs"
+                      style={{ height: `${bar.hFam * 0.45}%` }}
+                      title="Family Booking"
+                    />
+                    <div
+                      className="w-full bg-[#38BDF8]"
+                      style={{ height: `${bar.hPub * 0.45}%` }}
+                      title="Public Swimming"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* X-axis labels */}
-            <div className="flex justify-between text-[10px] text-slate-400 font-medium pt-1">
+            <div className="flex justify-between pl-14 pr-1 text-[10px] text-slate-400 font-semibold pt-1.5">
               <span>1 Jan</span>
               <span>5 Jan</span>
               <span>10 Jan</span>
@@ -473,7 +494,7 @@ export default function AdminOverviewPage() {
             </div>
 
             {/* Legend */}
-            <div className="flex justify-center items-center gap-6 pt-2 text-[11px] font-semibold text-slate-600">
+            <div className="flex justify-center items-center gap-6 pt-3 text-[11px] font-bold text-slate-600">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-xs bg-[#38BDF8]" />
                 <span>Public Swimming</span>
@@ -486,16 +507,16 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 2: Today's Bookings by Type (Concentric Donut Chart) */}
-        <div className="lg:col-span-4 bg-white rounded-2xl p-5 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] space-y-4">
+        {/* Card 2: Today's Bookings by Type (Donut on Left, Legend on Right - lg:col-span-4) */}
+        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
           <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-            <Calendar className="w-4 h-4 text-[#2563EB]" />
+            <Calendar className="w-4 h-4 text-[#1D68BD]" />
             <span>Today's Bookings by Type</span>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-2 space-y-4">
-            {/* Donut graphic */}
-            <div className="relative w-36 h-36 flex items-center justify-center">
+          <div className="flex items-center justify-around gap-4 py-3">
+            {/* Concentric Donut graphic */}
+            <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 {/* Background circle */}
                 <path
@@ -533,41 +554,42 @@ export default function AdminOverviewPage() {
                 <div className="text-xl font-black text-slate-900 tabular-nums">
                   {todayBookings.length || 12}
                 </div>
-                <div className="text-[10px] text-slate-400 font-semibold uppercase">
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                   Bookings
                 </div>
               </div>
             </div>
 
-            {/* Legend with exact count and percentages */}
-            <div className="w-full space-y-2 text-xs pt-1">
-              <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-md bg-[#38BDF8]" />
-                  <span className="font-semibold text-slate-700">Public Swimming</span>
+            {/* Legend with exact count and percentages (Right aligned as in Mockup Image 1) */}
+            <div className="space-y-3 text-xs">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 font-bold text-slate-700">
+                  <span className="w-2.5 h-2.5 rounded-xs bg-[#38BDF8] shrink-0" />
+                  <span>Public Swimming</span>
                 </div>
-                <span className="font-bold text-slate-900 tabular-nums">
-                  {publicBookings.length || 8} (66.7%)
-                </span>
+                <div className="text-sm font-black text-slate-900 pl-4 tabular-nums">
+                  {publicBookings.length || 8} <span className="text-xs font-semibold text-slate-500">(66.7%)</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-md bg-[#C084FC]" />
-                  <span className="font-semibold text-slate-700">Family Booking</span>
+
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 font-bold text-slate-700">
+                  <span className="w-2.5 h-2.5 rounded-xs bg-[#C084FC] shrink-0" />
+                  <span>Family Booking</span>
                 </div>
-                <span className="font-bold text-slate-900 tabular-nums">
-                  {familyBookings.length || 4} (33.3%)
-                </span>
+                <div className="text-sm font-black text-slate-900 pl-4 tabular-nums">
+                  {familyBookings.length || 4} <span className="text-xs font-semibold text-slate-500">(33.3%)</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Card 3: Recent Activity Feed */}
-        <div className="lg:col-span-3 bg-white rounded-2xl p-5 border border-white shadow-[0_4px_20px_rgba(30,70,120,0.05)] flex flex-col justify-between space-y-4">
+        {/* Card 3: Recent Activity Feed (lg:col-span-3) */}
+        <div className="lg:col-span-3 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center gap-2 font-bold text-slate-900 text-sm mb-3">
-              <Activity className="w-4 h-4 text-[#2563EB]" />
+              <Activity className="w-4 h-4 text-[#1D68BD]" />
               <span>Recent Activity</span>
             </div>
 
@@ -591,7 +613,7 @@ export default function AdminOverviewPage() {
                     <span className="text-[10px] text-slate-400">6 min ago</span>
                   </div>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">5 guests</span>
+                <span className="text-[11px] text-slate-500 font-semibold">5 guests</span>
               </div>
 
               <div className="flex items-start justify-between gap-2">
@@ -629,7 +651,7 @@ export default function AdminOverviewPage() {
           <div className="pt-2 border-t border-slate-100 text-right">
             <Link
               href="/admin/bookings"
-              className="text-xs font-semibold text-[#2563EB] hover:underline inline-flex items-center gap-1"
+              className="text-xs font-bold text-[#1D68BD] hover:underline inline-flex items-center gap-1"
             >
               <span>View All Activity</span>
               <ChevronRight className="w-3.5 h-3.5" />

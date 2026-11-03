@@ -104,21 +104,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Bookings", href: "/admin/bookings", icon: CalendarDays },
+    { name: "Bookings", href: "/admin/bookings", icon: CalendarDays, hasSubmenu: true },
     { name: "Customers", href: "/admin/customers", icon: User },
     { name: "Walk-ins", href: "/admin/walkins", icon: UserCheck },
     { name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Cancellations & Refunds", href: "/admin/cancellations", icon: XCircle },
     { name: "Complaints & Feedback", href: "/admin/complaints", icon: MessageSquareWarning },
-    { name: "Maintenance & Water Safety", href: "/admin/maintenance", icon: Droplets },
+    { name: "Maintenance", href: "/admin/maintenance", icon: Droplets },
     { name: "Reports", href: "/admin/reports", icon: BarChart3 },
-    { name: "Daily Closing", href: "/admin/closing", icon: FileCheck2 },
     ...(isOwnerOrAdmin
       ? [
           { name: "Staff & Permissions", href: "/admin/staff", icon: Users2 },
+          { name: "Notifications", href: "/admin/complaints", icon: Bell, badge: 3 },
           { name: "System Settings", href: "/admin/settings", icon: Settings },
         ]
-      : []),
+      : [
+          { name: "Notifications", href: "/admin/complaints", icon: Bell, badge: 3 },
+        ]),
+    { name: "Daily Closing", href: "/admin/closing", icon: FileCheck2 },
     { name: "Offline Sync", href: "/admin/offline", icon: WifiOff },
   ];
 
@@ -287,7 +290,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-500"}`} />
                     <span className="truncate">{item.name}</span>
                   </div>
-                  {item.name === "Complaints & Feedback" && (
+                  {item.hasSubmenu && (
+                    <ChevronDown className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-slate-400"}`} />
+                  )}
+                  {item.badge && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none">
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.name === "Complaints & Feedback" && !item.badge && (
                     <span className="w-2 h-2 rounded-full bg-amber-400" />
                   )}
                 </Link>
@@ -391,13 +402,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <ChevronDown className="w-3 h-3 text-slate-400" />
             </div>
 
-            {/* Owner Profile Pill in Top Bar (Exact Mockup Match) */}
-            <div className="bg-white rounded-2xl pl-1 pr-3 py-1 border border-white shadow-xs flex items-center gap-2 text-xs font-bold text-slate-800">
-              <div className="w-6 h-6 rounded-xl bg-slate-800 text-white font-bold text-[10px] flex items-center justify-center">
-                {user?.name ? user.name.charAt(0).toUpperCase() : "O"}
+            {/* Owner Profile Pill in Top Bar (Shown on Subpages as in Mockup Image 2) */}
+            {pathname !== "/admin" && (
+              <div className="bg-white rounded-2xl pl-1 pr-3 py-1 border border-white shadow-xs flex items-center gap-2 text-xs font-bold text-slate-800">
+                <div className="w-6 h-6 rounded-xl bg-slate-800 text-white font-bold text-[10px] flex items-center justify-center">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : "O"}
+                </div>
+                <span>{user?.role === "POOL_OWNER" ? "Owner" : user?.name || "Owner"}</span>
               </div>
-              <span>{user?.role === "POOL_OWNER" ? "Owner" : user?.name || "Owner"}</span>
-            </div>
+            )}
           </div>
         </header>
 
