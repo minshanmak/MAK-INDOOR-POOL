@@ -24,7 +24,7 @@ export default function HomePage() {
   return (
     <div className="bg-[#F0F5FA] text-slate-800 space-y-12 sm:space-y-16 pb-16">
       {/* 1. HERO SECTION (Exact Match to Mockup) */}
-      <section className="relative min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] flex items-center overflow-hidden bg-[#07172C]">
+      <section className="relative min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] flex items-center overflow-hidden bg-[#0284C7]">
         {/* Background Swimming Pool Photograph */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -32,9 +32,9 @@ export default function HomePage() {
             backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=85')`,
           }}
         />
-        {/* Dark Aquatic Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#07172C]/95 via-[#0A2647]/85 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#07172C] via-transparent to-transparent" />
+        {/* Luminous Aquatic Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0369A1]/85 via-[#0284C7]/70 to-[#38BDF8]/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0284C7]/40 via-transparent to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 z-10 w-full flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
           {/* Left Hero Content */}
@@ -488,7 +488,7 @@ export default function HomePage() {
 
       {/* 7. "READY TO SWIM?" CTA BANNER (Exact Match) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-[#0E5296] via-[#1A6BA8] to-[#0A3D73] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+        <div className="bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#38BDF8] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
           <div>
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
               Ready to Swim?
@@ -500,7 +500,7 @@ export default function HomePage() {
 
           <Link
             href="/book"
-            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
+            className="bg-white hover:bg-sky-50 active:scale-95 text-[#0284C7] font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
           >
             <span>Book Now</span>
             <ArrowRight className="w-4 h-4" />

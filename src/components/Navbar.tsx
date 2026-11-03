@@ -26,7 +26,7 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#07172C]/95 backdrop-blur-md border-b border-white/10 text-white shadow-md">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#0284C7] backdrop-blur-md border-b border-white/20 text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-[70px]">
           {/* Brand Logo */}
@@ -39,7 +39,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation Links (Pill Style - Exact Mockup Match) */}
-          <nav className="hidden lg:flex items-center gap-1 bg-white/5 border border-white/10 p-1.5 rounded-full shadow-inner backdrop-blur-md">
+          <nav className="hidden lg:flex items-center gap-1 bg-white/15 border border-white/25 p-1.5 rounded-full shadow-inner backdrop-blur-md">
             {navLinks.map((link) => {
               const isActive =
                 link.href === "/"
@@ -52,8 +52,8 @@ export default function Navbar() {
                   href={link.href}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 ${
                     isActive
-                      ? "bg-white/20 text-white font-bold shadow-xs"
-                      : "text-slate-300 hover:text-white hover:bg-white/10"
+                      ? "bg-white text-[#0284C7] font-extrabold shadow-sm"
+                      : "text-white/90 hover:text-white hover:bg-white/20"
                   }`}
                 >
                   {link.label}
@@ -66,14 +66,14 @@ export default function Navbar() {
           <div className="hidden sm:flex items-center gap-2.5">
             <Link
               href="/admin/login"
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-1.5 rounded-full text-xs font-bold transition backdrop-blur-xs"
+              className="bg-white/15 hover:bg-white/25 text-white border border-white/30 px-4 py-1.5 rounded-full text-xs font-bold transition backdrop-blur-xs"
             >
               Login
             </Link>
 
             <Link
               href="/book"
-              className="bg-white hover:bg-slate-100 text-slate-900 font-extrabold px-4 py-1.5 rounded-full text-xs shadow-md flex items-center gap-1.5 transition active:scale-95"
+              className="bg-white hover:bg-sky-50 text-[#0284C7] font-extrabold px-4 py-1.5 rounded-full text-xs shadow-md flex items-center gap-1.5 transition active:scale-95"
             >
               <span>Book Now</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -84,7 +84,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:hidden">
             <Link
               href="/book"
-              className="bg-white text-slate-900 font-extrabold px-3 py-1.5 rounded-full text-xs shadow-xs"
+              className="bg-white text-[#0284C7] font-extrabold px-3 py-1.5 rounded-full text-xs shadow-xs"
             >
               Book
             </Link>
@@ -92,7 +92,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition active:scale-95"
+              className="p-2 rounded-xl bg-white/15 text-white hover:bg-white/25 transition active:scale-95"
               aria-label="Toggle navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -103,7 +103,7 @@ export default function Navbar() {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden bg-[#07172C] border-b border-white/10 px-4 pt-3 pb-6 space-y-2">
+        <div className="sm:hidden bg-[#0284C7] border-b border-white/20 px-4 pt-3 pb-6 space-y-2">
           <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => {
               const isActive =
@@ -118,8 +118,8 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold ${
                     isActive
-                      ? "bg-white/20 text-white font-bold"
-                      : "text-slate-300 hover:text-white hover:bg-white/10"
+                      ? "bg-white text-[#0284C7] font-extrabold shadow-xs"
+                      : "text-white/90 hover:text-white hover:bg-white/15"
                   }`}
                 >
                   {link.label}
@@ -127,18 +127,18 @@ export default function Navbar() {
               );
             })}
           </nav>
-          <div className="pt-3 border-t border-white/10 flex items-center gap-2">
+          <div className="pt-3 border-t border-white/20 flex items-center gap-2">
             <Link
               href="/admin/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center bg-white/10 text-white py-2 rounded-full text-xs font-bold"
+              className="flex-1 text-center bg-white/15 hover:bg-white/25 text-white py-2 rounded-full text-xs font-bold border border-white/25"
             >
               Login
             </Link>
             <Link
               href="/book"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center bg-white text-slate-900 py-2 rounded-full text-xs font-black shadow-md"
+              className="flex-1 text-center bg-white text-[#0284C7] py-2 rounded-full text-xs font-black shadow-md"
             >
               Book Now
             </Link>
