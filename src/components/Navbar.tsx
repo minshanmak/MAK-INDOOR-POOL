@@ -11,12 +11,12 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
 
-  // Nav items in exact order matching reference mockup
+  // Nav items in exact sequential order matching the one-page landing sections
   const navItems = [
     { id: "home", label: "Home" },
+    { id: "about", label: "About" },
     { id: "pricing", label: "Pricing" },
     { id: "gallery", label: "Gallery" },
-    { id: "about", label: "About" },
     { id: "policies", label: "Policies" },
     { id: "faq", label: "FAQ" },
     { id: "contact", label: "Contact" },
@@ -27,7 +27,22 @@ export default function Navbar() {
     if (pathname !== "/") return;
 
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 140; // offset buffer for navbar
+      // If at top of the page
+      if (window.scrollY < 120) {
+        setActiveSection("home");
+        return;
+      }
+
+      // If at bottom of the page
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 80
+      ) {
+        setActiveSection("contact");
+        return;
+      }
+
+      const scrollPosition = window.scrollY + 160; // offset buffer for navbar
       // Check sections from bottom up
       const sectionOrder = [
         "contact",
