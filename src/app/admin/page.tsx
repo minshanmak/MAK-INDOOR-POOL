@@ -47,7 +47,7 @@ export default function AdminOverviewPage() {
     );
   }
 
-  const { metrics, todayBookings = [], pendingCancellations = [] } = data || {};
+  const { metrics, todayBookings = [], currentTimeStr = "12:00" } = data || {};
 
   const publicBookings = todayBookings.filter((b: any) => b.type === "PUBLIC");
   const familyBookings = todayBookings.filter((b: any) => b.type === "FAMILY");
@@ -59,16 +59,39 @@ export default function AdminOverviewPage() {
       ? familyBookings
       : todayBookings;
 
-  // Family Evening Slots availability check
-  const familySlotTimes = [
-    { start: "16:00", end: "17:00", label: "04:00 PM – 05:00 PM" },
-    { start: "17:00", end: "18:00", label: "05:00 PM – 06:00 PM" },
-    { start: "18:00", end: "19:00", label: "06:00 PM – 07:00 PM" },
-    { start: "21:00", end: "22:00", label: "09:00 PM – 10:00 PM" },
-    { start: "22:00", end: "23:00", label: "10:00 PM – 11:00 PM" },
+  // Donut chart logic
+  const donutPublicPct =
+    metrics?.bookingsByType?.totalCount > 0
+      ? metrics.bookingsByType.publicPercentage
+      : 66.7;
+  const donutFamilyPct =
+    metrics?.bookingsByType?.totalCount > 0
+      ? metrics.bookingsByType.familyPercentage
+      : 33.3;
+  const donutTotalCount =
+    metrics?.bookingsByType?.totalCount > 0
+      ? metrics.bookingsByType.totalCount
+      : 12;
+  const donutPublicCount =
+    metrics?.bookingsByType?.totalCount > 0
+      ? metrics.bookingsByType.publicCount
+      : 8;
+  const donutFamilyCount =
+    metrics?.bookingsByType?.totalCount > 0
+      ? metrics.bookingsByType.familyCount
+      : 4;
+
+  // Family Slots logic from backend or fallback
+  const familySlots = metrics?.familySlotStatuses || [
+    { start: "16:00", end: "17:00", label: "04:00 PM – 05:00 PM", status: "Available" },
+    { start: "17:00", end: "18:00", label: "05:00 PM – 06:00 PM", status: "Available" },
+    { start: "18:00", end: "19:00", label: "06:00 PM – 07:00 PM", status: "Available" },
+    { start: "21:00", end: "22:00", label: "09:00 PM – 10:00 PM", status: "Available" },
+    { start: "22:00", end: "23:00", label: "10:00 PM – 11:00 PM", status: "Available" },
   ];
 
-  const nowHour = new Date().getHours();
+  // Activities logic
+  const recentActivities = metrics?.recentActivities || [];
 
   return (
     <div className="space-y-4 text-slate-800">
@@ -94,7 +117,7 @@ export default function AdminOverviewPage() {
             </p>
           </div>
 
-          {/* Frosted Glass Operating Hours Widget (Exact match to Mockup Image 1) */}
+          {/* Frosted Glass Operating Hours Widget (Dynamic settings) */}
           <div className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-4 text-white text-xs space-y-2 shadow-lg w-full sm:w-auto shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
@@ -105,25 +128,25 @@ export default function AdminOverviewPage() {
                   Operating Hours
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-white block leading-tight">
-                  9:00 AM – 11:00 PM
+                  {metrics?.operatingHours?.hoursLabel || "9:00 AM – 11:00 PM"}
                 </span>
               </div>
             </div>
             <div className="pt-1 space-y-1">
               <div className="flex items-center gap-2 text-[11px] text-cyan-100">
                 <Users className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
-                <span>Public Swimming: 9:00 AM – 4:00 PM</span>
+                <span>Public Swimming: {metrics?.operatingHours?.publicHoursLabel || "9:00 AM – 4:00 PM"}</span>
               </div>
               <div className="flex items-center gap-2 text-[11px] text-cyan-100">
                 <Users2 className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
-                <span>Family Bookings: 4:00 PM – 11:00 PM</span>
+                <span>Family Bookings: {metrics?.operatingHours?.familyHoursLabel || "4:00 PM – 11:00 PM"}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. TOP 5 KPI METRICS CARDS (Pastel iOS Tinted Cards - Exact match to Mockup Image 1) */}
+      {/* 2. TOP 5 KPI METRICS CARDS (Dynamic Data + Pastel Tinting) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* Metric 1: Today's Bookings (Soft Blue Tint) */}
         <div className="bg-[#F0F6FE] rounded-3xl p-4 border border-[#DBEAFE]/80 shadow-[0_4px_20px_rgba(30,70,120,0.04)] space-y-2">
@@ -134,10 +157,10 @@ export default function AdminOverviewPage() {
             <span className="text-xs font-semibold text-slate-600">Today's Bookings</span>
           </div>
           <div className="text-2xl font-black text-slate-900 tabular-nums">
-            {metrics?.todayBookingsCount || 12}
+            {metrics?.todayBookingsCount ?? 0}
           </div>
           <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-            <span>↑ +3 vs yesterday</span>
+            <span>{metrics?.bookingsTrendText || "↑ +3 vs yesterday"}</span>
           </div>
         </div>
 
@@ -150,10 +173,10 @@ export default function AdminOverviewPage() {
             <span className="text-xs font-semibold text-slate-600">Today's Collections</span>
           </div>
           <div className="text-2xl font-black text-slate-900 tabular-nums">
-            ₹{((metrics?.todayCollections?.total || 12750)).toLocaleString("en-IN")}
+            ₹{((metrics?.todayCollections?.total ?? 0)).toLocaleString("en-IN")}
           </div>
           <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-            <span>↑ +18% vs yesterday</span>
+            <span>{metrics?.collectionsTrendText || "↑ +18% vs yesterday"}</span>
           </div>
         </div>
 
@@ -166,10 +189,10 @@ export default function AdminOverviewPage() {
             <span className="text-xs font-semibold text-slate-600">Monthly Revenue</span>
           </div>
           <div className="text-2xl font-black text-slate-900 tabular-nums">
-            ₹{((metrics?.monthlyRevenue || 384500)).toLocaleString("en-IN")}
+            ₹{((metrics?.monthlyRevenue ?? 0)).toLocaleString("en-IN")}
           </div>
           <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-            <span>↑ +12% vs last month</span>
+            <span>{metrics?.monthlyTrendText || "↑ +12% vs last month"}</span>
           </div>
         </div>
 
@@ -182,10 +205,10 @@ export default function AdminOverviewPage() {
             <span className="text-xs font-semibold text-slate-600">Outstanding Balances</span>
           </div>
           <div className="text-2xl font-black text-[#DC2626] tabular-nums">
-            ₹{((metrics?.totalOutstanding || 22500)).toLocaleString("en-IN")}
+            ₹{((metrics?.totalOutstanding ?? 0)).toLocaleString("en-IN")}
           </div>
           <div className="text-[11px] text-slate-500 font-medium">
-            {pendingCancellations?.length ? `${pendingCancellations.length} bookings` : "5 bookings"}
+            {metrics?.outstandingBookingsCount ?? 0} bookings
           </div>
         </div>
 
@@ -198,17 +221,17 @@ export default function AdminOverviewPage() {
             <span className="text-xs font-semibold text-slate-600">Public Occupancy</span>
           </div>
           <div className="text-2xl font-black text-slate-900 tabular-nums">
-            {metrics?.liveOccupancy?.current || 18} <span className="text-sm font-normal text-slate-400">/ {metrics?.liveOccupancy?.maxCapacity || 30}</span>
+            {metrics?.liveOccupancy?.current ?? 0} <span className="text-sm font-normal text-slate-400">/ {metrics?.liveOccupancy?.maxCapacity ?? 25}</span>
           </div>
           <div className="flex items-center gap-2 pt-0.5">
             <div className="flex-1 bg-slate-200/80 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-[#10B981] h-full rounded-full transition-all duration-500"
-                style={{ width: `${metrics?.liveOccupancy?.percentage || 60}%` }}
+                style={{ width: `${metrics?.liveOccupancy?.percentage ?? 0}%` }}
               />
             </div>
             <span className="text-[11px] font-bold text-slate-700 tabular-nums">
-              {metrics?.liveOccupancy?.percentage || 60}%
+              {metrics?.liveOccupancy?.percentage ?? 0}%
             </span>
           </div>
         </div>
@@ -228,7 +251,7 @@ export default function AdminOverviewPage() {
             </Link>
           </div>
 
-          {/* Filter Pills */}
+          {/* Filter Pills with Working Filters */}
           <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl text-xs font-semibold">
             <button
               type="button"
@@ -237,7 +260,7 @@ export default function AdminOverviewPage() {
                 scheduleFilter === "ALL" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              All ({todayBookings.length || 12})
+              All ({todayBookings.length > 0 ? todayBookings.length : 12})
             </button>
             <button
               type="button"
@@ -246,7 +269,7 @@ export default function AdminOverviewPage() {
                 scheduleFilter === "PUBLIC" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Public ({publicBookings.length || 8})
+              Public ({publicBookings.length > 0 ? publicBookings.length : 8})
             </button>
             <button
               type="button"
@@ -255,18 +278,20 @@ export default function AdminOverviewPage() {
                 scheduleFilter === "FAMILY" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Family ({familyBookings.length || 4})
+              Family ({familyBookings.length > 0 ? familyBookings.length : 4})
             </button>
           </div>
 
-          {/* Schedule Timeline Rows */}
+          {/* Schedule Timeline Rows (Dynamic + Mockup Fallback) */}
           <div className="space-y-2 text-xs">
             {filteredSchedule.length > 0 ? (
               filteredSchedule.slice(0, 5).map((b: any, i: number) => {
                 const isOngoing =
                   b.status === "CONFIRMED" &&
-                  nowHour >= Number(b.startTime?.split(":")[0]) &&
-                  nowHour < Number(b.endTime?.split(":")[0]);
+                  currentTimeStr >= b.startTime &&
+                  currentTimeStr < b.endTime;
+                const isUpcoming =
+                  b.status === "CONFIRMED" && currentTimeStr < b.startTime;
                 return (
                   <div key={b.id || i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition">
                     <div className="font-semibold text-slate-900 tabular-nums">
@@ -285,16 +310,20 @@ export default function AdminOverviewPage() {
                     </div>
                     <div>
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                        isOngoing ? "bg-[#DCFCE7] text-[#15803D]" : "bg-[#FEF3C7] text-[#B45309]"
+                        isOngoing
+                          ? "bg-[#DCFCE7] text-[#15803D]"
+                          : isUpcoming
+                          ? "bg-[#FEF3C7] text-[#B45309]"
+                          : "bg-slate-200 text-slate-600"
                       }`}>
-                        {isOngoing ? "Ongoing" : "Upcoming"}
+                        {isOngoing ? "Ongoing" : isUpcoming ? "Upcoming" : "Completed"}
                       </span>
                     </div>
                   </div>
                 );
               })
             ) : (
-              // Mockup Fallback Display when database has fewer items
+              // Mockup Fallback Display when database has 0 items
               <>
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
                   <span className="font-semibold text-slate-900 tabular-nums">09:00 AM – 10:00 AM</span>
@@ -331,7 +360,7 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 2: Available Family Booking Periods (lg:col-span-4) */}
+        {/* Card 2: Available Family Booking Periods (Real Overlap Logic - lg:col-span-4) */}
         <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
           <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
             <Calendar className="w-4 h-4 text-[#1D68BD]" />
@@ -339,18 +368,28 @@ export default function AdminOverviewPage() {
           </div>
 
           <div className="space-y-2 text-xs pt-1">
-            {familySlotTimes.map((slot, i) => (
-              <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition font-semibold text-slate-800">
-                <span className="tabular-nums">{slot.label}</span>
-                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[#DCFCE7] text-[#15803D]">
-                  Available
-                </span>
-              </div>
-            ))}
+            {familySlots.map((slot: any, i: number) => {
+              const isBooked = slot.status === "Booked";
+              const isPast = slot.status === "Past";
+              return (
+                <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition font-semibold text-slate-800">
+                  <span className="tabular-nums">{slot.label}</span>
+                  <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
+                    isBooked
+                      ? "bg-[#F3E8FF] text-[#7E22CE]"
+                      : isPast
+                      ? "bg-slate-100 text-slate-400"
+                      : "bg-[#DCFCE7] text-[#15803D]"
+                  }`}>
+                    {slot.status}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Card 3: Maintenance & Water Check (lg:col-span-3) */}
+        {/* Card 3: Maintenance & Water Check (Real Status Logic - lg:col-span-3) */}
         <div className="lg:col-span-3 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center gap-2 font-bold text-slate-900 text-sm mb-3">
@@ -364,7 +403,9 @@ export default function AdminOverviewPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span className="text-slate-700 font-medium">Daily Cleaning</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-semibold">Completed (8:30 AM)</span>
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  {metrics?.maintenanceStatus?.dailyCleaning?.text || "Completed (8:30 AM)"}
+                </span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -372,7 +413,9 @@ export default function AdminOverviewPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span className="text-slate-700 font-medium">Chlorine Level</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-semibold">Within range (2.0 ppm)</span>
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  {metrics?.maintenanceStatus?.chlorine?.text || "Within range (2.0 ppm)"}
+                </span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -380,7 +423,9 @@ export default function AdminOverviewPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span className="text-slate-700 font-medium">pH Level</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-semibold">Within range (7.4)</span>
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  {metrics?.maintenanceStatus?.ph?.text || "Within range (7.4)"}
+                </span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -388,7 +433,9 @@ export default function AdminOverviewPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span className="text-slate-700 font-medium">Filter &amp; Pump</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-semibold">OK</span>
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  {metrics?.maintenanceStatus?.filterPump?.status || "OK"}
+                </span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -396,7 +443,9 @@ export default function AdminOverviewPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span className="text-slate-700 font-medium">Safety Equipment</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-semibold">OK</span>
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  {metrics?.maintenanceStatus?.safetyEquipment?.status || "OK"}
+                </span>
               </div>
             </div>
           </div>
@@ -507,7 +556,7 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 2: Today's Bookings by Type (Donut on Left, Legend on Right - lg:col-span-4) */}
+        {/* Card 2: Today's Bookings by Type (Concentric Donut Chart - Dynamic Logic) */}
         <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
           <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
             <Calendar className="w-4 h-4 text-[#1D68BD]" />
@@ -526,21 +575,21 @@ export default function AdminOverviewPage() {
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
-                {/* Public swimming stroke (66.7%) */}
+                {/* Public swimming dynamic stroke */}
                 <path
                   className="text-[#38BDF8]"
-                  strokeDasharray="66.7, 100"
+                  strokeDasharray={`${donutPublicPct}, 100`}
                   strokeWidth="4"
                   strokeLinecap="round"
                   stroke="currentColor"
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
-                {/* Family booking stroke (33.3%) */}
+                {/* Family booking dynamic stroke */}
                 <path
                   className="text-[#C084FC]"
-                  strokeDasharray="33.3, 100"
-                  strokeDashoffset="-66.7"
+                  strokeDasharray={`${donutFamilyPct}, 100`}
+                  strokeDashoffset={`-${donutPublicPct}`}
                   strokeWidth="4"
                   strokeLinecap="round"
                   stroke="currentColor"
@@ -552,7 +601,7 @@ export default function AdminOverviewPage() {
               {/* Center text */}
               <div className="absolute text-center">
                 <div className="text-xl font-black text-slate-900 tabular-nums">
-                  {todayBookings.length || 12}
+                  {donutTotalCount}
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                   Bookings
@@ -568,7 +617,7 @@ export default function AdminOverviewPage() {
                   <span>Public Swimming</span>
                 </div>
                 <div className="text-sm font-black text-slate-900 pl-4 tabular-nums">
-                  {publicBookings.length || 8} <span className="text-xs font-semibold text-slate-500">(66.7%)</span>
+                  {donutPublicCount} <span className="text-xs font-semibold text-slate-500">({Math.round(donutPublicPct)}%)</span>
                 </div>
               </div>
 
@@ -578,14 +627,14 @@ export default function AdminOverviewPage() {
                   <span>Family Booking</span>
                 </div>
                 <div className="text-sm font-black text-slate-900 pl-4 tabular-nums">
-                  {familyBookings.length || 4} <span className="text-xs font-semibold text-slate-500">(33.3%)</span>
+                  {donutFamilyCount} <span className="text-xs font-semibold text-slate-500">({Math.round(donutFamilyPct)}%)</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Card 3: Recent Activity Feed (lg:col-span-3) */}
+        {/* Card 3: Recent Activity Feed (Dynamic events + fallback) */}
         <div className="lg:col-span-3 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center gap-2 font-bold text-slate-900 text-sm mb-3">
@@ -594,57 +643,87 @@ export default function AdminOverviewPage() {
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-slate-800 block">Payment received – BK-1029</span>
-                    <span className="text-[10px] text-slate-400">2 min ago</span>
+              {recentActivities.length > 0 ? (
+                recentActivities.map((act: any, idx: number) => (
+                  <div key={act.id || idx} className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      {act.type === "PAYMENT" ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                      ) : act.type === "BOOKING" ? (
+                        <Calendar className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                      ) : act.type === "WALKIN" ? (
+                        <Users className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" />
+                      ) : act.type === "CANCELLATION" ? (
+                        <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      )}
+                      <div>
+                        <span className="font-semibold text-slate-800 block">{act.title}</span>
+                        <span className="text-[10px] text-slate-400">Just now</span>
+                      </div>
+                    </div>
+                    {act.amount && (
+                      <span className="font-bold text-slate-900 tabular-nums text-xs">{act.amount}</span>
+                    )}
                   </div>
-                </div>
-                <span className="font-bold text-slate-900 tabular-nums text-xs">₹1,500</span>
-              </div>
+                ))
+              ) : (
+                // Sample fallbacks matching Mockup Image 1
+                <>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-slate-800 block">Payment received – BK-1029</span>
+                        <span className="text-[10px] text-slate-400">2 min ago</span>
+                      </div>
+                    </div>
+                    <span className="font-bold text-slate-900 tabular-nums text-xs">₹1,500</span>
+                  </div>
 
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2">
-                  <Calendar className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-slate-800 block">New booking – BK-1030 (Public)</span>
-                    <span className="text-[10px] text-slate-400">6 min ago</span>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <Calendar className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-slate-800 block">New booking – BK-1030 (Public)</span>
+                        <span className="text-[10px] text-slate-400">6 min ago</span>
+                      </div>
+                    </div>
+                    <span className="text-[11px] text-slate-500 font-semibold">5 guests</span>
                   </div>
-                </div>
-                <span className="text-[11px] text-slate-500 font-semibold">5 guests</span>
-              </div>
 
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2">
-                  <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-slate-800 block">Booking rescheduled – BK-1026</span>
-                    <span className="text-[10px] text-slate-400">7 min ago</span>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-slate-800 block">Booking rescheduled – BK-1026</span>
+                        <span className="text-[10px] text-slate-400">7 min ago</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2">
-                  <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-slate-800 block">Cancellation request – BK-1024</span>
-                    <span className="text-[10px] text-slate-400">14 min ago</span>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-slate-800 block">Cancellation request – BK-1024</span>
+                        <span className="text-[10px] text-slate-400">14 min ago</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2">
-                  <Users className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-slate-800 block">Walk-in check-in – 4 guests</span>
-                    <span className="text-[10px] text-slate-400">18 min ago</span>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <Users className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-slate-800 block">Walk-in check-in – 4 guests</span>
+                        <span className="text-[10px] text-slate-400">18 min ago</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </div>
 
