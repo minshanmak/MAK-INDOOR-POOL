@@ -68,9 +68,9 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* 2. 3-COLUMN PRICING GRID (Exact Match to Mockup) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-10 relative z-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+      {/* 2. 2-COLUMN PRICING GRID (Clean Dual Plans) */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-10 relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* Card 1: Public Swimming */}
           <div className="bg-[#F0F8FF] border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-6">
             <div className="space-y-4">
@@ -108,7 +108,7 @@ export default function PricingPage() {
 
             <Link
               href="/book?type=PUBLIC"
-              className="w-full text-center bg-[#1D68BD] hover:bg-[#155299] text-white font-bold py-3 rounded-2xl text-xs shadow-md transition active:scale-95"
+              className="w-full text-center bg-[#0284C7] hover:bg-[#0369A1] text-white font-bold py-3 rounded-2xl text-xs shadow-md transition active:scale-95"
             >
               Book Public Slot
             </Link>
@@ -155,15 +155,6 @@ export default function PricingPage() {
             >
               Book Family Slot
             </Link>
-          </div>
-
-          {/* Card 3: Real Photography Card */}
-          <div className="rounded-3xl overflow-hidden shadow-xs border border-white h-full min-h-[280px] relative">
-            <img
-              src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1000&q=80"
-              alt="Pool Atmosphere"
-              className="w-full h-full object-cover"
-            />
           </div>
         </div>
       </section>

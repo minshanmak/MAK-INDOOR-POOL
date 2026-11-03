@@ -335,7 +335,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch">
           {/* Pricing Card 1: Public Swimming */}
           <div className="bg-white border border-sky-100 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col justify-between space-y-6">
             <div className="space-y-4">
@@ -412,15 +412,6 @@ export default function HomePage() {
             >
               Book Family Slot
             </Link>
-          </div>
-
-          {/* Pricing Card 3: Photography Card (Exact Match) */}
-          <div className="rounded-3xl overflow-hidden shadow-xs border border-white h-full min-h-[260px] relative">
-            <img
-              src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1000&q=80"
-              alt="Pool Atmosphere"
-              className="w-full h-full object-cover"
-            />
           </div>
         </div>
       </section>
