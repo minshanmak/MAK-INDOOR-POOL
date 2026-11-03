@@ -217,12 +217,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile Top Header */}
       <div className="lg:hidden bg-white/95 backdrop-blur-md text-slate-900 p-3.5 flex justify-between items-center border-b border-slate-200 sticky top-0 z-50 shadow-2xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#1D68BD] flex items-center justify-center text-white shadow-sm">
-            <Waves className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-xl bg-slate-950 flex items-center justify-center text-white shadow-sm">
+            <Waves className="w-4 h-4 text-cyan-400" />
           </div>
           <div>
             <span className="font-extrabold text-sm tracking-tight block leading-tight">M.A.K Indoor Pool</span>
-            <span className="text-[10px] text-slate-500 font-medium block">Ops Manager</span>
+            <span className="text-[10px] text-slate-500 font-medium block">Ops Command Hub</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -258,8 +258,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1">
           {/* Brand Header */}
           <div className="flex items-center gap-3 px-2 py-2 mb-3 border-b border-slate-100/90 pb-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#1D68BD] flex items-center justify-center text-white shadow-md shadow-blue-600/25 shrink-0">
-              <Waves className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-2xl bg-slate-950 flex items-center justify-center text-white shadow-md shadow-slate-950/20 shrink-0">
+              <Waves className="w-5 h-5 text-cyan-400" />
             </div>
             <div>
               <span className="font-black text-sm text-slate-900 leading-tight block tracking-tight">M.A.K</span>
@@ -282,12 +282,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all active:scale-[0.98] ${
                     isActive
-                      ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/25"
+                      ? "bg-slate-950 text-white shadow-md shadow-slate-950/20"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-500"}`} />
+                    <Icon className={`w-4 h-4 ${isActive ? "text-cyan-300" : "text-slate-500"}`} />
                     <span className="truncate">{item.name}</span>
                   </div>
                   {item.hasSubmenu && (
