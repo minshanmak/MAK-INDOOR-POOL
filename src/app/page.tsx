@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Waves,
@@ -8,375 +8,264 @@ import {
   Calendar,
   Clock,
   Users,
+  Users2,
   ArrowRight,
   Droplets,
-  Sparkles,
-  HeartHandshake,
-  CheckCircle2,
+  Layers,
+  Image as ImageIcon,
+  Play,
   Check,
-  BadgeCheck,
-  Award,
-  Lock,
-  Thermometer,
-  Activity,
-  CheckCircle,
+  CheckCircle2,
 } from "lucide-react";
 
 export default function HomePage() {
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
 
   return (
-    <div className="space-y-16 sm:space-y-24 pb-20 bg-[#F8FAFC]">
-      {/* 1. HERO SECTION (Atmospheric Aquatic Luxury with Ambient Depth) */}
-      <section className="relative min-h-[580px] sm:min-h-[640px] flex items-center bg-[#07172C] overflow-hidden">
-        {/* Background Pool Photograph with Deep Vignette & Blur */}
+    <div className="bg-[#F0F5FA] text-slate-800 space-y-12 sm:space-y-16 pb-16">
+      {/* 1. HERO SECTION (Exact Match to Mockup) */}
+      <section className="relative min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] flex items-center overflow-hidden bg-[#07172C]">
+        {/* Background Swimming Pool Photograph */}
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-40 sm:opacity-50 scale-105 transition-transform duration-1000"
+          className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=85')`,
           }}
         />
-        {/* Refined gradient overlay for maximum text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#061220] via-[#07172C]/90 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#061220] via-transparent to-transparent" />
+        {/* Dark Aquatic Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#07172C]/95 via-[#0A2647]/85 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#07172C] via-transparent to-transparent" />
 
-        {/* Ambient aquatic glow */}
-        <div className="absolute top-1/4 right-10 w-96 h-96 bg-[#00838F]/15 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 z-10 w-full">
-          <div className="max-w-3xl space-y-6">
-            {/* Live Operational Status Beacon */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-teal-500/30 text-xs font-semibold backdrop-blur-md shadow-xs">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span className="text-emerald-400">Open Daily: 9:00 AM – 11:00 PM</span>
-              <span className="text-slate-600">•</span>
-              <span className="text-slate-300">Moonniyur, Malappuram</span>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 z-10 w-full flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
+          {/* Left Hero Content */}
+          <div className="max-w-2xl space-y-5 text-white">
+            {/* Pill Tag */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold text-white shadow-xs">
+              <span>M.A.K Indoor Pool</span>
             </div>
 
-            {/* Main Title */}
-            <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-[1.08]">
-              M.A.K{" "}
-              <span className="bg-gradient-to-r from-cyan-300 via-teal-200 to-white bg-clip-text text-transparent">
-                Indoor Pool
-              </span>
+            {/* Main Headline */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
+              Premium Indoor <br />
+              Swimming Experience
             </h1>
 
-            <p className="text-base sm:text-xl text-slate-200 font-medium leading-relaxed max-w-2xl">
-              Kerala’s purpose-built temperature-controlled indoor swimming sanctuary. Hospital-grade dual sand filtration, continuous hygiene testing, and 100% private family evening sessions.
+            {/* Subtitle */}
+            <p className="text-xs sm:text-sm text-cyan-100 font-normal leading-relaxed max-w-lg">
+              A clean, safe and family-friendly indoor pool for public swimming and exclusive family bookings.
             </p>
 
-            {/* Feature Pills */}
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 pt-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00838F]/20 border border-cyan-400/30 text-cyan-200 text-xs font-semibold backdrop-blur-xs">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Clean &amp; Hygienic Environment</span>
-              </div>
-
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00838F]/20 border border-cyan-400/30 text-cyan-200 text-xs font-semibold backdrop-blur-xs">
-                <Users className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Family Friendly Facility</span>
-              </div>
-
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00838F]/20 border border-cyan-400/30 text-cyan-200 text-xs font-semibold backdrop-blur-xs">
-                <Award className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Affordable Pricing</span>
-              </div>
-
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00838F]/20 border border-cyan-400/30 text-cyan-200 text-xs font-semibold backdrop-blur-xs">
-                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Safe &amp; Supervised</span>
-              </div>
-            </div>
-
-            {/* Dual Actions: Primary High-Converting CTA + Secondary Outline */}
-            <div className="flex flex-wrap items-center gap-3.5 pt-4">
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
                 href="/book"
-                className="bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold px-7 py-3.5 rounded-xl text-xs sm:text-sm tracking-wide shadow-glow transition duration-150 inline-flex items-center gap-2 group"
+                className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-extrabold px-6 py-2.5 rounded-full text-xs shadow-lg transition flex items-center gap-2"
               >
-                <span>Book Your Slot Online</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                <span>Book Now</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
 
               <Link
                 href="/pricing"
-                className="border border-white/60 hover:bg-white/10 hover:border-white text-white font-bold px-6 py-3.5 rounded-xl text-xs sm:text-sm tracking-wide backdrop-blur-xs transition duration-150"
+                className="bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur-md border border-white/30 text-white font-bold px-6 py-2.5 rounded-full text-xs transition"
               >
-                View Prices &amp; Sessions
+                View Pricing
               </Link>
             </div>
-          </div>
-        </div>
 
-        {/* Bottom stats reassurance ribbon */}
-        <div className="absolute bottom-0 inset-x-0 bg-slate-950/80 border-t border-slate-800/80 backdrop-blur-md hidden md:block">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 grid grid-cols-4 divide-x divide-slate-800 text-xs text-slate-300">
-            <div className="flex items-center gap-2.5 px-4 justify-center">
-              <Thermometer className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span><strong>28°C–30°C</strong> Heated Water</span>
-            </div>
-            <div className="flex items-center gap-2.5 px-4 justify-center">
-              <Users className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span><strong>25 Cap</strong> Daytime Limit</span>
-            </div>
-            <div className="flex items-center gap-2.5 px-4 justify-center">
-              <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span><strong>100% Private</strong> Family Exclusivity</span>
-            </div>
-            <div className="flex items-center gap-2.5 px-4 justify-center">
-              <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span><strong>Daily 4x</strong> Water Quality Tests</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. 4 CORE PILLARS (Clean Modern Cards with Micro-Elevation) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-10 relative z-20">
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 divide-y sm:divide-y-0 lg:divide-x divide-slate-100">
-            {/* Feature 1 */}
-            <div className="text-center space-y-2.5 pt-4 sm:pt-0 group">
-              <div className="w-13 h-13 mx-auto rounded-2xl bg-teal-50 text-[#00838F] border border-teal-100 flex items-center justify-center transition-transform group-hover:scale-105">
-                <Waves className="w-6 h-6 stroke-[2.2]" />
+            {/* 4 Feature Pills Row */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-4 text-xs font-medium text-cyan-100">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-300" />
+                <span>Clean &amp; Safe</span>
               </div>
-              <h3 className="font-bold text-sm text-[#0A192F]">Public Swimming</h3>
-              <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-                Open sessions for individuals and families at ₹150/hr with strict capacity limits.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="text-center space-y-2.5 pt-4 sm:pt-0 lg:pl-6 group">
-              <div className="w-13 h-13 mx-auto rounded-2xl bg-teal-50 text-[#00838F] border border-teal-100 flex items-center justify-center transition-transform group-hover:scale-105">
-                <Users className="w-6 h-6 stroke-[2.2]" />
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
+                <Users className="w-3.5 h-3.5 text-cyan-300" />
+                <span>Family Friendly</span>
               </div>
-              <h3 className="font-bold text-sm text-[#0A192F]">Family Exclusive Booking</h3>
-              <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-                Private pool time for your family and friends with no outside visitors allowed.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="text-center space-y-2.5 pt-4 sm:pt-0 lg:pl-6 group">
-              <div className="w-13 h-13 mx-auto rounded-2xl bg-teal-50 text-[#00838F] border border-teal-100 flex items-center justify-center transition-transform group-hover:scale-105">
-                <BadgeCheck className="w-6 h-6 stroke-[2.2]" />
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
+                <Droplets className="w-3.5 h-3.5 text-cyan-300" />
+                <span>Well Maintained</span>
               </div>
-              <h3 className="font-bold text-sm text-[#0A192F]">Clean &amp; Well Maintained</h3>
-              <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-                Dual sand filtration, regular water tests, and hospital-grade sanitized decks.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="text-center space-y-2.5 pt-4 sm:pt-0 lg:pl-6 group">
-              <div className="w-13 h-13 mx-auto rounded-2xl bg-teal-50 text-[#00838F] border border-teal-100 flex items-center justify-center transition-transform group-hover:scale-105">
-                <HeartHandshake className="w-6 h-6 stroke-[2.2]" />
-              </div>
-              <h3 className="font-bold text-sm text-[#0A192F]">Safe &amp; Friendly Staff</h3>
-              <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-                Trained life-safety personnel and courteous reception to assist your visit.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. OUR FACILITY SHOWCASE (Refined High-Resolution Architecture Tour) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-50 text-[#00838F] font-bold text-[11px] uppercase tracking-wider">
-            <span>Facility Tour</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#0A192F] tracking-tight">
-            Our Facility
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-            Modern indoor aquatic center with pure water, private changing suites, and comfortable amenities for all age groups in Moonniyur, Malappuram district.
-          </p>
-        </div>
-
-        {/* 3 Photography Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Photo 1: Swimming Basin */}
-          <div className="group bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden transition-all duration-300 hover:shadow-float hover:-translate-y-1">
-            <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100 relative">
-              <img
-                src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&q=80"
-                alt="Main Indoor Swimming Pool Basin"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-90" />
-              <div className="absolute bottom-4 left-4 right-4 text-white">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-300 block mb-0.5">
-                  Main Basin
-                </span>
-                <span className="font-bold text-sm block">25m Temperature-Controlled Pool</span>
-                <span className="text-[11px] text-slate-300 block mt-0.5">1.2m – 2.0m gradual depth • Anti-slip perimeter</span>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
+                <Calendar className="w-3.5 h-3.5 text-cyan-300" />
+                <span>Flexible Booking</span>
               </div>
             </div>
           </div>
 
-          {/* Photo 2: Changing Rooms & Hot Showers */}
-          <div className="group bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden transition-all duration-300 hover:shadow-float hover:-translate-y-1">
-            <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100 relative">
-              <img
-                src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80"
-                alt="Sanitized Changing Suites and Hot Showers"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-90" />
-              <div className="absolute bottom-4 left-4 right-4 text-white">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-300 block mb-0.5">
-                  Private Suites
-                </span>
-                <span className="font-bold text-sm block">Changing Rooms &amp; Hot Showers</span>
-                <span className="text-[11px] text-slate-300 block mt-0.5">Individual stalls • Lockers • Heated water</span>
+          {/* Right Floating Frosted Glass Operating Hours Widget */}
+          <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-3xl p-5 text-white shadow-2xl space-y-3.5 w-full max-w-xs shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0 shadow-xs">
+                <Clock className="w-4 h-4 text-white" />
               </div>
-            </div>
-          </div>
-
-          {/* Photo 3: Lounge & Spectator Area */}
-          <div className="group bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden transition-all duration-300 hover:shadow-float hover:-translate-y-1">
-            <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100 relative">
-              <img
-                src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
-                alt="Spectator & Family Lounge"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-90" />
-              <div className="absolute bottom-4 left-4 right-4 text-white">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-300 block mb-0.5">
-                  Reception
-                </span>
-                <span className="font-bold text-sm block">Spectator &amp; Family Lounge</span>
-                <span className="text-[11px] text-slate-300 block mt-0.5">Air-conditioned • Glass pool view • Seating</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. SESSION COMPARISON & PRICING (Modern High-Conversion Cards) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-50 text-[#00838F] font-bold text-[11px] uppercase tracking-wider">
-            <span>Transparent Pricing</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#0A192F] tracking-tight">
-            Choose Your Swimming Session
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-            Guaranteed 100% private pool lockdown for family sessions, with shared daytime public swimming.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-stretch pt-2">
-          {/* Public Swimming Card */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-8 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#00838F] bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
-                  DAYTIME SESSION • 9:00 AM – 4:00 PM
-                </span>
-                <span className="text-xs font-mono font-bold text-slate-500">Shared Pool</span>
-              </div>
-
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-[#0A192F]">Daily Public Swimming</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-1">
-                  Open access swimming for individuals, fitness swimmers, and casual family visits. Capacity is strictly capped at 25 swimmers to guarantee space and clean water.
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 space-y-2.5 text-xs text-slate-700">
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>₹150 per person per hour</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>Strict 25-person occupancy cap</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>Online advance booking &amp; walk-in counter admission</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#00838F] shrink-0" />
-                  <span>Free access to hot showers &amp; changing rooms</span>
-                </div>
+                <span className="text-[10px] text-cyan-200 uppercase tracking-wider font-semibold block leading-tight">
+                  Operating Hours
+                </span>
+                <span className="text-sm font-bold text-white block leading-tight">
+                  9:00 AM – 11:00 PM
+                </span>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
-              <div>
-                <span className="text-3xl font-black text-[#0A192F]">₹150</span>
-                <span className="text-xs text-slate-500"> / person / hr</span>
+            <div className="pt-1 space-y-2 text-xs">
+              <div className="flex items-center gap-2 text-cyan-100">
+                <Waves className="w-4 h-4 text-cyan-300 shrink-0" />
+                <span>Public Swimming: 9:00 AM – 4:00 PM</span>
               </div>
-              <Link
-                href="/book?type=PUBLIC"
-                className="bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-xs transition inline-flex items-center gap-1.5"
+              <div className="flex items-center gap-2 text-cyan-100">
+                <Users2 className="w-4 h-4 text-cyan-300 shrink-0" />
+                <span>Family Bookings: 4:00 PM – 11:00 PM</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. 4 QUICK-ACTION CARDS (Overlapping Below Hero - Exact Match) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-12 relative z-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Book Your Slot */}
+          <Link
+            href="/book"
+            className="bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.06)] hover:shadow-lg hover:-translate-y-0.5 transition-all group flex items-center gap-4"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#1D68BD] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#1D68BD] transition-colors flex items-center gap-1">
+                <span>Book Your Slot</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
+                <span>Check availability and book instantly</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </p>
+            </div>
+          </Link>
+
+          {/* Card 2: Our Pricing */}
+          <Link
+            href="/pricing"
+            className="bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.06)] hover:shadow-lg hover:-translate-y-0.5 transition-all group flex items-center gap-4"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Layers className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 group-hover:text-purple-600 transition-colors flex items-center gap-1">
+                <span>Our Pricing</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
+                <span>Simple and transparent rates</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </p>
+            </div>
+          </Link>
+
+          {/* Card 3: View Gallery */}
+          <Link
+            href="/gallery"
+            className="bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.06)] hover:shadow-lg hover:-translate-y-0.5 transition-all group flex items-center gap-4"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <ImageIcon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 group-hover:text-teal-600 transition-colors flex items-center gap-1">
+                <span>View Gallery</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
+                <span>Explore our pool and facilities</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </p>
+            </div>
+          </Link>
+
+          {/* Card 4: Safety & Policies */}
+          <Link
+            href="/policies"
+            className="bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.06)] hover:shadow-lg hover:-translate-y-0.5 transition-all group flex items-center gap-4"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-1">
+                <span>Safety &amp; Policies</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
+                <span>Booking, cancellation and safety rules</span>
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </p>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* 3. ABOUT SECTION: "A Modern Indoor Pool for Everyone" (Exact Match) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left Column: Image with Play Button */}
+          <div className="lg:col-span-6 relative">
+            <div className="relative rounded-3xl overflow-hidden shadow-md border border-white aspect-[16/10] group">
+              <img
+                src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1200&q=80"
+                alt="M.A.K Indoor Pool Facility"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-slate-900/10 transition-colors" />
+
+              {/* Circular Play Button in Center */}
+              <button
+                type="button"
+                onClick={() => setIsPlayingVideo(!isPlayingVideo)}
+                className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/90 hover:bg-white text-slate-900 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95"
+                aria-label="Play pool showcase video"
               >
-                <span>Book Public Session</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+                <Play className="w-5 h-5 fill-slate-900 translate-x-0.5" />
+              </button>
             </div>
           </div>
 
-          {/* Family Exclusive Card */}
-          <div className="bg-white border-2 border-[#00838F] rounded-2xl p-6 sm:p-8 shadow-md hover:shadow-float transition flex flex-col justify-between space-y-6 relative overflow-hidden">
-            {/* Top right "Most Popular" ribbon */}
-            <div className="absolute top-0 right-0 bg-[#00838F] text-white text-[10px] font-black uppercase tracking-wider py-1 px-4 rounded-bl-xl shadow-xs">
-              100% PRIVATE
-            </div>
+          {/* Right Column: About Text & Highlights */}
+          <div className="lg:col-span-6 space-y-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#1D68BD] block">
+              About M.A.K Indoor Pool
+            </span>
 
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                  FULL DAY &amp; EVENING • 9:00 AM – 11:00 PM
-                </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              A Modern Indoor Pool <br />
+              for Everyone
+            </h2>
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+              M.A.K Indoor Pool offers a clean, safe and comfortable swimming environment for individuals, friends and families. Enjoy public swimming during the day or book exclusive time for your family in the evening.
+            </p>
+
+            <div className="space-y-2.5 pt-1 text-xs font-semibold text-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-lg bg-sky-50 text-[#1D68BD] flex items-center justify-center shrink-0">
+                  <Waves className="w-3.5 h-3.5" />
+                </div>
+                <span>Public Swimming (9:00 AM – 4:00 PM)</span>
               </div>
-
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-[#0A192F]">Family Exclusive Booking</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-1">
-                  The entire swimming pool facility, deck, and changing suites are locked exclusively for your family or group. Zero outside guests during your reservation.
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 space-y-2.5 text-xs text-slate-700">
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>₹1,500 per hour (includes up to 12 persons)</span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                  <Users2 className="w-3.5 h-3.5" />
                 </div>
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Additional guests above 12: ₹100 per person per hour</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>₹750 online advance to authoritatively lock your slot</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Remaining balance payable at facility arrival (Cash / UPI)</span>
-                </div>
+                <span>Exclusive Family Bookings (4:00 PM – 11:00 PM)</span>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
-              <div>
-                <span className="text-3xl font-black text-[#0A192F]">₹1,500</span>
-                <span className="text-xs text-slate-500"> / hr (up to 12)</span>
-              </div>
+            <div className="pt-2">
               <Link
-                href="/book?type=FAMILY"
-                className="bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-xs transition inline-flex items-center gap-1.5"
+                href="/about"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition active:scale-95 shadow-xs"
               >
-                <span>Book Family Slot</span>
+                <span>Learn More</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -384,53 +273,238 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. WATER QUALITY & HYGIENE STANDARD METRICS (Trust Reassurance) */}
+      {/* 4. STATS RIBBON (Clean White Rounded Floating Container - Exact Match) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#0A192F] text-white rounded-2xl p-8 sm:p-10 border border-slate-800 shadow-xl relative overflow-hidden">
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-7 space-y-3">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-cyan-400">
-                Hospital-Grade Hygiene Assurance
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-                Scientific Water Purity Tested 4 Times Daily
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
-                Unlike outdoor open pools prone to monsoon mud and leaves, M.A.K Indoor Pool maintains strict automated sand filtration, continuous circulation, and certified pH levels.
-              </p>
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 divide-y sm:divide-y-0 md:divide-x divide-slate-100 text-xs text-slate-700">
+            {/* Stat 1 */}
+            <div className="flex items-center gap-3 px-2 sm:px-4 justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-sky-50 text-[#1D68BD] flex items-center justify-center shrink-0">
+                <Waves className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-extrabold text-base text-slate-900 block leading-tight">2</span>
+                <span className="text-slate-500 font-medium block text-[11px] leading-tight">Swimming Modes</span>
+              </div>
             </div>
 
-            {/* Live Water Reading Dashboard Snapshot */}
-            <div className="lg:col-span-5 bg-slate-900/80 border border-slate-700/80 rounded-xl p-5 space-y-3">
-              <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-800">
-                <span className="font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Pool Chemistry Log</span>
-                </span>
-                <span className="text-[10px] font-mono uppercase bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800 font-bold">
-                  OPTIMAL
-                </span>
+            {/* Stat 2 */}
+            <div className="flex items-center gap-3 px-2 sm:px-4 justify-center pt-3 sm:pt-0">
+              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <Calendar className="w-5 h-5" />
               </div>
+              <div>
+                <span className="font-extrabold text-base text-slate-900 block leading-tight">12+</span>
+                <span className="text-slate-500 font-medium block text-[11px] leading-tight">Hours Daily</span>
+              </div>
+            </div>
 
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/50">
-                  <span className="text-[10px] text-slate-400 block">pH Balance</span>
-                  <span className="text-lg font-black font-mono text-cyan-300">7.4</span>
-                  <span className="text-[9px] text-slate-500 block">Ideal: 7.2–7.6</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/50">
-                  <span className="text-[10px] text-slate-400 block">Chlorine</span>
-                  <span className="text-lg font-black font-mono text-cyan-300">1.8 ppm</span>
-                  <span className="text-[9px] text-slate-500 block">Ideal: 1.5–2.0</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/50">
-                  <span className="text-[10px] text-slate-400 block">Water Temp</span>
-                  <span className="text-lg font-black font-mono text-cyan-300">29°C</span>
-                  <span className="text-[9px] text-slate-500 block">Heated basin</span>
-                </div>
+            {/* Stat 3 */}
+            <div className="flex items-center gap-3 px-2 sm:px-4 justify-center pt-3 sm:pt-0">
+              <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <Users2 className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-extrabold text-sm text-slate-900 block leading-tight">Family Friendly</span>
+                <span className="text-slate-500 font-medium block text-[11px] leading-tight">Exclusive Bookings</span>
+              </div>
+            </div>
+
+            {/* Stat 4 */}
+            <div className="flex items-center gap-3 px-2 sm:px-4 justify-center pt-3 sm:pt-0">
+              <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-extrabold text-sm text-slate-900 block leading-tight">Safe &amp; Hygienic</span>
+                <span className="text-slate-500 font-medium block text-[11px] leading-tight">Clean &amp; Well Maintained</span>
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* 5. "OUR PRICING" SECTION (Exact Match to Mockup) */}
+      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            Our Pricing
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
+            Simple and transparent pricing for all your swimming needs.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+          {/* Pricing Card 1: Public Swimming */}
+          <div className="bg-[#F0F8FF] border border-sky-100 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                <div className="w-7 h-7 rounded-xl bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center shrink-0">
+                  <Waves className="w-4 h-4" />
+                </div>
+                <span>Public Swimming</span>
+              </div>
+
+              <div>
+                <div className="text-3xl font-black text-slate-900 tracking-tight">₹150</div>
+                <div className="text-xs text-slate-500 font-medium">per person / hour</div>
+              </div>
+
+              <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-1">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Shared pool access (9:00 AM – 4:00 PM)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Ideal for individuals and groups</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Clean and supervised environment</span>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/book?type=PUBLIC"
+              className="w-full text-center bg-[#1D68BD] hover:bg-[#155299] text-white font-bold py-2.5 rounded-2xl text-xs shadow-xs transition active:scale-95"
+            >
+              Book Public Slot
+            </Link>
+          </div>
+
+          {/* Pricing Card 2: Exclusive Family Booking */}
+          <div className="bg-[#FAF5FF] border border-purple-100 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                <div className="w-7 h-7 rounded-xl bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center shrink-0">
+                  <Users2 className="w-4 h-4" />
+                </div>
+                <span>Exclusive Family Booking</span>
+              </div>
+
+              <div>
+                <div className="text-3xl font-black text-slate-900 tracking-tight">₹1,500</div>
+                <div className="text-xs text-slate-500 font-medium">per hour (up to 12 people)</div>
+              </div>
+
+              <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-1">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Private and exclusive pool access (4:00 PM – 11:00 PM)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>₹100 per additional person / hour (above 12 people)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>₹750 advance required per booking</span>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/book?type=FAMILY"
+              className="w-full text-center bg-[#9333EA] hover:bg-[#7E22CE] text-white font-bold py-2.5 rounded-2xl text-xs shadow-xs transition active:scale-95"
+            >
+              Book Family Slot
+            </Link>
+          </div>
+
+          {/* Pricing Card 3: Photography Card (Exact Match) */}
+          <div className="rounded-3xl overflow-hidden shadow-xs border border-white h-full min-h-[260px] relative">
+            <img
+              src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1000&q=80"
+              alt="Pool Atmosphere"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 6. "EXPLORE OUR POOL" (Gallery Showcase - Exact Match) */}
+      <section id="gallery" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Explore Our Pool
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
+              Take a look at our indoor pool, facilities and ambiance.
+            </p>
+          </div>
+
+          <Link
+            href="/gallery"
+            className="bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full font-bold text-xs text-slate-700 shadow-2xs inline-flex items-center gap-1.5 transition active:scale-95 shrink-0"
+          >
+            <span>View Gallery</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {/* 4 Photo Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Photo 1: Main Pool */}
+          <div className="rounded-3xl overflow-hidden shadow-xs border border-white aspect-[4/3] relative group">
+            <img
+              src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&q=80"
+              alt="Main Indoor Heated Pool"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
+          {/* Photo 2: Lounge / Waiting Area */}
+          <div className="rounded-3xl overflow-hidden shadow-xs border border-white aspect-[4/3] relative group">
+            <img
+              src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80"
+              alt="Lounge and Waiting Area"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
+          {/* Photo 3: Showers */}
+          <div className="rounded-3xl overflow-hidden shadow-xs border border-white aspect-[4/3] relative group">
+            <img
+              src="https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&w=800&q=80"
+              alt="Showers and Sanitization Area"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+
+          {/* Photo 4: Locker Room */}
+          <div className="rounded-3xl overflow-hidden shadow-xs border border-white aspect-[4/3] relative group">
+            <img
+              src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80"
+              alt="Secure Lockers and Changing Facility"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 7. "READY TO SWIM?" CTA BANNER (Exact Match) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-r from-[#0E5296] via-[#1A6BA8] to-[#0A3D73] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+              Ready to Swim?
+            </h2>
+            <p className="text-cyan-100 text-xs sm:text-sm mt-1 max-w-xl font-normal leading-relaxed">
+              Book your slot now and experience a clean, modern and family-friendly indoor pool.
+            </p>
+          </div>
+
+          <Link
+            href="/book"
+            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
+          >
+            <span>Book Now</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
     </div>

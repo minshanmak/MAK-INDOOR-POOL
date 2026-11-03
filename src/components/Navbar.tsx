@@ -1,60 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Menu,
-  X,
-  Phone,
-  MessageCircle,
-  Calendar,
-  Clock,
-  Search,
-  ChevronRight,
-} from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 import MakLogo from "@/components/MakLogo";
-import { getPoolHour } from "@/lib/timezone";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentSessionText, setCurrentSessionText] = useState("Public Swimming (Until 4:00 PM)");
-
-  useEffect(() => {
-    // Determine current live session based on IST hour (Asia/Kolkata)
-    const updateSessionStatus = () => {
-      try {
-        const istHour = getPoolHour();
-
-        if (istHour >= 9 && istHour < 16) {
-          setCurrentSessionText("Public Swimming (Until 4:00 PM)");
-        } else if (istHour >= 16 && istHour < 23) {
-          setCurrentSessionText("Family Exclusive Sessions (Until 11:00 PM)");
-        } else {
-          setCurrentSessionText("Pool Closed (Opens at 9:00 AM)");
-        }
-      } catch {
-        setCurrentSessionText("Public 9 AM - 4 PM • Family 9 AM - 11 PM");
-      }
-    };
-
-    updateSessionStatus();
-    const interval = setInterval(updateSessionStatus, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [mobileMenuOpen]);
 
   // Do not render public header on admin management routes
   if (pathname.startsWith("/admin")) {
@@ -63,220 +17,131 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/about", label: "About" },
-    { href: "/pricing", label: "Prices" },
+    { href: "/pricing", label: "Pricing" },
     { href: "/gallery", label: "Gallery" },
+    { href: "/about", label: "About" },
     { href: "/policies", label: "Policies" },
+    { href: "/faq", label: "FAQ" },
     { href: "/contact", label: "Contact" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#07172C] text-slate-100 shadow-md">
-      {/* MAIN NAVIGATION BAR (Deep Aquatic Midnight connected seamlessly with Hero) */}
-      <div className="border-b border-slate-800/80 bg-[#07172C]/95 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-[72px]">
-            {/* Brand Logo */}
+    <header className="sticky top-0 z-50 bg-[#07172C]/95 backdrop-blur-md border-b border-white/10 text-white shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-[70px]">
+          {/* Brand Logo */}
+          <Link
+            href="/"
+            className="flex items-center group py-2"
+            aria-label="M.A.K Indoor Pool - Home"
+          >
+            <MakLogo size="md" light={true} />
+          </Link>
+
+          {/* Desktop Navigation Links (Pill Style - Exact Mockup Match) */}
+          <nav className="hidden lg:flex items-center gap-1 bg-white/5 border border-white/10 p-1.5 rounded-full shadow-inner backdrop-blur-md">
+            {navLinks.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href);
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 ${
+                    isActive
+                      ? "bg-white/20 text-white font-bold shadow-xs"
+                      : "text-slate-300 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Right Action Group: Login Pill + Book Now CTA (Exact Mockup Match) */}
+          <div className="hidden sm:flex items-center gap-2.5">
             <Link
-              href="/"
-              className="flex items-center group py-2"
-              aria-label="M.A.K Indoor Pool - Home"
+              href="/admin/login"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-1.5 rounded-full text-xs font-bold transition backdrop-blur-xs"
             >
-              <MakLogo size="md" light={true} />
+              Login
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-7 lg:gap-8 h-full">
-              {navLinks.map((link) => {
-                const isActive =
-                  pathname === link.href ||
-                  (link.href !== "/" && pathname.startsWith(link.href));
+            <Link
+              href="/book"
+              className="bg-white hover:bg-slate-100 text-slate-900 font-extrabold px-4 py-1.5 rounded-full text-xs shadow-md flex items-center gap-1.5 transition active:scale-95"
+            >
+              <span>Book Now</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
 
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`relative flex items-center h-full text-[13px] font-semibold transition-colors duration-150 ${
-                      isActive
-                        ? "text-cyan-400 font-bold"
-                        : "text-slate-200 hover:text-cyan-300"
-                    }`}
-                  >
-                    <span>{link.label}</span>
-                    {/* Active Bottom Indicator Bar */}
-                    {isActive && (
-                      <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-cyan-400 rounded-t-full shadow-[0_0_8px_rgba(34,211,238,0.7)]" />
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
+          {/* Mobile Hamburger Toggle */}
+          <div className="flex items-center gap-2 sm:hidden">
+            <Link
+              href="/book"
+              className="bg-white text-slate-900 font-extrabold px-3 py-1.5 rounded-full text-xs shadow-xs"
+            >
+              Book
+            </Link>
 
-            {/* Right Action Group: Desk Contact & Teal Book Now CTA */}
-            <div className="hidden md:flex items-center gap-4">
-              <a
-                href="tel:+919947714716"
-                className="hidden lg:flex flex-col text-right leading-tight group"
-              >
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                  Quick Enquiries
-                </span>
-                <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors tabular-nums">
-                  +91 99477 14716
-                </span>
-              </a>
-
-              <Link
-                href="/book"
-                className="bg-[#00838F] hover:bg-[#007079] active:scale-[0.98] text-white font-bold px-5 py-2.5 rounded-lg text-xs shadow-xs hover:shadow transition-all duration-150 flex items-center gap-2 group"
-              >
-                <Calendar className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
-                <span>Book Now</span>
-              </Link>
-            </div>
-
-            {/* Mobile Controls: Book CTA + Hamburger Menu Toggle */}
-            <div className="flex items-center gap-2.5 md:hidden">
-              <Link
-                href="/book"
-                className="bg-[#00838F] hover:bg-[#007079] text-white font-bold px-3 py-1.5 rounded-md text-xs shadow-xs flex items-center gap-1"
-              >
-                <Calendar className="w-3 h-3" />
-                <span>Book</span>
-              </Link>
-
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition"
-                aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-                aria-expanded={mobileMenuOpen}
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-5 h-5 text-white" />
-                ) : (
-                  <Menu className="w-5 h-5" />
-                )}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition active:scale-95"
+              aria-label="Toggle navigation"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* 3. MOBILE NAVIGATION DRAWER (Slide-Down Surface with Quick Actions) */}
+      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 top-[72px] md:hidden">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity"
-            onClick={() => setMobileMenuOpen(false)}
-          />
+        <div className="sm:hidden bg-[#07172C] border-b border-white/10 px-4 pt-3 pb-6 space-y-2">
+          <nav className="flex flex-col space-y-1">
+            {navLinks.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href);
 
-          {/* Drawer Menu Surface */}
-          <div className="relative bg-[#07172C] border-b border-slate-800 text-slate-100 shadow-2xl max-h-[calc(100vh-72px)] overflow-y-auto px-4 py-5 space-y-5">
-            {/* Live Operational Status Banner */}
-            <div className="bg-slate-850/80 border border-slate-700/80 rounded-xl p-3 flex items-start gap-3 text-xs">
-              <div className="p-1.5 rounded-lg bg-cyan-950 text-cyan-400 shrink-0 mt-0.5">
-                <Clock className="w-4 h-4" />
-              </div>
-              <div className="leading-tight">
-                <span className="font-bold text-white block">
-                  Open Daily: 9:00 AM – 11:00 PM
-                </span>
-                <span className="text-cyan-300 text-[11px] block mt-0.5">
-                  {currentSessionText}
-                </span>
-              </div>
-            </div>
-
-            {/* Navigation Links */}
-            <div className="space-y-1">
-              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-3 block mb-1">
-                Navigation
-              </span>
-              {navLinks.map((link) => {
-                const isActive =
-                  pathname === link.href ||
-                  (link.href !== "/" && pathname.startsWith(link.href));
-
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold transition ${
-                      isActive
-                        ? "text-cyan-300 bg-slate-800/90 font-bold border-l-2 border-cyan-400"
-                        : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-                    }`}
-                  >
-                    <span>{link.label}</span>
-                    <ChevronRight
-                      className={`w-4 h-4 ${
-                        isActive ? "text-cyan-400" : "text-slate-500"
-                      }`}
-                    />
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Action Group: Direct Call, WhatsApp & Booking */}
-            <div className="space-y-2 pt-2 border-t border-slate-800">
-              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider px-3 block mb-1">
-                Contact &amp; Reservations
-              </span>
-
-              <Link
-                href="/book"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full bg-[#00838F] hover:bg-[#007079] text-white font-bold py-3 rounded-lg text-xs shadow-xs flex items-center justify-center gap-2"
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Book Swimming Slot Online</span>
-              </Link>
-
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <a
-                  href="tel:+919947714716"
-                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-slate-700 bg-slate-800/60 text-slate-200 font-semibold text-xs hover:bg-slate-800 transition"
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold ${
+                    isActive
+                      ? "bg-white/20 text-white font-bold"
+                      : "text-slate-300 hover:text-white hover:bg-white/10"
+                  }`}
                 >
-                  <Phone className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Call Desk</span>
-                </a>
-
-                <a
-                  href="https://wa.me/919947714716?text=Hello%20M.A.K%20Indoor%20Pool%2C%20I%20would%20like%20to%20enquire%20about%20booking%20a%20slot."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-emerald-800/80 bg-emerald-950/50 text-emerald-300 font-semibold text-xs hover:bg-emerald-900/60 transition"
-                >
-                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>WhatsApp</span>
-                </a>
-              </div>
-
-              <Link
-                href="/booking-status"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-slate-700 bg-slate-800/40 text-slate-300 font-semibold text-xs hover:bg-slate-800 transition text-center"
-              >
-                <Search className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Lookup Existing Booking</span>
-              </Link>
-            </div>
-
-            {/* Bottom Utility: Staff Access */}
-            <div className="pt-3 border-t border-slate-800 flex justify-end items-center px-2 text-xs">
-              <Link
-                href="/admin/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-cyan-400 hover:text-cyan-300 font-bold py-1 px-2 rounded-md hover:bg-slate-800 transition inline-flex items-center gap-1"
-              >
-                <span>Staff Portal</span>
-                <span>&rarr;</span>
-              </Link>
-            </div>
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="pt-3 border-t border-white/10 flex items-center gap-2">
+            <Link
+              href="/admin/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex-1 text-center bg-white/10 text-white py-2 rounded-full text-xs font-bold"
+            >
+              Login
+            </Link>
+            <Link
+              href="/book"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex-1 text-center bg-white text-slate-900 py-2 rounded-full text-xs font-black shadow-md"
+            >
+              Book Now
+            </Link>
           </div>
         </div>
       )}
