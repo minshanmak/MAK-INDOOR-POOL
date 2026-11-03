@@ -11,7 +11,6 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isPastHero, setIsPastHero] = useState(false);
 
   // References to navigation anchor links for measuring the sliding indicator position
   const navItemRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
@@ -36,7 +35,7 @@ export default function Navbar() {
     { id: "contact", label: "Contact" },
   ];
 
-  // Measure and update the iPhone liquid glass sliding indicator pill
+  // Measure and update the liquid glass sliding indicator pill
   useEffect(() => {
     const updateIndicator = () => {
       const currentRef = navItemRefs.current[activeSection];
@@ -63,21 +62,13 @@ export default function Navbar() {
     };
   }, [activeSection, pathname]);
 
-  // Scroll-Spy & Dynamic Header Clear Glass Transition
+  // Scroll-Spy to track active section
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       setIsScrolled(scrollY > 20);
 
-      if (pathname !== "/") {
-        setIsPastHero(true);
-        return;
-      }
-
-      // Detect when scrolled past the hero section
-      const heroElement = document.getElementById("home");
-      const heroHeight = heroElement ? heroElement.offsetHeight - 90 : 580;
-      setIsPastHero(scrollY >= heroHeight);
+      if (pathname !== "/") return;
 
       // If user clicked a tab, let smooth scroll finish without jittering intermediate tabs
       if (isClickScrollingRef.current) return;
@@ -85,7 +76,6 @@ export default function Navbar() {
       // Top boundary
       if (scrollY < 100) {
         setActiveSection("home");
-        setIsPastHero(false);
         return;
       }
 
@@ -137,9 +127,6 @@ export default function Navbar() {
     return null;
   }
 
-  // Determine if navbar is over light page content (after hero or on child routes)
-  const isLightGlass = pathname !== "/" || isPastHero;
-
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     id: string
@@ -156,10 +143,9 @@ export default function Navbar() {
 
         // Instantly glide indicator to target tab with fluid iOS animation
         setActiveSection(id);
-        setIsPastHero(id !== "home");
 
         // Native iOS spring smooth scrolling with exact navbar offset
-        const yOffset = -75;
+        const yOffset = -90;
         const y =
           element.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: "smooth" });
@@ -175,164 +161,128 @@ export default function Navbar() {
   };
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        isLightGlass
-          ? "bg-white/50 backdrop-blur-2xl backdrop-saturate-200 border-b border-slate-900/[0.06] shadow-[0_4px_30px_rgba(0,0,0,0.03)]"
-          : isScrolled
-          ? "bg-black/15 backdrop-blur-2xl border-b border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)]"
-          : "bg-transparent backdrop-blur-md border-b border-white/10 shadow-none"
-      } ${isLightGlass ? "text-slate-900" : "text-white"}`}
-    >
-      {/* Specular top rim highlight for Apple liquid glass refraction */}
+    <header className="fixed top-3 sm:top-5 inset-x-0 z-50 flex flex-col items-center px-3 sm:px-4 pointer-events-none">
+      {/* Haven-Style Unified Floating Island Capsule */}
       <div
-        className={`absolute inset-x-0 top-0 h-px pointer-events-none transition-opacity duration-500 ${
-          isLightGlass
-            ? "bg-gradient-to-r from-transparent via-slate-400/20 to-transparent"
-            : "bg-gradient-to-r from-transparent via-white/40 to-transparent"
+        className={`pointer-events-auto flex items-center justify-between gap-1.5 sm:gap-3 lg:gap-4 pl-3.5 pr-2 sm:pl-4 sm:pr-2.5 py-1.5 rounded-full transition-all duration-300 max-w-fit w-auto text-slate-900 ${
+          isScrolled
+            ? "bg-white/85 backdrop-blur-2xl backdrop-saturate-200 border border-white/90 shadow-[0_10px_35px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)]"
+            : "bg-white/75 backdrop-blur-2xl backdrop-saturate-200 border border-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.95)]"
         }`}
-      />
+      >
+        {/* 1. Brand Logo inside the floating island */}
+        <Link
+          href="/"
+          onClick={(e) => handleNavClick(e, "home")}
+          className="flex items-center gap-2 group py-1 pr-1 shrink-0 select-none"
+          aria-label="M.A.K Indoor Pool - Home"
+        >
+          <MakLogo size="sm" showTagline={false} light={false} />
+          <div className="hidden min-[460px]:block leading-none pr-1">
+            <span className="font-black text-xs tracking-tight text-slate-900 block">
+              M.A.K
+            </span>
+            <span className="text-[8.5px] font-bold text-[#00838F] block tracking-wider uppercase">
+              INDOOR POOL
+            </span>
+          </div>
+        </Link>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-[70px]">
-          {/* Brand Logo with dynamic light/dark contrast */}
+        {/* Subtle Vertical Divider */}
+        <div className="hidden lg:block w-px h-5 bg-slate-300/60 my-auto" />
+
+        {/* 2. Desktop Navigation Links (Unified track with sliding white pill indicator) */}
+        <nav className="relative hidden lg:flex items-center p-1 rounded-full bg-slate-100/70 border border-slate-200/50">
+          {/* Hardware-accelerated sliding liquid glass indicator */}
+          <div
+            className="absolute rounded-full pointer-events-none bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.95)]"
+            style={{
+              transform: `translate3d(${indicatorStyle.left}px, 0, 0)`,
+              width: `${indicatorStyle.width}px`,
+              left: 0,
+              top: "3px",
+              bottom: "3px",
+              opacity: indicatorStyle.opacity,
+              transition:
+                "transform 340ms cubic-bezier(0.16, 1, 0.3, 1), width 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease",
+              willChange: "transform, width",
+            }}
+          />
+
+          {navItems.map((item) => {
+            const isActive = pathname === "/" && activeSection === item.id;
+            const targetHref =
+              pathname === "/" ? `#${item.id}` : `/#${item.id}`;
+
+            return (
+              <a
+                key={item.id}
+                ref={(el) => {
+                  navItemRefs.current[item.id] = el;
+                }}
+                href={targetHref}
+                onClick={(e) => handleNavClick(e, item.id)}
+                className={`relative z-10 px-3 py-1 rounded-full text-xs font-semibold select-none transition-colors duration-200 ${
+                  isActive
+                    ? "text-slate-950 font-bold"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                {item.label}
+              </a>
+            );
+          })}
+        </nav>
+
+        {/* Subtle Vertical Divider */}
+        <div className="hidden lg:block w-px h-5 bg-slate-300/60 my-auto" />
+
+        {/* 3. Right Action Group: Login + Ceramic Book Now Button */}
+        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
           <Link
-            href="/"
-            onClick={(e) => handleNavClick(e, "home")}
-            className={`flex items-center group py-2 transition-all ${
-              isLightGlass
-                ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
-                : "drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
-            }`}
-            aria-label="M.A.K Indoor Pool - Home"
+            href="/admin/login"
+            className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100/80 transition active:scale-95"
           >
-            <MakLogo size="md" light={!isLightGlass} />
+            Login
           </Link>
 
-          {/* Desktop Navigation Links (iPhone Liquid Glass Capsule with GPU Sliding Pill) */}
-          <nav
-            className={`relative hidden lg:flex items-center p-1 rounded-full backdrop-blur-2xl backdrop-saturate-200 transition-all duration-300 ${
-              isLightGlass
-                ? "bg-white/55 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.95),inset_0_-1px_1px_rgba(0,0,0,0.03),0_8px_30px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.03)]"
-                : "bg-white/[0.14] border border-white/[0.28] shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_1px_rgba(0,0,0,0.15),0_8px_32px_rgba(0,0,0,0.25)]"
-            }`}
+          <Link
+            href="/book"
+            className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-slate-950 hover:bg-slate-800 shadow-[0_2px_10px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.25)] flex items-center gap-1.5 transition active:scale-95"
           >
-            {/* iPhone Liquid Glass Sliding Pill Indicator (GPU Hardware Accelerated) */}
-            <div
-              className={`absolute rounded-full pointer-events-none ${
-                isLightGlass
-                  ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]"
-                  : "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.3),0_1px_3px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.95)]"
-              }`}
-              style={{
-                transform: `translate3d(${indicatorStyle.left}px, 0, 0)`,
-                width: `${indicatorStyle.width}px`,
-                left: 0,
-                top: "4px",
-                bottom: "4px",
-                opacity: indicatorStyle.opacity,
-                transition:
-                  "transform 380ms cubic-bezier(0.16, 1, 0.3, 1), width 300ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease",
-                willChange: "transform, width",
-              }}
-            />
+            <span>Book Now</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
 
-            {navItems.map((item) => {
-              const isActive = pathname === "/" && activeSection === item.id;
-              const targetHref =
-                pathname === "/" ? `#${item.id}` : `/#${item.id}`;
+        {/* 4. Mobile Quick Action & Hamburger Toggle */}
+        <div className="flex sm:hidden items-center gap-1.5 shrink-0">
+          <Link
+            href="/book"
+            className="px-3 py-1 rounded-full text-xs font-bold text-white bg-slate-950 shadow-xs active:scale-95 transition"
+          >
+            Book
+          </Link>
 
-              return (
-                <a
-                  key={item.id}
-                  ref={(el) => {
-                    navItemRefs.current[item.id] = el;
-                  }}
-                  href={targetHref}
-                  onClick={(e) => handleNavClick(e, item.id)}
-                  className={`relative z-10 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer select-none transition-colors duration-200 ${
-                    isActive
-                      ? "text-slate-950"
-                      : isLightGlass
-                      ? "text-slate-600 hover:text-slate-950"
-                      : "text-white/80 hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                </a>
-              );
-            })}
-          </nav>
-
-          {/* Right Action Group: Liquid Glass Login Pill + Ceramic Book Now CTA */}
-          <div className="hidden sm:flex items-center gap-2.5">
-            <Link
-              href="/admin/login"
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all backdrop-blur-2xl active:scale-95 ${
-                isLightGlass
-                  ? "bg-white/55 hover:bg-white/85 text-slate-800 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_2px_10px_rgba(0,0,0,0.04)]"
-                  : "bg-white/[0.14] hover:bg-white/[0.24] text-white border border-white/[0.28] shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_4px_16px_rgba(0,0,0,0.15)]"
-              }`}
-            >
-              Login
-            </Link>
-
-            <Link
-              href="/book"
-              className={`px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition active:scale-95 ${
-                isLightGlass
-                  ? "bg-slate-950 hover:bg-slate-800 text-white shadow-[0_4px_16px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.2)]"
-                  : "bg-white hover:bg-slate-100 text-slate-950 shadow-[0_4px_24px_rgba(255,255,255,0.25),inset_0_1px_1px_rgba(255,255,255,0.95)]"
-              }`}
-            >
-              <span>Book Now</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Mobile Hamburger Toggle */}
-          <div className="flex items-center gap-2 sm:hidden">
-            <Link
-              href="/book"
-              className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-xs transition active:scale-95 ${
-                isLightGlass
-                  ? "bg-slate-950 text-white"
-                  : "bg-white text-slate-950"
-              }`}
-            >
-              Book
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`p-2 rounded-xl border transition backdrop-blur-xl active:scale-95 ${
-                isLightGlass
-                  ? "bg-white/60 border-white/80 text-slate-800 hover:bg-white/80"
-                  : "bg-white/[0.12] border-white/20 text-white hover:bg-white/20"
-              }`}
-              aria-label="Toggle navigation"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-1.5 rounded-full bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200/80 transition active:scale-95 border border-slate-200/60"
+            aria-label="Toggle navigation"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Menu className="w-4 h-4" />
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu (iOS Frosted Glass) */}
+      {/* Mobile Glass Dropdown (Anchored directly under the floating island) */}
       {mobileMenuOpen && (
-        <div
-          className={`sm:hidden backdrop-blur-3xl px-4 pt-3 pb-6 space-y-2 shadow-2xl transition-all border-b ${
-            isLightGlass
-              ? "bg-white/95 border-slate-200/80 text-slate-800"
-              : "bg-slate-950/90 border-white/[0.15] text-white"
-          }`}
-        >
-          <nav className="flex flex-col space-y-1">
+        <div className="pointer-events-auto mt-2 w-full max-w-xs sm:hidden rounded-3xl bg-white/95 backdrop-blur-3xl border border-white/90 shadow-[0_16px_40px_rgba(0,0,0,0.15)] p-3 space-y-2 transition-all">
+          <nav className="flex flex-col space-y-0.5">
             {navItems.map((item) => {
               const isActive = pathname === "/" && activeSection === item.id;
               const targetHref =
@@ -343,14 +293,10 @@ export default function Navbar() {
                   key={item.id}
                   href={targetHref}
                   onClick={(e) => handleNavClick(e, item.id)}
-                  className={`px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer transition ${
                     isActive
-                      ? isLightGlass
-                        ? "bg-slate-950 text-white font-bold shadow-xs"
-                        : "bg-white text-slate-950 font-bold shadow-md"
-                      : isLightGlass
-                      ? "text-slate-600 hover:text-slate-950 hover:bg-slate-100/70"
-                      : "text-white/80 hover:text-white hover:bg-white/10"
+                      ? "bg-slate-950 text-white font-bold shadow-xs"
+                      : "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
                   }`}
                 >
                   {item.label}
@@ -358,30 +304,19 @@ export default function Navbar() {
               );
             })}
           </nav>
-          <div
-            className={`pt-3 border-t flex items-center gap-2 ${
-              isLightGlass ? "border-slate-200" : "border-white/[0.15]"
-            }`}
-          >
+
+          <div className="pt-2 border-t border-slate-200/80 flex items-center gap-2">
             <Link
               href="/admin/login"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex-1 text-center py-2 rounded-full text-xs font-semibold border backdrop-blur-xl ${
-                isLightGlass
-                  ? "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
-                  : "bg-white/[0.12] hover:bg-white/20 text-white border-white/20"
-              }`}
+              className="flex-1 text-center py-2 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition"
             >
               Login
             </Link>
             <Link
               href="/book"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex-1 text-center py-2 rounded-full text-xs font-bold shadow-md ${
-                isLightGlass
-                  ? "bg-slate-950 text-white hover:bg-slate-800"
-                  : "bg-white text-slate-900 hover:bg-slate-100"
-              }`}
+              className="flex-1 text-center py-2 rounded-full text-xs font-bold bg-slate-950 text-white hover:bg-slate-800 shadow-sm transition"
             >
               Book Now
             </Link>
