@@ -161,50 +161,33 @@ export default function Navbar() {
   };
 
   return (
-    <header className="fixed top-3 sm:top-5 inset-x-0 z-50 flex flex-col items-center px-3 sm:px-4 pointer-events-none">
+    <header className="fixed top-3.5 sm:top-5 inset-x-0 z-50 flex flex-col items-center px-3 sm:px-4 pointer-events-none">
       {/* Haven-Style Unified Floating Island Capsule */}
-      <div
-        className={`pointer-events-auto flex items-center justify-between gap-1.5 sm:gap-3 lg:gap-4 pl-3.5 pr-2 sm:pl-4 sm:pr-2.5 py-1.5 rounded-full transition-all duration-300 max-w-fit w-auto text-slate-900 ${
-          isScrolled
-            ? "bg-white/85 backdrop-blur-2xl backdrop-saturate-200 border border-white/90 shadow-[0_10px_35px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.95)]"
-            : "bg-white/75 backdrop-blur-2xl backdrop-saturate-200 border border-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.95)]"
-        }`}
-      >
+      <div className="pointer-events-auto flex items-center justify-between gap-4 sm:gap-6 lg:gap-8 px-3.5 sm:px-5 py-2 rounded-full transition-all duration-300 max-w-fit w-auto text-slate-900 bg-white/95 backdrop-blur-xl border border-white/90 shadow-[0_6px_28px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         {/* 1. Brand Logo inside the floating island */}
         <Link
           href="/"
           onClick={(e) => handleNavClick(e, "home")}
-          className="flex items-center gap-2 group py-1 pr-1 shrink-0 select-none"
+          className="flex items-center group py-0.5 shrink-0 select-none"
           aria-label="M.A.K Indoor Pool - Home"
         >
-          <MakLogo size="sm" showTagline={false} light={false} />
-          <div className="hidden min-[460px]:block leading-none pr-1">
-            <span className="font-black text-xs tracking-tight text-slate-900 block">
-              M.A.K
-            </span>
-            <span className="text-[8.5px] font-bold text-[#00838F] block tracking-wider uppercase">
-              INDOOR POOL
-            </span>
-          </div>
+          <MakLogo size="sm" showTagline={true} light={false} />
         </Link>
 
-        {/* Subtle Vertical Divider */}
-        <div className="hidden lg:block w-px h-5 bg-slate-300/60 my-auto" />
-
-        {/* 2. Desktop Navigation Links (Unified track with sliding white pill indicator) */}
-        <nav className="relative hidden lg:flex items-center p-1 rounded-full bg-slate-100/70 border border-slate-200/50">
+        {/* 2. Desktop Navigation Links (Floating directly inside island without nested grey box) */}
+        <nav className="relative hidden lg:flex items-center gap-0.5">
           {/* Hardware-accelerated sliding liquid glass indicator */}
           <div
-            className="absolute rounded-full pointer-events-none bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.95)]"
+            className="absolute rounded-full pointer-events-none bg-slate-100 border border-slate-200/50 shadow-xs"
             style={{
               transform: `translate3d(${indicatorStyle.left}px, 0, 0)`,
               width: `${indicatorStyle.width}px`,
               left: 0,
-              top: "3px",
-              bottom: "3px",
+              top: "2px",
+              bottom: "2px",
               opacity: indicatorStyle.opacity,
               transition:
-                "transform 340ms cubic-bezier(0.16, 1, 0.3, 1), width 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease",
+                "transform 300ms cubic-bezier(0.16, 1, 0.3, 1), width 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease",
               willChange: "transform, width",
             }}
           />
@@ -222,7 +205,7 @@ export default function Navbar() {
                 }}
                 href={targetHref}
                 onClick={(e) => handleNavClick(e, item.id)}
-                className={`relative z-10 px-3 py-1 rounded-full text-xs font-semibold select-none transition-colors duration-200 ${
+                className={`relative z-10 px-3.5 py-1.5 rounded-full text-xs font-semibold select-none transition-colors duration-200 ${
                   isActive
                     ? "text-slate-950 font-bold"
                     : "text-slate-600 hover:text-slate-950"
@@ -234,21 +217,18 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Subtle Vertical Divider */}
-        <div className="hidden lg:block w-px h-5 bg-slate-300/60 my-auto" />
-
         {/* 3. Right Action Group: Login + Ceramic Book Now Button */}
-        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
           <Link
             href="/admin/login"
-            className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100/80 transition active:scale-95"
+            className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-950 transition active:scale-95"
           >
             Login
           </Link>
 
           <Link
             href="/book"
-            className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-slate-950 hover:bg-slate-800 shadow-[0_2px_10px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.25)] flex items-center gap-1.5 transition active:scale-95"
+            className="px-4 py-2 rounded-full text-xs font-bold text-white bg-slate-950 hover:bg-slate-800 shadow-[0_2px_10px_rgba(0,0,0,0.18),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center gap-1.5 transition active:scale-95"
           >
             <span>Book Now</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -259,7 +239,7 @@ export default function Navbar() {
         <div className="flex sm:hidden items-center gap-1.5 shrink-0">
           <Link
             href="/book"
-            className="px-3 py-1 rounded-full text-xs font-bold text-white bg-slate-950 shadow-xs active:scale-95 transition"
+            className="px-3 py-1.5 rounded-full text-xs font-bold text-white bg-slate-950 shadow-xs active:scale-95 transition"
           >
             Book
           </Link>
