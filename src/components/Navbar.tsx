@@ -21,6 +21,10 @@ export default function Navbar() {
     opacity: 0,
   });
 
+  // Lock to avoid scroll-spy bouncing intermediate tabs during smooth click-scrolling
+  const isClickScrollingRef = useRef(false);
+  const clickScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Nav items in exact sequential order
   const navItems = [
     { id: "home", label: "Home" },
@@ -32,21 +36,9 @@ export default function Navbar() {
     { id: "contact", label: "Contact" },
   ];
 
-  // Measure and update the iOS sliding indicator pill
+  // Measure and update the iPhone liquid glass sliding indicator pill
   useEffect(() => {
-    const currentRef = navItemRefs.current[activeSection];
-    if (currentRef) {
-      setIndicatorStyle({
-        left: currentRef.offsetLeft,
-        width: currentRef.offsetWidth,
-        opacity: 1,
-      });
-    }
-  }, [activeSection, pathname]);
-
-  // Recalculate on window resize
-  useEffect(() => {
-    const handleResize = () => {
+    const updateIndicator = () => {
       const currentRef = navItemRefs.current[activeSection];
       if (currentRef) {
         setIndicatorStyle({
@@ -56,9 +48,20 @@ export default function Navbar() {
         });
       }
     };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [activeSection]);
+
+    updateIndicator();
+    const rafId = requestAnimationFrame(updateIndicator);
+
+    if (typeof document !== "undefined" && (document as any).fonts?.ready) {
+      (document as any).fonts.ready.then(updateIndicator);
+    }
+
+    window.addEventListener("resize", updateIndicator);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", updateIndicator);
+    };
+  }, [activeSection, pathname]);
 
   // Scroll-Spy & Dynamic Header Clear Glass Transition
   useEffect(() => {
@@ -76,16 +79,20 @@ export default function Navbar() {
       const heroHeight = heroElement ? heroElement.offsetHeight - 90 : 580;
       setIsPastHero(scrollY >= heroHeight);
 
+      // If user clicked a tab, let smooth scroll finish without jittering intermediate tabs
+      if (isClickScrollingRef.current) return;
+
       // Top boundary
       if (scrollY < 100) {
         setActiveSection("home");
+        setIsPastHero(false);
         return;
       }
 
       // Bottom boundary
       if (
         window.innerHeight + scrollY >=
-        document.documentElement.scrollHeight - 80
+        document.documentElement.scrollHeight - 70
       ) {
         setActiveSection("contact");
         return;
@@ -117,7 +124,12 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (clickScrollTimeoutRef.current) {
+        clearTimeout(clickScrollTimeoutRef.current);
+      }
+    };
   }, [pathname]);
 
   // Do not render public header on admin management routes
@@ -126,7 +138,7 @@ export default function Navbar() {
   }
 
   // Determine if navbar is over light page content (after hero or on child routes)
-  const isLightGlass = pathname !== "/" || isPastHero || activeSection !== "home";
+  const isLightGlass = pathname !== "/" || isPastHero;
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -136,14 +148,27 @@ export default function Navbar() {
       e.preventDefault();
       const element = document.getElementById(id);
       if (element) {
+        // Prevent scroll-spy from jumping tabs during smooth scroll
+        isClickScrollingRef.current = true;
+        if (clickScrollTimeoutRef.current) {
+          clearTimeout(clickScrollTimeoutRef.current);
+        }
+
+        // Instantly glide indicator to target tab with fluid iOS animation
+        setActiveSection(id);
+        setIsPastHero(id !== "home");
+
         // Native iOS spring smooth scrolling with exact navbar offset
         const yOffset = -75;
         const y =
           element.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: "smooth" });
         window.history.pushState(null, "", `#${id}`);
-        setActiveSection(id);
-        setIsPastHero(id !== "home");
+
+        // Re-enable scroll-spy once smooth scrolling completes
+        clickScrollTimeoutRef.current = setTimeout(() => {
+          isClickScrollingRef.current = false;
+        }, 850);
       }
     }
     setMobileMenuOpen(false);
@@ -153,18 +178,18 @@ export default function Navbar() {
     <header
       className={`sticky top-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isLightGlass
-          ? "bg-white/60 backdrop-blur-2xl backdrop-saturate-180 border-b border-slate-900/[0.07] shadow-[0_4px_30px_rgba(0,0,0,0.04)]"
+          ? "bg-white/50 backdrop-blur-2xl backdrop-saturate-200 border-b border-slate-900/[0.06] shadow-[0_4px_30px_rgba(0,0,0,0.03)]"
           : isScrolled
-          ? "bg-black/20 backdrop-blur-2xl border-b border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)]"
-          : "bg-black/10 backdrop-blur-xl border-b border-white/10 shadow-none"
+          ? "bg-black/15 backdrop-blur-2xl border-b border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)]"
+          : "bg-transparent backdrop-blur-md border-b border-white/10 shadow-none"
       } ${isLightGlass ? "text-slate-900" : "text-white"}`}
     >
-      {/* Specular top rim highlight for Apple liquid glass effect */}
+      {/* Specular top rim highlight for Apple liquid glass refraction */}
       <div
         className={`absolute inset-x-0 top-0 h-px pointer-events-none transition-opacity duration-500 ${
           isLightGlass
-            ? "bg-gradient-to-r from-transparent via-slate-400/25 to-transparent"
-            : "bg-gradient-to-r from-transparent via-white/35 to-transparent"
+            ? "bg-gradient-to-r from-transparent via-slate-400/20 to-transparent"
+            : "bg-gradient-to-r from-transparent via-white/40 to-transparent"
         }`}
       />
 
@@ -184,27 +209,31 @@ export default function Navbar() {
             <MakLogo size="md" light={!isLightGlass} />
           </Link>
 
-          {/* Desktop Navigation Links (iOS Liquid Glass Capsule with Sliding Pill) */}
+          {/* Desktop Navigation Links (iPhone Liquid Glass Capsule with GPU Sliding Pill) */}
           <nav
-            className={`relative hidden lg:flex items-center p-1 rounded-full backdrop-blur-2xl transition-all duration-300 ${
+            className={`relative hidden lg:flex items-center p-1 rounded-full backdrop-blur-2xl backdrop-saturate-200 transition-all duration-300 ${
               isLightGlass
-                ? "bg-slate-900/[0.05] border border-slate-900/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_2px_12px_rgba(0,0,0,0.03)]"
-                : "bg-white/[0.12] border border-white/[0.25] shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_8px_24px_rgba(0,0,0,0.2)]"
+                ? "bg-white/55 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.95),inset_0_-1px_1px_rgba(0,0,0,0.03),0_8px_30px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.03)]"
+                : "bg-white/[0.14] border border-white/[0.28] shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_1px_rgba(0,0,0,0.15),0_8px_32px_rgba(0,0,0,0.25)]"
             }`}
           >
-            {/* iOS Spring Sliding White Pill Indicator */}
+            {/* iPhone Liquid Glass Sliding Pill Indicator (GPU Hardware Accelerated) */}
             <div
-              className={`absolute rounded-full transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${
+              className={`absolute rounded-full pointer-events-none ${
                 isLightGlass
-                  ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.06)]"
-                  : "bg-white shadow-[0_2px_12px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.9)]"
+                  ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]"
+                  : "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.3),0_1px_3px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.95)]"
               }`}
               style={{
-                left: `${indicatorStyle.left}px`,
+                transform: `translate3d(${indicatorStyle.left}px, 0, 0)`,
                 width: `${indicatorStyle.width}px`,
+                left: 0,
                 top: "4px",
                 bottom: "4px",
                 opacity: indicatorStyle.opacity,
+                transition:
+                  "transform 380ms cubic-bezier(0.16, 1, 0.3, 1), width 300ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease",
+                willChange: "transform, width",
               }}
             />
 
@@ -221,9 +250,9 @@ export default function Navbar() {
                   }}
                   href={targetHref}
                   onClick={(e) => handleNavClick(e, item.id)}
-                  className={`relative z-10 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors duration-200 ${
+                  className={`relative z-10 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer select-none transition-colors duration-200 ${
                     isActive
-                      ? "text-slate-950 font-extrabold"
+                      ? "text-slate-950"
                       : isLightGlass
                       ? "text-slate-600 hover:text-slate-950"
                       : "text-white/80 hover:text-white"
@@ -235,14 +264,14 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Right Action Group: Clear Glass Login Pill + CTA */}
+          {/* Right Action Group: Liquid Glass Login Pill + Ceramic Book Now CTA */}
           <div className="hidden sm:flex items-center gap-2.5">
             <Link
               href="/admin/login"
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all backdrop-blur-2xl active:scale-95 ${
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all backdrop-blur-2xl active:scale-95 ${
                 isLightGlass
-                  ? "bg-slate-900/[0.05] hover:bg-slate-900/[0.09] text-slate-800 border border-slate-900/10 shadow-xs"
-                  : "bg-white/[0.12] hover:bg-white/[0.22] text-white border border-white/[0.25] shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_16px_rgba(0,0,0,0.15)]"
+                  ? "bg-white/55 hover:bg-white/85 text-slate-800 border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_2px_10px_rgba(0,0,0,0.04)]"
+                  : "bg-white/[0.14] hover:bg-white/[0.24] text-white border border-white/[0.28] shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_4px_16px_rgba(0,0,0,0.15)]"
               }`}
             >
               Login
@@ -250,10 +279,10 @@ export default function Navbar() {
 
             <Link
               href="/book"
-              className={`px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 transition active:scale-95 ${
+              className={`px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition active:scale-95 ${
                 isLightGlass
-                  ? "bg-slate-950 hover:bg-slate-800 text-white shadow-[0_4px_16px_rgba(0,0,0,0.15)]"
-                  : "bg-white hover:bg-slate-100 text-slate-950 shadow-[0_4px_24px_rgba(255,255,255,0.25),inset_0_1px_1px_rgba(255,255,255,0.9)]"
+                  ? "bg-slate-950 hover:bg-slate-800 text-white shadow-[0_4px_16px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.2)]"
+                  : "bg-white hover:bg-slate-100 text-slate-950 shadow-[0_4px_24px_rgba(255,255,255,0.25),inset_0_1px_1px_rgba(255,255,255,0.95)]"
               }`}
             >
               <span>Book Now</span>
@@ -265,7 +294,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:hidden">
             <Link
               href="/book"
-              className={`px-3 py-1.5 rounded-full text-xs font-black shadow-xs transition active:scale-95 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-xs transition active:scale-95 ${
                 isLightGlass
                   ? "bg-slate-950 text-white"
                   : "bg-white text-slate-950"
@@ -279,7 +308,7 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`p-2 rounded-xl border transition backdrop-blur-xl active:scale-95 ${
                 isLightGlass
-                  ? "bg-slate-900/[0.05] border-slate-900/10 text-slate-800 hover:bg-slate-900/10"
+                  ? "bg-white/60 border-white/80 text-slate-800 hover:bg-white/80"
                   : "bg-white/[0.12] border-white/20 text-white hover:bg-white/20"
               }`}
               aria-label="Toggle navigation"
@@ -317,10 +346,10 @@ export default function Navbar() {
                   className={`px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${
                     isActive
                       ? isLightGlass
-                        ? "bg-slate-950 text-white font-extrabold shadow-sm"
-                        : "bg-white text-slate-950 font-extrabold shadow-md"
+                        ? "bg-slate-950 text-white font-bold shadow-xs"
+                        : "bg-white text-slate-950 font-bold shadow-md"
                       : isLightGlass
-                      ? "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+                      ? "text-slate-600 hover:text-slate-950 hover:bg-slate-100/70"
                       : "text-white/80 hover:text-white hover:bg-white/10"
                   }`}
                 >
@@ -337,7 +366,7 @@ export default function Navbar() {
             <Link
               href="/admin/login"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex-1 text-center py-2 rounded-full text-xs font-bold border backdrop-blur-xl ${
+              className={`flex-1 text-center py-2 rounded-full text-xs font-semibold border backdrop-blur-xl ${
                 isLightGlass
                   ? "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
                   : "bg-white/[0.12] hover:bg-white/20 text-white border-white/20"
@@ -348,7 +377,7 @@ export default function Navbar() {
             <Link
               href="/book"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex-1 text-center py-2 rounded-full text-xs font-black shadow-md ${
+              className={`flex-1 text-center py-2 rounded-full text-xs font-bold shadow-md ${
                 isLightGlass
                   ? "bg-slate-950 text-white hover:bg-slate-800"
                   : "bg-white text-slate-900 hover:bg-slate-100"
