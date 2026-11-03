@@ -166,39 +166,39 @@ export default function HomePage() {
   return (
     <div className="bg-[#F0F5FA] text-slate-800 space-y-16 sm:space-y-20 pb-20 scroll-smooth">
       {/* =========================================================================
-          1. HERO SECTION (#home) - Exact Mockup Match
+          1. HERO SECTION (#home) - Highlighted Photo Without Color Gradient
          ========================================================================= */}
       <section
         id="home"
-        className="scroll-mt-24 relative min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] flex items-center overflow-hidden bg-[#061426]"
+        className="scroll-mt-24 relative min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] flex items-center overflow-hidden bg-slate-900"
       >
-        {/* Background Swimming Pool Photograph */}
+        {/* Background Swimming Pool Photograph - Highlighted & Crystal Clear */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center brightness-105 contrast-105"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=85')`,
+            backgroundImage: `url('/images/hero-pool.jpg')`,
           }}
         />
-        {/* Sleek Deep Oceanic Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#061426]/95 via-[#0A2647]/80 to-[#0A2647]/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#061426]/60 via-transparent to-transparent" />
+        {/* Pure Neutral Scrim (Color gradient completely removed so image is fully highlighted) */}
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 z-10 w-full flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
           {/* Left Hero Content */}
           <div className="max-w-2xl space-y-5 text-white">
             {/* Pill Tag */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-white shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/30 text-xs font-semibold text-white shadow-xs">
               <span>M.A.K Indoor Pool</span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
               Premium Indoor <br />
               Swimming Experience
             </h1>
 
             {/* Subtitle */}
-            <p className="text-xs sm:text-sm text-cyan-100/90 font-normal leading-relaxed max-w-lg">
+            <p className="text-xs sm:text-sm text-white/95 font-medium leading-relaxed max-w-lg drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
               A clean, safe and family-friendly indoor pool for public swimming and exclusive family bookings.
             </p>
 
@@ -214,14 +214,14 @@ export default function HomePage() {
 
               <a
                 href="#pricing"
-                className="bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-md border border-white/25 text-white font-bold px-6 py-2.5 rounded-full text-xs transition"
+                className="bg-black/30 hover:bg-black/50 active:scale-95 backdrop-blur-md border border-white/30 text-white font-bold px-6 py-2.5 rounded-full text-xs transition drop-shadow-xs"
               >
                 View Pricing
               </a>
             </div>
 
             {/* 4 Feature Badges Row */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-5 pt-3 text-xs font-medium text-white/90">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-5 pt-3 text-xs font-medium text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-cyan-300" />
                 <span>Clean &amp; Safe</span>
@@ -242,9 +242,9 @@ export default function HomePage() {
           </div>
 
           {/* Right Floating Frosted Glass Operating Hours Widget */}
-          <div className="bg-[#0A2647]/50 backdrop-blur-xl border border-white/20 rounded-3xl p-5 sm:p-6 text-white shadow-2xl space-y-4 w-full max-w-xs shrink-0">
+          <div className="bg-black/40 backdrop-blur-xl border border-white/25 rounded-3xl p-5 sm:p-6 text-white shadow-2xl space-y-4 w-full max-w-xs shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center shrink-0 shadow-inner">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
                 <Clock className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -258,11 +258,11 @@ export default function HomePage() {
             </div>
 
             <div className="pt-1 space-y-2.5 text-xs">
-              <div className="flex items-center gap-2.5 text-cyan-100">
+              <div className="flex items-center gap-2.5 text-white/90">
                 <Waves className="w-4 h-4 text-cyan-300 shrink-0" />
                 <span>Public Swimming: 9:00 AM – 4:00 PM</span>
               </div>
-              <div className="flex items-center gap-2.5 text-cyan-100">
+              <div className="flex items-center gap-2.5 text-white/90">
                 <Users2 className="w-4 h-4 text-cyan-300 shrink-0" />
                 <span>Family Bookings: 4:00 PM – 11:00 PM</span>
               </div>
