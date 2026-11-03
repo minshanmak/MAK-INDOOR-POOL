@@ -386,19 +386,19 @@ function BookingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-10 sm:py-16">
+    <div className="min-h-screen bg-[#F0F5FA] py-10 sm:py-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Step Progress Indicator */}
         <div className="max-w-md mx-auto flex items-center justify-between text-xs font-semibold text-slate-500">
-          <div className={`flex items-center gap-2 ${step >= 1 ? "text-[#00838F] font-bold" : "text-slate-400"}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 1 ? "bg-[#00838F] text-white" : "bg-slate-200 text-slate-600"}`}>
+          <div className={`flex items-center gap-2 ${step >= 1 ? "text-[#1D68BD] font-bold" : "text-slate-400"}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 1 ? "bg-[#1D68BD] text-white" : "bg-slate-200 text-slate-600"}`}>
               1
             </span>
             <span>Configure</span>
           </div>
           <span className="h-0.5 w-12 bg-slate-200" />
-          <div className={`flex items-center gap-2 ${step >= 2 ? "text-[#00838F] font-bold" : "text-slate-400"}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 2 ? "bg-[#00838F] text-white" : "bg-slate-200 text-slate-600"}`}>
+          <div className={`flex items-center gap-2 ${step >= 2 ? "text-[#1D68BD] font-bold" : "text-slate-400"}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono ${step >= 2 ? "bg-[#1D68BD] text-white" : "bg-slate-200 text-slate-600"}`}>
               2
             </span>
             <span>Secure Hold</span>
@@ -431,8 +431,8 @@ function BookingContent() {
                 onClick={() => setBookingType("PUBLIC")}
                 className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 ${
                   bookingType === "PUBLIC"
-                    ? "bg-[#00838F] text-white shadow-xs scale-[1.02]"
-                    : "text-slate-600 hover:text-[#00838F]"
+                    ? "bg-[#1D68BD] text-white shadow-xs scale-[1.02]"
+                    : "text-slate-600 hover:text-[#1D68BD]"
                 }`}
               >
                 Public Swimming (9 AM – 4 PM)
@@ -442,8 +442,8 @@ function BookingContent() {
                 onClick={() => setBookingType("FAMILY")}
                 className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 ${
                   bookingType === "FAMILY"
-                    ? "bg-[#00838F] text-white shadow-xs scale-[1.02]"
-                    : "text-slate-600 hover:text-[#00838F]"
+                    ? "bg-[#1D68BD] text-white shadow-xs scale-[1.02]"
+                    : "text-slate-600 hover:text-[#1D68BD]"
                 }`}
               >
                 Family Exclusive (9 AM – 11 PM)
@@ -508,7 +508,7 @@ function BookingContent() {
                     min={todayIST}
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00838F]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1D68BD]"
                   />
                 </div>
               </div>
@@ -557,8 +557,8 @@ function BookingContent() {
                             : isHeld
                             ? "border-amber-200 bg-amber-50 text-amber-700 cursor-not-allowed"
                             : isSelected
-                            ? "border-[#00838F] bg-[#00838F]/5 text-[#00838F] ring-1 ring-[#00838F]"
-                            : "border-slate-200 bg-white hover:border-[#00838F]/40 text-slate-800"
+                            ? "border-[#1D68BD] bg-[#1D68BD]/5 text-[#1D68BD] ring-1 ring-[#1D68BD]"
+                            : "border-slate-200 bg-white hover:border-[#1D68BD]/40 text-slate-800"
                         }`}
                       >
                         <div className={`font-bold text-xs font-mono ${isBooked ? "text-rose-900" : ""}`}>
@@ -573,7 +573,7 @@ function BookingContent() {
                               : isHeld
                               ? "text-amber-700 font-bold"
                               : isSelected
-                              ? "text-[#00838F] font-bold"
+                              ? "text-[#1D68BD] font-bold"
                               : "text-emerald-700"
                           }`}
                         >
@@ -661,7 +661,7 @@ function BookingContent() {
                 <select
                   value={durationHours}
                   onChange={(e) => setDurationHours(Number(e.target.value))}
-                  className="w-full sm:w-64 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00838F]"
+                  className="w-full sm:w-64 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1D68BD]"
                 >
                   {[1, 2, 3, 4]
                     .filter((h) => h <= maxAllowedHours && !isDurationColliding(startTime, h))
@@ -717,7 +717,7 @@ function BookingContent() {
               {/* Context-Aware Session Rules Box */}
               {isFamily ? (
                 <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-100 space-y-2 text-xs text-slate-700">
-                  <div className="flex items-center gap-2 text-[#00838F] font-bold">
+                  <div className="flex items-center gap-2 text-[#1D68BD] font-bold">
                     <Info className="w-4 h-4" />
                     <span>Family Exclusive Booking Rules</span>
                   </div>
@@ -732,7 +732,7 @@ function BookingContent() {
                 </div>
               ) : (
                 <div className="p-4 rounded-xl bg-cyan-50/70 border border-cyan-100 space-y-2 text-xs text-slate-700">
-                  <div className="flex items-center gap-2 text-[#00838F] font-bold">
+                  <div className="flex items-center gap-2 text-[#1D68BD] font-bold">
                     <Info className="w-4 h-4" />
                     <span>Public Swimming Session Rules</span>
                   </div>
@@ -856,7 +856,7 @@ function BookingContent() {
                 className={`w-full font-bold py-3.5 rounded-lg text-xs shadow-xs transition duration-150 flex items-center justify-center gap-2 ${
                   availResult && !availResult.available
                     ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                    : "bg-[#00838F] hover:bg-[#007079] text-white"
+                    : "bg-[#1D68BD] hover:bg-[#155299] text-white"
                 }`}
               >
                 {loading
@@ -877,7 +877,7 @@ function BookingContent() {
         {step === 2 && (
           <div className="max-w-xl mx-auto bg-white rounded-xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
             <div className="text-center space-y-2">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#00838F] bg-teal-50 px-2.5 py-1 rounded">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[#1D68BD] bg-teal-50 px-2.5 py-1 rounded">
                 SLOT TEMPORARILY LOCKED
               </span>
               <h2 className="text-xl font-black text-[#0A192F]">
@@ -932,7 +932,7 @@ function BookingContent() {
                 type="button"
                 disabled={loading}
                 onClick={handleCompletePayment}
-                className="w-full bg-[#00838F] hover:bg-[#007079] text-white font-bold py-3.5 rounded-lg text-xs shadow-xs transition"
+                className="w-full bg-[#1D68BD] hover:bg-[#155299] text-white font-bold py-3.5 rounded-lg text-xs shadow-xs transition"
               >
                 {loading
                   ? "Confirming Gateway Transaction..."
