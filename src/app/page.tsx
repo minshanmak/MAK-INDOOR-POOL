@@ -166,23 +166,23 @@ export default function HomePage() {
   return (
     <div className="bg-[#F0F5FA] text-slate-800 space-y-16 sm:space-y-20 pb-20 scroll-smooth">
       {/* =========================================================================
-          1. HERO SECTION (#home) - High-Clarity Full-Bleed Pool Image
+          1. HERO SECTION (#home) - Official M.A.K Indoor Pool Experience (Ultra-HD)
          ========================================================================= */}
       <section
         id="home"
         className="scroll-mt-24 relative min-h-[520px] sm:min-h-[580px] lg:min-h-[640px] flex items-center overflow-hidden bg-slate-950"
       >
-        {/* Background Swimming Pool Photograph - 2.5K Resolution, 100% Full Bleed, Zero Borders */}
+        {/* Background Indoor Swimming Pool Photograph - 2400x1600 Ultra HD, Edge-to-Edge Full Bleed */}
         <img
-          src="/images/hero-pool.jpg?v=2"
-          alt="M.A.K Pool Ambiance"
-          className="absolute inset-0 w-full h-full object-cover object-center brightness-[1.08] contrast-[1.08] select-none pointer-events-none"
+          src="/images/mak-indoor-pool.jpg?v=1"
+          alt="M.A.K Indoor Pool Facility & Experience"
+          className="absolute inset-0 w-full h-full object-cover object-center brightness-[1.05] contrast-[1.05] select-none pointer-events-none"
           loading="eager"
         />
 
-        {/* Pure Neutral Scrim (Completely removed colored gradient; preserves natural vivid image clarity) */}
+        {/* Pure Neutral Scrim (No colored gradient; preserves natural indoor pool clarity) */}
         <div className="absolute inset-0 bg-black/25" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/15 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 z-10 w-full flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
           {/* Left Hero Content */}
