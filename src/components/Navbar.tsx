@@ -217,15 +217,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* 3. Right Action Group: Login + Ceramic Book Now Button */}
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
-          <Link
-            href="/admin/login"
-            className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-950 transition active:scale-95"
-          >
-            Login
-          </Link>
-
+        {/* 3. Right Action Group: Ceramic Book Now Button */}
+        <div className="hidden sm:flex items-center shrink-0">
           <Link
             href="/book"
             className="px-4 py-2 rounded-full text-xs font-bold text-white bg-slate-950 hover:bg-slate-800 shadow-[0_2px_10px_rgba(0,0,0,0.18),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center gap-1.5 transition active:scale-95"
@@ -285,18 +278,11 @@ export default function Navbar() {
             })}
           </nav>
 
-          <div className="pt-2 border-t border-slate-200/80 flex items-center gap-2">
-            <Link
-              href="/admin/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center py-2 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition"
-            >
-              Login
-            </Link>
+          <div className="pt-2 border-t border-slate-200/80">
             <Link
               href="/book"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center py-2 rounded-full text-xs font-bold bg-slate-950 text-white hover:bg-slate-800 shadow-sm transition"
+              className="block w-full text-center py-2 rounded-full text-xs font-bold bg-slate-950 text-white hover:bg-slate-800 shadow-sm transition"
             >
               Book Now
             </Link>

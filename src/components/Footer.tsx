@@ -175,7 +175,16 @@ export default function Footer() {
 
         {/* Bottom Bar: Copyright & MishGa Attribution */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400 text-center sm:text-left">
-          <p>© 2026 M.A.K Indoor Pool. All rights reserved.</p>
+          <div className="flex items-center gap-3">
+            <p>© 2026 M.A.K Indoor Pool. All rights reserved.</p>
+            <span>•</span>
+            <Link
+              href="/admin/login"
+              className="text-slate-400 hover:text-white transition-colors"
+            >
+              Staff Portal
+            </Link>
+          </div>
           <p>
             Developed by{" "}
             <a
