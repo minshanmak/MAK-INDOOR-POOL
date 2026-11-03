@@ -206,8 +206,11 @@ export default function HomePage() {
       </section>
 
       {/* 3. ABOUT SECTION: "A Modern Indoor Pool for Everyone" (Exact Match) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        {/* Ambient Decorative Wave Gradient on Right Edge (Exact Mockup Match) */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[400px] bg-gradient-to-l from-sky-200/40 via-sky-100/20 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Column: Image with Play Button */}
           <div className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden shadow-md border border-white aspect-[16/10] group">
@@ -222,7 +225,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setIsPlayingVideo(!isPlayingVideo)}
-                className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/90 hover:bg-white text-slate-900 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95"
+                className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/95 hover:bg-white text-slate-900 flex items-center justify-center shadow-2xl transition-transform hover:scale-110 active:scale-95"
                 aria-label="Play pool showcase video"
               >
                 <Play className="w-5 h-5 fill-slate-900 translate-x-0.5" />
@@ -232,7 +235,7 @@ export default function HomePage() {
 
           {/* Right Column: About Text & Highlights */}
           <div className="lg:col-span-6 space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#1D68BD] block">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0284C7] block">
               About M.A.K Indoor Pool
             </span>
 
@@ -247,13 +250,13 @@ export default function HomePage() {
 
             <div className="space-y-2.5 pt-1 text-xs font-semibold text-slate-800">
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-lg bg-sky-50 text-[#1D68BD] flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-full bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0 shadow-2xs">
                   <Waves className="w-3.5 h-3.5" />
                 </div>
                 <span>Public Swimming (9:00 AM – 4:00 PM)</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-full bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0 shadow-2xs">
                   <Users2 className="w-3.5 h-3.5" />
                 </div>
                 <span>Exclusive Family Bookings (4:00 PM – 11:00 PM)</span>
@@ -335,84 +338,72 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch">
-          {/* Pricing Card 1: Public Swimming */}
-          <div className="bg-white border border-sky-100 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                <div className="w-7 h-7 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center shrink-0">
-                  <Waves className="w-4 h-4" />
-                </div>
-                <span>Public Swimming</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          {/* Pricing Card 1: Public Swimming (Exact Mockup Match) */}
+          <Link
+            href="/book?type=PUBLIC"
+            className="bg-[#F0F8FF] border border-sky-100 hover:border-sky-300 rounded-3xl p-6 sm:p-8 shadow-xs hover:shadow-md transition-all group block space-y-4"
+          >
+            <div className="flex items-center gap-2.5 text-slate-900 font-bold text-sm">
+              <div className="w-8 h-8 rounded-xl bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Waves className="w-4 h-4" />
               </div>
-
-              <div>
-                <div className="text-3xl font-black text-slate-900 tracking-tight">₹150</div>
-                <div className="text-xs text-slate-500 font-medium">per person / hour</div>
-              </div>
-
-              <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-1">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Shared pool access (9:00 AM – 4:00 PM)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Ideal for individuals and groups</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Clean and supervised environment</span>
-                </div>
-              </div>
+              <span className="text-base font-extrabold">Public Swimming</span>
             </div>
 
-            <Link
-              href="/book?type=PUBLIC"
-              className="w-full text-center bg-[#0284C7] hover:bg-[#0369A1] text-white font-bold py-2.5 rounded-2xl text-xs shadow-xs transition active:scale-95"
-            >
-              Book Public Slot
-            </Link>
-          </div>
-
-          {/* Pricing Card 2: Exclusive Family Booking */}
-          <div className="bg-white border border-purple-100 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                <div className="w-7 h-7 rounded-xl bg-purple-50 text-[#9333EA] flex items-center justify-center shrink-0">
-                  <Users2 className="w-4 h-4" />
-                </div>
-                <span>Exclusive Family Booking</span>
-              </div>
-
-              <div>
-                <div className="text-3xl font-black text-slate-900 tracking-tight">₹1,500</div>
-                <div className="text-xs text-slate-500 font-medium">per hour (up to 12 people)</div>
-              </div>
-
-              <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-1">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Private and exclusive pool access (4:00 PM – 11:00 PM)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>₹100 per additional person / hour (above 12 people)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>₹750 advance required per booking</span>
-                </div>
-              </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">₹150</div>
+              <div className="text-xs text-slate-500 font-medium mt-0.5">per person / hour</div>
             </div>
 
-            <Link
-              href="/book?type=FAMILY"
-              className="w-full text-center bg-[#9333EA] hover:bg-[#7E22CE] text-white font-bold py-2.5 rounded-2xl text-xs shadow-xs transition active:scale-95"
-            >
-              Book Family Slot
-            </Link>
-          </div>
+            <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-sky-100">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>Shared pool access (9:00 AM – 4:00 PM)</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>Ideal for individuals and groups</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>Clean and supervised environment</span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Pricing Card 2: Exclusive Family Booking (Exact Mockup Match) */}
+          <Link
+            href="/book?type=FAMILY"
+            className="bg-[#FAF5FF] border border-purple-100 hover:border-purple-300 rounded-3xl p-6 sm:p-8 shadow-xs hover:shadow-md transition-all group block space-y-4"
+          >
+            <div className="flex items-center gap-2.5 text-slate-900 font-bold text-sm">
+              <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Users2 className="w-4 h-4" />
+              </div>
+              <span className="text-base font-extrabold">Exclusive Family Booking</span>
+            </div>
+
+            <div>
+              <div className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">₹1,500</div>
+              <div className="text-xs text-slate-500 font-medium mt-0.5">per hour (up to 12 people)</div>
+            </div>
+
+            <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-purple-100">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>Private and exclusive pool access (4:00 PM – 11:00 PM)</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>₹100 per additional person / hour (above 12 people)</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>₹750 advance required per booking</span>
+              </div>
+            </div>
+          </Link>
         </div>
       </section>
 
