@@ -71,25 +71,31 @@ export default function PricingPage() {
       {/* 2. 2-COLUMN PRICING GRID (Clean Dual Plans) */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-10 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          {/* Card 1: Public Swimming */}
-          <div className="bg-[#F0F8FF] border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                <div className="w-8 h-8 rounded-xl bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center shrink-0">
+          {/* Card 1: Public Swimming (Exact Component Sheet Match) */}
+          <Link
+            href="/book?type=PUBLIC"
+            className="relative overflow-hidden bg-gradient-to-br from-[#EBF5FF] via-[#E1F0FE] to-[#D5EAFF] border border-sky-200 hover:border-sky-300 rounded-3xl p-6 sm:p-8 shadow-xs hover:shadow-md transition-all group block space-y-5"
+          >
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-2.5 text-slate-900 font-bold text-sm">
+                <div className="w-8 h-8 rounded-xl bg-white text-[#0284C7] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                   <Waves className="w-4 h-4" />
                 </div>
-                <span>Public Swimming</span>
+                <span className="text-base font-extrabold">Public Swimming</span>
               </div>
 
               <div>
-                <div className="text-4xl font-black text-slate-900 tracking-tight">₹150</div>
-                <div className="text-xs text-slate-500 font-medium">per person / hour</div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-4xl font-black text-slate-900 tracking-tight">₹150</span>
+                  <span className="text-sm font-semibold text-slate-500">/ hour</span>
+                </div>
+                <div className="text-xs text-slate-500 font-medium mt-0.5">per person</div>
               </div>
 
-              <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-sky-100">
+              <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-sky-200/60">
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Shared pool access (9:00 AM – 4:00 PM)</span>
+                  <span>Pool access (9:00 AM – 4:00 PM)</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -106,41 +112,53 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <Link
-              href="/book?type=PUBLIC"
-              className="w-full text-center bg-[#0284C7] hover:bg-[#0369A1] text-white font-bold py-3 rounded-2xl text-xs shadow-md transition active:scale-95"
+            {/* Decorative Ambient Waves (Exact UI Component Match) */}
+            <svg
+              className="absolute -bottom-2 -right-2 w-72 h-36 opacity-30 pointer-events-none"
+              viewBox="0 0 200 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              Book Public Slot
-            </Link>
-          </div>
+              <path
+                d="M0 60 C50 35 100 80 150 45 C180 25 200 55 220 45 L220 100 L0 100 Z"
+                fill="#0284C7"
+              />
+            </svg>
+          </Link>
 
-          {/* Card 2: Exclusive Family Booking */}
-          <div className="bg-[#FAF5FF] border border-purple-100 rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center shrink-0">
+          {/* Card 2: Exclusive Family Booking (Exact Component Sheet Match) */}
+          <Link
+            href="/book?type=FAMILY"
+            className="relative overflow-hidden bg-gradient-to-br from-[#FAF5FF] via-[#F6EDFD] to-[#EEDEFB] border border-purple-200 hover:border-purple-300 rounded-3xl p-6 sm:p-8 shadow-xs hover:shadow-md transition-all group block space-y-5"
+          >
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-2.5 text-slate-900 font-bold text-sm">
+                <div className="w-8 h-8 rounded-xl bg-white text-[#9333EA] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                   <Users2 className="w-4 h-4" />
                 </div>
-                <span>Exclusive Family Booking</span>
+                <span className="text-base font-extrabold">Exclusive Family Booking</span>
               </div>
 
               <div>
-                <div className="text-4xl font-black text-slate-900 tracking-tight">₹1,500</div>
-                <div className="text-xs text-slate-500 font-medium">per hour (up to 12 people)</div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-4xl font-black text-slate-900 tracking-tight">₹1,500</span>
+                  <span className="text-sm font-semibold text-slate-500">/ hour</span>
+                </div>
+                <div className="text-xs text-slate-500 font-medium mt-0.5">up to 12 people</div>
               </div>
 
-              <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-purple-100">
+              <div className="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-purple-200/60">
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Private and exclusive pool access (4:00 PM – 11:00 PM)</span>
+                  <span>Private pool access (4:00 PM – 11:00 PM)</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>₹100 per additional person / hour (above 12 people)</span>
+                  <span>₹100 per additional person / hour</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>₹750 flat advance required to lock slot</span>
+                  <span>₹750 advance required per booking</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -149,13 +167,19 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <Link
-              href="/book?type=FAMILY"
-              className="w-full text-center bg-[#9333EA] hover:bg-[#7E22CE] text-white font-bold py-3 rounded-2xl text-xs shadow-md transition active:scale-95"
+            {/* Decorative Ambient Waves (Exact UI Component Match) */}
+            <svg
+              className="absolute -bottom-2 -right-2 w-72 h-36 opacity-25 pointer-events-none"
+              viewBox="0 0 200 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              Book Family Slot
-            </Link>
-          </div>
+              <path
+                d="M0 60 C50 35 100 80 150 45 C180 25 200 55 220 45 L220 100 L0 100 Z"
+                fill="#9333EA"
+              />
+            </svg>
+          </Link>
         </div>
       </section>
 
@@ -276,7 +300,7 @@ export default function PricingPage() {
               Ready to Swim?
             </h2>
             <p className="text-cyan-100 text-xs sm:text-sm mt-1 max-w-xl font-normal leading-relaxed">
-              Book your slot now and experience a clean, modern and family-friendly indoor pool.
+              Book your slot now and enjoy a clean and premium indoor pool.
             </p>
           </div>
 

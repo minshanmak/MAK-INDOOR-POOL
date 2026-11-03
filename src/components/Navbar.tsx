@@ -52,7 +52,7 @@ export default function Navbar() {
                   href={link.href}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 ${
                     isActive
-                      ? "bg-white/20 text-white font-bold shadow-xs"
+                      ? "bg-[#0284C7] text-white font-bold shadow-sm"
                       : "text-slate-300 hover:text-white hover:bg-white/10"
                   }`}
                 >
@@ -118,7 +118,7 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold ${
                     isActive
-                      ? "bg-white/20 text-white font-bold"
+                      ? "bg-[#0284C7] text-white font-bold"
                       : "text-slate-300 hover:text-white hover:bg-white/10"
                   }`}
                 >

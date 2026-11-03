@@ -424,7 +424,7 @@ function BookingStatusContent() {
               Ready to Swim?
             </h2>
             <p className="text-cyan-100 text-xs sm:text-sm mt-1 max-w-xl font-normal leading-relaxed">
-              Book your slot now and experience a clean, modern and family-friendly indoor pool.
+              Book your slot now and enjoy a clean and premium indoor pool.
             </p>
           </div>
 
