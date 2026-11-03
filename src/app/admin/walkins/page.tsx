@@ -4,17 +4,13 @@ import React, { useState, useEffect } from "react";
 import { formatPoolTime } from "@/lib/timezone";
 import {
   Users,
-  UserPlus,
   Clock,
   CheckCircle2,
   AlertTriangle,
   Zap,
-  CreditCard,
   Minus,
   Plus,
-  ArrowRight,
-  LogOut,
-  Sparkles,
+  ChevronDown,
 } from "lucide-react";
 
 export default function AdminWalkinsPage() {
@@ -27,20 +23,25 @@ export default function AdminWalkinsPage() {
 
   // Form states
   const [visitorCount, setVisitorCount] = useState(4);
-  const [durationHours, setDurationHours] = useState(1);
-  const [ratePerHour, setRatePerHour] = useState(150);
+  const [ratePerHour] = useState(150);
   const [entryTime, setEntryTime] = useState("");
-  const [overrideCharge, setOverrideCharge] = useState<string>("");
-  const [overrideReason, setOverrideReason] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"UPI" | "CASH">("UPI");
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Table filter: "ALL" | "ACTIVE" | "CHECKED_OUT"
+  const [tableFilter, setTableFilter] = useState<"ALL" | "ACTIVE" | "CHECKED_OUT">("ALL");
 
   useEffect(() => {
     const now = new Date();
-    setEntryTime(now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }));
+    setEntryTime(
+      now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    );
   }, []);
 
   const fetchWalkIns = async () => {
@@ -61,34 +62,25 @@ export default function AdminWalkinsPage() {
     fetchWalkIns();
   }, []);
 
-  const calculatedCharge = visitorCount * durationHours * ratePerHour;
-  const isOverridden = overrideCharge !== "" && Number(overrideCharge) !== calculatedCharge;
+  const calculatedCharge = visitorCount * 1 * ratePerHour;
 
   const handleEntrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-
-    if (isOverridden && !overrideReason.trim()) {
-      setFormError("A mandatory explanation reason is required for fee overrides.");
-      return;
-    }
-
+    setSuccessMsg(null);
     setSubmitting(true);
+
     try {
       const res = await fetch("/api/admin/walkins", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "CHECK_IN",
+          action: entryMode === "QUICK" ? "QUICK_ENTRY" : "CHECK_IN",
           visitorCount,
-          durationHours: entryMode === "QUICK" ? 1 : durationHours,
+          durationHours: 1,
           ratePerHour,
-          overrideCharge: isOverridden ? Number(overrideCharge) : null,
-          overrideReason: isOverridden ? overrideReason : null,
-          collectedAmount: isOverridden ? Number(overrideCharge) : calculatedCharge,
+          collectedAmount: calculatedCharge,
           paymentMethod,
-          customerName: customerName || null,
-          customerPhone: customerPhone || null,
         }),
       });
       const data = await res.json();
@@ -96,12 +88,9 @@ export default function AdminWalkinsPage() {
         throw new Error(data.error || "Failed to log walk-in.");
       }
 
-      setVisitorCount(4);
-      setDurationHours(1);
-      setOverrideCharge("");
-      setOverrideReason("");
-      setCustomerName("");
-      setCustomerPhone("");
+      setSuccessMsg(
+        `✓ ${visitorCount} Swimmer${visitorCount > 1 ? "s" : ""} admitted successfully! Collected ₹${calculatedCharge.toFixed(2)} via ${paymentMethod}.`
+      );
       fetchWalkIns();
     } catch (err: any) {
       setFormError(err.message || "Failed to record walk-in.");
@@ -128,12 +117,15 @@ export default function AdminWalkinsPage() {
     }
   };
 
-  const maxCapacity = 25;
-  const isNearCapacity = currentOccupancy >= maxCapacity * 0.8;
+  const filteredWalkIns = walkIns.filter((w) => {
+    if (tableFilter === "ACTIVE") return w.status === "ACTIVE";
+    if (tableFilter === "CHECKED_OUT") return w.status === "CHECKED_OUT";
+    return true;
+  });
 
   return (
     <div className="space-y-4 max-w-7xl mx-auto pb-12">
-      {/* Top 2 Mode Selection Cards (Exact Mockup Match) */}
+      {/* Top 2 Mode Selection Cards (Exact Match to Image 2 Card 3) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Mode 1: Full Check-in / Check-out */}
         <button
@@ -198,18 +190,27 @@ export default function AdminWalkinsPage() {
         </button>
       </div>
 
-      {/* Main Two-Column Admission Form (Exact Mockup Match) */}
+      {successMsg && (
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span className="font-semibold">{successMsg}</span>
+        </div>
+      )}
+
+      {formError && (
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-xs flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+          <span className="font-semibold">{formError}</span>
+        </div>
+      )}
+
+      {/* Main Two-Column Admission Form (Exact Match to Image 2 Card 3) */}
       <form onSubmit={handleEntrySubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Left Column: Visitor Details Card */}
-        <div className="bg-white rounded-3xl p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-5">
-          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-            <h2 className="font-bold text-slate-900 text-sm">Visitor Details</h2>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
-              ₹150 / hr / person
-            </span>
-          </div>
+        <div className="bg-white rounded-3xl p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
+          <h2 className="font-extrabold text-slate-900 text-sm">Visitor Details</h2>
 
-          {/* Stepper: No. of Visitors */}
+          {/* Stepper: No. of Visitors * */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-700">
               No. of Visitors <span className="text-rose-500">*</span>
@@ -235,7 +236,7 @@ export default function AdminWalkinsPage() {
             </div>
           </div>
 
-          {/* Entry Time */}
+          {/* Entry Time * */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-700">
               Entry Time <span className="text-rose-500">*</span>
@@ -245,158 +246,108 @@ export default function AdminWalkinsPage() {
                 type="text"
                 value={entryTime}
                 onChange={(e) => setEntryTime(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition"
               />
-              <Clock className="w-4 h-4 text-slate-400 absolute right-3.5 top-3 pointer-events-none" />
+              <Clock className="w-4 h-4 text-slate-400 absolute right-4 top-3.5 pointer-events-none" />
             </div>
-          </div>
-
-          {/* Duration & Contact Fields */}
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                Duration (Hours)
-              </label>
-              <select
-                value={durationHours}
-                onChange={(e) => setDurationHours(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800"
-              >
-                <option value={1}>1 Hour</option>
-                <option value={1.5}>1.5 Hours</option>
-                <option value={2}>2 Hours</option>
-                <option value={3}>3 Hours</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                Visitor Phone (Optional)
-              </label>
-              <input
-                type="tel"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                placeholder="+91..."
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800"
-              />
-            </div>
-          </div>
-
-          <div className="text-[11px] text-slate-500 bg-slate-50/80 p-3 rounded-2xl border border-slate-100 flex items-center gap-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>
-              Real-time auto-checkout active. Slot releases automatically once duration expires.
-            </span>
           </div>
         </div>
 
         {/* Right Column: Payment Details Card */}
-        <div className="bg-white rounded-3xl p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-5 flex flex-col justify-between">
+        <div className="bg-white rounded-3xl p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-              <h2 className="font-bold text-slate-900 text-sm">Payment Details</h2>
-              <span className="text-[10px] font-bold text-slate-400">Auto Computed</span>
-            </div>
-
-            {formError && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-2xl text-xs flex items-start gap-1.5 border border-red-200/60">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
-                <span>{formError}</span>
-              </div>
-            )}
+            <h2 className="font-extrabold text-slate-900 text-sm">Payment Details</h2>
 
             {/* Amount (Auto) */}
             <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <label className="block text-xs font-bold text-slate-700">Amount (Auto)</label>
-                <span className="text-[10px] text-slate-400 font-mono">
-                  {visitorCount} × ₹{ratePerHour} × {durationHours} hr
-                </span>
-              </div>
-              <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-xl font-black text-slate-900 tracking-tight flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700">Amount (Auto)</label>
+              <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-sm font-extrabold text-slate-900 flex items-center justify-end">
                 <span>₹{calculatedCharge.toFixed(2)}</span>
-                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  Standard Rate
-                </span>
               </div>
             </div>
 
-            {/* Payment Method Dropdown */}
+            {/* Payment Method * */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700">
                 Payment Method <span className="text-rose-500">*</span>
               </label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value as "UPI" | "CASH")}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition"
-              >
-                <option value="UPI">UPI</option>
-                <option value="CASH">Cash</option>
-              </select>
-            </div>
-
-            {/* Optional Authorized Override */}
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                Authorized Override Fee (Optional)
-              </label>
-              <input
-                type="number"
-                min={0}
-                value={overrideCharge}
-                onChange={(e) => setOverrideCharge(e.target.value)}
-                placeholder="Leave blank for standard charge"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800"
-              />
-            </div>
-
-            {isOverridden && (
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-amber-900">
-                  Mandatory Audit Reason *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={overrideReason}
-                  onChange={(e) => setOverrideReason(e.target.value)}
-                  placeholder="e.g. Owner guest, tournament"
-                  className="w-full px-3 py-2 border border-amber-300 bg-amber-50 rounded-xl text-xs"
-                />
+              <div className="relative">
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value as "UPI" | "CASH")}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition appearance-none"
+                >
+                  <option value="UPI">UPI</option>
+                  <option value="CASH">Cash</option>
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 top-3.5 pointer-events-none" />
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Big Blue Check In Button */}
+          {/* Big Solid Blue Check In Button */}
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[#1D68BD] hover:bg-[#155299] active:scale-[0.99] text-white font-extrabold py-3.5 rounded-2xl shadow-md shadow-blue-700/20 transition-all flex items-center justify-center gap-2 text-sm mt-4"
+            className="w-full bg-[#1D68BD] hover:bg-[#155299] active:scale-[0.99] text-white font-extrabold py-3.5 rounded-2xl shadow-md shadow-blue-700/20 transition-all text-sm mt-3"
           >
-            <UserPlus className="w-4 h-4" />
-            {submitting ? "Processing Check In..." : "Check In"}
+            {submitting ? "Checking In..." : "Check In"}
           </button>
         </div>
       </form>
 
-      {/* Today's Walk-in Swimmers Ledger Card (Matching Mockup Table Style) */}
+      {/* Today's Walk-in Visitors & Live Checkout Ledger */}
       <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex justify-between items-center">
+        <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
             <h2 className="font-extrabold text-sm text-slate-900">Today's Walk-in Visitors</h2>
-            <p className="text-[11px] text-slate-400 mt-0.5">Live occupancy and checkout records</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Live capacity and counter checkout management
+            </p>
           </div>
-          <span className="text-[10px] font-bold text-[#1D68BD] bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200/60">
-            Real-time Status
-          </span>
+
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setTableFilter("ALL")}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
+                tableFilter === "ALL"
+                  ? "bg-[#1D68BD] text-white"
+                  : "bg-slate-100 text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => setTableFilter("ACTIVE")}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
+                tableFilter === "ACTIVE"
+                  ? "bg-[#1D68BD] text-white"
+                  : "bg-slate-100 text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              In Pool ({currentOccupancy})
+            </button>
+            <button
+              type="button"
+              onClick={() => setTableFilter("CHECKED_OUT")}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
+                tableFilter === "CHECKED_OUT"
+                  ? "bg-[#1D68BD] text-white"
+                  : "bg-slate-100 text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Checked Out
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
           {loading ? (
             <div className="p-8 text-center text-slate-400 text-xs">Loading walk-in entries...</div>
-          ) : walkIns.length > 0 ? (
+          ) : filteredWalkIns.length > 0 ? (
             <table className="w-full text-left text-xs text-slate-700">
               <thead className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 <tr>
@@ -410,7 +361,7 @@ export default function AdminWalkinsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {walkIns.map((w) => (
+                {filteredWalkIns.map((w) => (
                   <tr key={w.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="px-5 py-3.5">
                       <span
@@ -448,7 +399,7 @@ export default function AdminWalkinsPage() {
                       {w.status === "ACTIVE" ? (
                         <button
                           onClick={() => handleCheckOut(w.id)}
-                          className="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-[11px] font-bold px-3 py-1 rounded-xl transition"
+                          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white text-[11px] font-bold px-3 py-1 rounded-xl shadow-xs transition"
                         >
                           Check Out
                         </button>
@@ -462,7 +413,7 @@ export default function AdminWalkinsPage() {
             </table>
           ) : (
             <div className="p-8 text-center text-slate-400 text-xs">
-              No walk-in visitors recorded yet today.
+              No walk-in visitors found.
             </div>
           )}
         </div>
