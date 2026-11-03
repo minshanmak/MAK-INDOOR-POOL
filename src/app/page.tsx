@@ -170,7 +170,7 @@ export default function HomePage() {
          ========================================================================= */}
       <section
         id="home"
-        className="scroll-mt-24 relative min-h-[520px] sm:min-h-[580px] lg:min-h-[640px] flex items-center overflow-hidden bg-slate-950"
+        className="scroll-mt-24 relative min-h-[580px] sm:min-h-[640px] lg:min-h-[700px] -mt-[70px] pt-[70px] flex items-center overflow-hidden bg-slate-950"
       >
         {/* Background Indoor Swimming Pool Photograph - 2400x1600 Ultra HD, Edge-to-Edge Full Bleed */}
         <img
