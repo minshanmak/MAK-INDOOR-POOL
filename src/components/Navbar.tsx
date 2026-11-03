@@ -11,6 +11,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isPastHero, setIsPastHero] = useState(false);
 
   // References to navigation anchor links for measuring the sliding indicator position
   const navItemRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
@@ -59,13 +60,21 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, [activeSection]);
 
-  // Scroll-Spy & Dynamic Header Blur Transition
+  // Scroll-Spy & Dynamic Header Clear Glass Transition
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      setIsScrolled(scrollY > 25);
+      setIsScrolled(scrollY > 20);
 
-      if (pathname !== "/") return;
+      if (pathname !== "/") {
+        setIsPastHero(true);
+        return;
+      }
+
+      // Detect when scrolled past the hero section
+      const heroElement = document.getElementById("home");
+      const heroHeight = heroElement ? heroElement.offsetHeight - 90 : 580;
+      setIsPastHero(scrollY >= heroHeight);
 
       // Top boundary
       if (scrollY < 100) {
@@ -116,6 +125,9 @@ export default function Navbar() {
     return null;
   }
 
+  // Determine if navbar is over light page content (after hero or on child routes)
+  const isLightGlass = pathname !== "/" || isPastHero || activeSection !== "home";
+
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     id: string
@@ -131,6 +143,7 @@ export default function Navbar() {
         window.scrollTo({ top: y, behavior: "smooth" });
         window.history.pushState(null, "", `#${id}`);
         setActiveSection(id);
+        setIsPastHero(id !== "home");
       }
     }
     setMobileMenuOpen(false);
@@ -139,31 +152,53 @@ export default function Navbar() {
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        isScrolled
-          ? "bg-[#030d1a]/70 backdrop-blur-2xl border-b border-white/[0.15] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
-          : "bg-black/15 backdrop-blur-xl border-b border-white/10 shadow-none"
-      } text-white`}
+        isLightGlass
+          ? "bg-white/60 backdrop-blur-2xl backdrop-saturate-180 border-b border-slate-900/[0.07] shadow-[0_4px_30px_rgba(0,0,0,0.04)]"
+          : isScrolled
+          ? "bg-black/20 backdrop-blur-2xl border-b border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)]"
+          : "bg-black/10 backdrop-blur-xl border-b border-white/10 shadow-none"
+      } ${isLightGlass ? "text-slate-900" : "text-white"}`}
     >
       {/* Specular top rim highlight for Apple liquid glass effect */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
+      <div
+        className={`absolute inset-x-0 top-0 h-px pointer-events-none transition-opacity duration-500 ${
+          isLightGlass
+            ? "bg-gradient-to-r from-transparent via-slate-400/25 to-transparent"
+            : "bg-gradient-to-r from-transparent via-white/35 to-transparent"
+        }`}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-[70px]">
-          {/* Brand Logo with drop shadow */}
+          {/* Brand Logo with dynamic light/dark contrast */}
           <Link
             href="/"
             onClick={(e) => handleNavClick(e, "home")}
-            className="flex items-center group py-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
+            className={`flex items-center group py-2 transition-all ${
+              isLightGlass
+                ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                : "drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
+            }`}
             aria-label="M.A.K Indoor Pool - Home"
           >
-            <MakLogo size="md" light={true} />
+            <MakLogo size="md" light={!isLightGlass} />
           </Link>
 
           {/* Desktop Navigation Links (iOS Liquid Glass Capsule with Sliding Pill) */}
-          <nav className="relative hidden lg:flex items-center bg-white/[0.12] border border-white/[0.25] p-1 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-2xl">
+          <nav
+            className={`relative hidden lg:flex items-center p-1 rounded-full backdrop-blur-2xl transition-all duration-300 ${
+              isLightGlass
+                ? "bg-slate-900/[0.05] border border-slate-900/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_2px_12px_rgba(0,0,0,0.03)]"
+                : "bg-white/[0.12] border border-white/[0.25] shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_8px_24px_rgba(0,0,0,0.2)]"
+            }`}
+          >
             {/* iOS Spring Sliding White Pill Indicator */}
             <div
-              className="absolute rounded-full bg-white shadow-[0_2px_12px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.9)] transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none"
+              className={`absolute rounded-full transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${
+                isLightGlass
+                  ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.06)]"
+                  : "bg-white shadow-[0_2px_12px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.9)]"
+              }`}
               style={{
                 left: `${indicatorStyle.left}px`,
                 width: `${indicatorStyle.width}px`,
@@ -189,6 +224,8 @@ export default function Navbar() {
                   className={`relative z-10 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors duration-200 ${
                     isActive
                       ? "text-slate-950 font-extrabold"
+                      : isLightGlass
+                      ? "text-slate-600 hover:text-slate-950"
                       : "text-white/80 hover:text-white"
                   }`}
                 >
@@ -198,18 +235,26 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Right Action Group: Clear Glass Login Pill + Ceramic Book Now CTA */}
+          {/* Right Action Group: Clear Glass Login Pill + CTA */}
           <div className="hidden sm:flex items-center gap-2.5">
             <Link
               href="/admin/login"
-              className="bg-white/[0.12] hover:bg-white/[0.22] text-white border border-white/[0.25] px-4 py-1.5 rounded-full text-xs font-bold transition-all backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_16px_rgba(0,0,0,0.15)] active:scale-95"
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all backdrop-blur-2xl active:scale-95 ${
+                isLightGlass
+                  ? "bg-slate-900/[0.05] hover:bg-slate-900/[0.09] text-slate-800 border border-slate-900/10 shadow-xs"
+                  : "bg-white/[0.12] hover:bg-white/[0.22] text-white border border-white/[0.25] shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_16px_rgba(0,0,0,0.15)]"
+              }`}
             >
               Login
             </Link>
 
             <Link
               href="/book"
-              className="bg-white hover:bg-slate-100 text-slate-950 font-black px-4 py-1.5 rounded-full text-xs shadow-[0_4px_24px_rgba(255,255,255,0.25),inset_0_1px_1px_rgba(255,255,255,0.9)] flex items-center gap-1.5 transition active:scale-95"
+              className={`px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 transition active:scale-95 ${
+                isLightGlass
+                  ? "bg-slate-950 hover:bg-slate-800 text-white shadow-[0_4px_16px_rgba(0,0,0,0.15)]"
+                  : "bg-white hover:bg-slate-100 text-slate-950 shadow-[0_4px_24px_rgba(255,255,255,0.25),inset_0_1px_1px_rgba(255,255,255,0.9)]"
+              }`}
             >
               <span>Book Now</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -220,7 +265,11 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:hidden">
             <Link
               href="/book"
-              className="bg-white text-slate-950 font-black px-3 py-1.5 rounded-full text-xs shadow-xs"
+              className={`px-3 py-1.5 rounded-full text-xs font-black shadow-xs transition active:scale-95 ${
+                isLightGlass
+                  ? "bg-slate-950 text-white"
+                  : "bg-white text-slate-950"
+              }`}
             >
               Book
             </Link>
@@ -228,7 +277,11 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl bg-white/[0.12] border border-white/20 text-white hover:bg-white/20 transition backdrop-blur-xl active:scale-95"
+              className={`p-2 rounded-xl border transition backdrop-blur-xl active:scale-95 ${
+                isLightGlass
+                  ? "bg-slate-900/[0.05] border-slate-900/10 text-slate-800 hover:bg-slate-900/10"
+                  : "bg-white/[0.12] border-white/20 text-white hover:bg-white/20"
+              }`}
               aria-label="Toggle navigation"
             >
               {mobileMenuOpen ? (
@@ -243,7 +296,13 @@ export default function Navbar() {
 
       {/* Mobile Drawer Menu (iOS Frosted Glass) */}
       {mobileMenuOpen && (
-        <div className="sm:hidden bg-[#030d1a]/85 backdrop-blur-3xl border-b border-white/[0.15] px-4 pt-3 pb-6 space-y-2 shadow-2xl transition-all">
+        <div
+          className={`sm:hidden backdrop-blur-3xl px-4 pt-3 pb-6 space-y-2 shadow-2xl transition-all border-b ${
+            isLightGlass
+              ? "bg-white/95 border-slate-200/80 text-slate-800"
+              : "bg-slate-950/90 border-white/[0.15] text-white"
+          }`}
+        >
           <nav className="flex flex-col space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === "/" && activeSection === item.id;
@@ -257,7 +316,11 @@ export default function Navbar() {
                   onClick={(e) => handleNavClick(e, item.id)}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${
                     isActive
-                      ? "bg-white text-slate-950 font-extrabold shadow-md"
+                      ? isLightGlass
+                        ? "bg-slate-950 text-white font-extrabold shadow-sm"
+                        : "bg-white text-slate-950 font-extrabold shadow-md"
+                      : isLightGlass
+                      ? "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
                       : "text-white/80 hover:text-white hover:bg-white/10"
                   }`}
                 >
@@ -266,18 +329,30 @@ export default function Navbar() {
               );
             })}
           </nav>
-          <div className="pt-3 border-t border-white/[0.15] flex items-center gap-2">
+          <div
+            className={`pt-3 border-t flex items-center gap-2 ${
+              isLightGlass ? "border-slate-200" : "border-white/[0.15]"
+            }`}
+          >
             <Link
               href="/admin/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center bg-white/[0.12] hover:bg-white/20 text-white py-2 rounded-full text-xs font-bold border border-white/20 backdrop-blur-xl"
+              className={`flex-1 text-center py-2 rounded-full text-xs font-bold border backdrop-blur-xl ${
+                isLightGlass
+                  ? "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                  : "bg-white/[0.12] hover:bg-white/20 text-white border-white/20"
+              }`}
             >
               Login
             </Link>
             <Link
               href="/book"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center bg-white text-slate-900 py-2 rounded-full text-xs font-black shadow-md"
+              className={`flex-1 text-center py-2 rounded-full text-xs font-black shadow-md ${
+                isLightGlass
+                  ? "bg-slate-950 text-white hover:bg-slate-800"
+                  : "bg-white text-slate-900 hover:bg-slate-100"
+              }`}
             >
               Book Now
             </Link>
