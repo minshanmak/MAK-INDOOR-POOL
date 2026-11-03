@@ -222,47 +222,48 @@ export default function AdminReportsPage() {
   }, [dailyTrends]);
 
   return (
-    <div className="space-y-6 pb-12 text-slate-800">
-      {/* 1. TOP HEADER & FILTER BAR */}
-      <div className="bg-white rounded-3xl border border-black/[0.04] shadow-[0_2px_16px_rgba(0,0,0,0.03)] p-5 sm:p-6 space-y-5">
-        {/* Row 1: Title, Subtitle, & Export Actions */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-slate-100">
-          <div>
-            <div className="flex items-center gap-2 text-[#007AFF] text-xs font-bold uppercase tracking-wider mb-1">
-              <BarChart3 className="w-4 h-4 text-[#007AFF]" />
-              <span>Executive Business Intelligence</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Reports &amp; Analytics
-            </h1>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Authoritative revenue trends, slot occupancy heatmaps, and financial audit reconciliation.
-            </p>
-          </div>
-
-          {/* Export Actions (Apple Pill Buttons) */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+    <div className="space-y-4 pb-12 text-slate-800">
+      {/* 1. TOP SUB-TABS & EXPORT ACTIONS (Exact Mockup Match) */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        {/* Sub-tabs matching Image 2 */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          {["Revenue", "Bookings", "Walk-ins", "Cancellations", "Refunds", "Staff"].map((tabName, idx) => (
             <button
-              onClick={() => handleDownloadCsv("csv")}
-              className="flex-1 sm:flex-none bg-[#007AFF] hover:bg-[#0066DD] active:scale-95 text-white font-bold px-4 py-2.5 rounded-full text-xs shadow-sm transition flex items-center justify-center gap-2"
-              title="Download detailed Bookings Report (.csv)"
+              key={tabName}
+              type="button"
+              className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
+                idx === 0
+                  ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+                  : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+              }`}
             >
-              <Download className="w-4 h-4" />
-              <span>Export Bookings CSV</span>
+              {tabName}
             </button>
-            <button
-              onClick={() => handleDownloadCsv("payments-csv")}
-              className="flex-1 sm:flex-none bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold px-4 py-2.5 rounded-full text-xs shadow-sm transition flex items-center justify-center gap-2"
-              title="Download Financial Transaction Ledger (.csv)"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-cyan-400" />
-              <span>Export Ledger CSV</span>
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Row 2: Date Presets & Custom Pickers */}
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pt-1">
+        {/* Export Actions (Apple Pill Buttons) */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={() => handleDownloadCsv("csv")}
+            className="flex-1 sm:flex-none bg-white hover:bg-slate-50 active:scale-95 text-slate-700 font-bold px-3.5 py-2 rounded-2xl text-xs border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)] transition flex items-center justify-center gap-1.5"
+            title="Download Bookings CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Export CSV</span>
+          </button>
+          <button
+            onClick={() => window.print()}
+            className="flex-1 sm:flex-none bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center justify-center gap-1.5"
+          >
+            <span>Export PDF</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Date Presets Strip */}
+      <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] p-4">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
           {/* Preset Buttons Strip (iOS Segmented Switcher) */}
           <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl text-xs font-semibold overflow-x-auto w-full xl:w-auto">
             {[

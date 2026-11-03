@@ -99,25 +99,16 @@ export default function AdminClosingPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Title & Date Selector */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">End-of-Day Closing & Audit</h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Reconcile physical cash drawer and UPI statements against authoritative system bookings
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs">
-          <label className="font-semibold text-slate-600">Reconciliation Date:</label>
-          <input
-            type="date"
-            value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
-            className="px-3.5 py-1.5 bg-white border border-slate-200/80 rounded-full text-xs font-semibold shadow-2xs"
-          />
-        </div>
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
+      {/* Date Selector Row */}
+      <div className="flex justify-end items-center gap-2 text-xs">
+        <label className="font-bold text-slate-700">Reconciliation Date:</label>
+        <input
+          type="date"
+          value={targetDate}
+          onChange={(e) => setTargetDate(e.target.value)}
+          className="px-3.5 py-2 bg-white border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)] rounded-2xl text-xs font-bold text-slate-800"
+        />
       </div>
 
       {feedback && (

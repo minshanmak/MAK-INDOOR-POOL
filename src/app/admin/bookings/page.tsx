@@ -167,63 +167,54 @@ export default function AdminBookingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Page Header (Exact Mockup Match) */}
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
+      {/* Top Filter Tabs & New Booking Action (Exact Mockup Match) */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Bookings</h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Manage public and family bookings
-          </p>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          <button
+            type="button"
+            onClick={() => setFilterType("ALL")}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
+              filterType === "ALL"
+                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+            }`}
+          >
+            All Bookings
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType("PUBLIC")}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
+              filterType === "PUBLIC"
+                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+            }`}
+          >
+            Public Swimming
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType("FAMILY")}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
+              filterType === "FAMILY"
+                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+            }`}
+          >
+            Family Booking
+          </button>
         </div>
 
-        {/* Primary Action Button */}
         <button
           onClick={() => {
             setModalError(null);
             setShowCreateModal(true);
           }}
-          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2.5 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2"
+          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2 shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>New Booking</span>
-        </button>
-      </div>
-
-      {/* Top Filter Tabs: All Bookings, Public Swimming, Family Booking */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <button
-          type="button"
-          onClick={() => setFilterType("ALL")}
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-            filterType === "ALL"
-              ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
-              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-          }`}
-        >
-          All Bookings
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilterType("PUBLIC")}
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-            filterType === "PUBLIC"
-              ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
-              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-          }`}
-        >
-          Public Swimming
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilterType("FAMILY")}
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-            filterType === "FAMILY"
-              ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
-              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-          }`}
-        >
-          Family Booking
         </button>
       </div>
 

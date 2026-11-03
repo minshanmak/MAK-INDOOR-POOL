@@ -132,14 +132,32 @@ export default function AdminStaffPage() {
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Header (Exact Mockup Match) */}
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
+      {/* Tabs: Staff Members, Roles & Permissions & Add Staff Button (Exact Mockup Match) */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Staff & Permissions</h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Manage staff accounts and their access permissions
-          </p>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab("MEMBERS")}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === "MEMBERS"
+                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+            }`}
+          >
+            Staff Members
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("ROLES")}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === "ROLES"
+                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+            }`}
+          >
+            Roles & Permissions
+          </button>
         </div>
 
         <button
@@ -147,36 +165,10 @@ export default function AdminStaffPage() {
             setError(null);
             setShowCreate(true);
           }}
-          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2.5 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2"
+          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-center"
         >
           <Plus className="w-4 h-4" />
           <span>Add Staff</span>
-        </button>
-      </div>
-
-      {/* Tabs: Staff Members, Roles & Permissions */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <button
-          type="button"
-          onClick={() => setActiveTab("MEMBERS")}
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-            activeTab === "MEMBERS"
-              ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
-              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-          }`}
-        >
-          Staff Members
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("ROLES")}
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-            activeTab === "ROLES"
-              ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
-              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-          }`}
-        >
-          Roles & Permissions
         </button>
       </div>
 

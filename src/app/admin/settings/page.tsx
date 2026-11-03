@@ -95,15 +95,7 @@ export default function AdminSettingsPage() {
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Header (Exact Mockup Match) */}
-      <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">System Settings</h1>
-        <p className="text-xs text-slate-500 font-medium mt-0.5">
-          Configure pool operations, pricing and system preferences
-        </p>
-      </div>
-
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
       {feedback && (
         <div
           className={`p-4 rounded-2xl text-xs flex items-center gap-2 ${

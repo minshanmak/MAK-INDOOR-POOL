@@ -78,15 +78,7 @@ export default function AdminPaymentsPage() {
   }, [data, activeTab, selectedMethod, selectedDate, search]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Header (Exact Mockup Match) */}
-      <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Payments</h1>
-        <p className="text-xs text-slate-500 font-medium mt-0.5">
-          Track and manage all payments
-        </p>
-      </div>
-
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
       {/* 4 Top KPI Cards (Exact Mockup Match) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Today's Collection */}
@@ -310,3 +302,4 @@ export default function AdminPaymentsPage() {
     </div>
   );
 }
+

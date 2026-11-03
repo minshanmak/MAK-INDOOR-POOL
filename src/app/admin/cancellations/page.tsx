@@ -103,17 +103,7 @@ export default function AdminCancellationsPage() {
   const { cancellationRequests = [], refunds = [] } = data || {};
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Header (Exact Mockup Match) */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Cancellations & Refunds</h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Manage cancellation requests and refund processing
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
       {actionSuccess && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />

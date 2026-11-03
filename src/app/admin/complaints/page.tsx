@@ -120,22 +120,15 @@ export default function AdminComplaintsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Complaints & Feedback</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Log and resolve customer issues, audit service quality, and moderate public website reviews
-          </p>
-        </div>
-
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
+      {/* Top Action Row */}
+      <div className="flex justify-end items-center pb-1">
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="bg-ocean-600 hover:bg-ocean-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow transition flex items-center gap-1.5"
+          className="bg-[#1D68BD] hover:bg-[#155299] text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
-          Log New Complaint
+          <span>Log New Complaint</span>
         </button>
       </div>
 

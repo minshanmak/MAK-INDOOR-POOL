@@ -55,37 +55,27 @@ export default function AdminCustomersPage() {
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Header (Exact Mockup Match) */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Customers</h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Manage customer profiles and booking history
-          </p>
-        </div>
-
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2.5 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Customer</span>
-        </button>
-      </div>
-
-      {/* Search Bar (Exact Mockup Match) */}
-      <div className="bg-white p-3.5 rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)]">
-        <form onSubmit={handleSearch} className="relative">
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
+      {/* Top Search & Add Customer Action Bar (Exact Mockup Match) */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <form onSubmit={handleSearch} className="relative flex-1 w-full max-w-md">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or phone..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition-all font-medium"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] rounded-2xl text-xs text-slate-900 focus:ring-2 focus:ring-[#1D68BD]/20 transition-all font-medium"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
         </form>
+
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2.5 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-center"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add Customer</span>
+        </button>
       </div>
 
       {/* Customers Table (Exact Mockup Match) */}
@@ -228,3 +218,4 @@ export default function AdminCustomersPage() {
     </div>
   );
 }
+

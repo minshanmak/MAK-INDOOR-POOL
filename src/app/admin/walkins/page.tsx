@@ -132,42 +132,7 @@ export default function AdminWalkinsPage() {
   const isNearCapacity = currentOccupancy >= maxCapacity * 0.8;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Page Title & Subtitle */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Walk-ins</h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Record and manage walk-in visitors
-          </p>
-        </div>
-
-        {/* Live Swimmers Status Indicator */}
-        <div
-          className={`px-4 py-2 rounded-2xl border flex items-center gap-3 transition-all ${
-            isNearCapacity
-              ? "bg-amber-50/90 border-amber-300 text-amber-950 shadow-xs"
-              : "bg-white border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)]"
-          }`}
-        >
-          <div
-            className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white shadow-xs ${
-              isNearCapacity ? "bg-amber-500" : "bg-[#1D68BD]"
-            }`}
-          >
-            <Users className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-              Current Swimmers
-            </span>
-            <span className="text-sm font-black text-slate-900 tabular-nums">
-              {currentOccupancy} <span className="text-xs font-semibold text-slate-400">/ {maxCapacity} Max</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
       {/* Top 2 Mode Selection Cards (Exact Mockup Match) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Mode 1: Full Check-in / Check-out */}

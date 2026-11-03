@@ -180,19 +180,7 @@ export default function AdminMaintenancePage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Page Title & Subtitle */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Maintenance & Water Safety
-          </h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Daily maintenance, water quality and safety checks
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
       {/* Segmented Filter Tabs (Exact Mockup Match) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <button

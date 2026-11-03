@@ -105,26 +105,18 @@ export default function AdminOfflineSyncPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Offline Support & Queue Sync</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Operational continuity during internet outages. Local queueing for walk-ins and conflict detection.
-          </p>
-        </div>
-
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
+      <div className="flex justify-end items-center pb-1">
         <button
           onClick={toggleSimulateOffline}
-          className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+          className={`px-3.5 py-2 rounded-2xl border text-xs font-bold transition flex items-center gap-1.5 shadow-xs ${
             isOnline
-              ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
               : "bg-amber-100 border-amber-300 text-amber-900"
           }`}
         >
           {isOnline ? <Wifi className="w-4 h-4 text-emerald-600" /> : <WifiOff className="w-4 h-4 text-amber-600" />}
-          <span>{isOnline ? "Network: Online (Click to toggle)" : "Network: Offline (Simulated)"}</span>
+          <span>{isOnline ? "Network: Online (Simulate Offline)" : "Network: Offline (Simulated)"}</span>
         </button>
       </div>
 
