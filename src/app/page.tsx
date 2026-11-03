@@ -32,6 +32,7 @@ import {
   RefreshCw,
   XCircle,
   LifeBuoy,
+  ArrowDown,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -166,109 +167,97 @@ export default function HomePage() {
   return (
     <div className="bg-[#F0F5FA] text-slate-800 space-y-16 sm:space-y-20 pb-20 scroll-smooth">
       {/* =========================================================================
-          1. HERO SECTION (#home) - Official M.A.K Indoor Pool Experience (Ultra-HD)
+          1. HERO SECTION (#home) - Haven-Style Centered Minimalist Glass Aesthetic
          ========================================================================= */}
       <section
         id="home"
-        className="scroll-mt-24 relative min-h-[580px] sm:min-h-[640px] lg:min-h-[700px] -mt-[70px] pt-[70px] flex items-center overflow-hidden bg-slate-950"
+        className="scroll-mt-24 relative min-h-[620px] sm:min-h-[700px] lg:min-h-[760px] -mt-[70px] pt-[115px] pb-16 flex flex-col justify-between items-center overflow-hidden bg-slate-950 text-center"
       >
         {/* Background Indoor Swimming Pool Photograph - 2400x1600 Ultra HD, Edge-to-Edge Full Bleed */}
         <img
           src="/images/mak-indoor-pool.jpg?v=1"
           alt="M.A.K Indoor Pool Facility & Experience"
-          className="absolute inset-0 w-full h-full object-cover object-center brightness-[1.05] contrast-[1.05] select-none pointer-events-none"
+          className="absolute inset-0 w-full h-full object-cover object-center brightness-[1.04] contrast-[1.05] select-none pointer-events-none"
           loading="eager"
         />
 
-        {/* Pure Neutral Scrim (No colored gradient; preserves natural indoor pool clarity) */}
-        <div className="absolute inset-0 bg-black/25" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
+        {/* Pure Neutral Scrim (Preserves real photo colors & clarity, zero blue wash) */}
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/55" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 z-10 w-full flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
-          {/* Left Hero Content */}
-          <div className="max-w-2xl space-y-5 text-white">
-            {/* Pill Tag */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/30 text-xs font-semibold text-white shadow-xs">
-              <span>M.A.K Indoor Pool</span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
-              Premium Indoor <br />
-              Swimming Experience
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-xs sm:text-sm text-white/95 font-medium leading-relaxed max-w-lg drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
-              A clean, safe and family-friendly indoor pool for public swimming and exclusive family bookings.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Link
-                href="/book"
-                className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-extrabold px-6 py-2.5 rounded-full text-xs shadow-lg transition flex items-center gap-2"
-              >
-                <span>Book Now</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-
-              <a
-                href="#pricing"
-                className="bg-black/30 hover:bg-black/50 active:scale-95 backdrop-blur-md border border-white/30 text-white font-bold px-6 py-2.5 rounded-full text-xs transition drop-shadow-xs"
-              >
-                View Pricing
-              </a>
-            </div>
-
-            {/* 4 Feature Badges Row */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-5 pt-3 text-xs font-medium text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-cyan-300" />
-                <span>Clean &amp; Safe</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-cyan-300" />
-                <span>Family Friendly</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Droplets className="w-4 h-4 text-cyan-300" />
-                <span>Well Maintained</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-cyan-300" />
-                <span>Flexible Booking</span>
-              </div>
-            </div>
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-auto space-y-6 w-full flex flex-col items-center">
+          {/* Top Pill Badge (Operating Hours & Location - Haven "We just raised 20M" style) */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 hover:bg-white/20 backdrop-blur-xl border border-white/30 text-xs font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.4)] transition hover:scale-105">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Open Daily: 9:00 AM – 11:00 PM</span>
+            <span className="text-white/40">•</span>
+            <span className="text-cyan-200">Moonniyur, Kerala</span>
           </div>
 
-          {/* Right Floating Frosted Glass Operating Hours Widget */}
-          <div className="bg-black/40 backdrop-blur-xl border border-white/25 rounded-3xl p-5 sm:p-6 text-white shadow-2xl space-y-4 w-full max-w-xs shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
-                <Clock className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <span className="text-[10px] text-cyan-200 uppercase tracking-wider font-semibold block leading-tight">
-                  Operating Hours
-                </span>
-                <span className="text-sm font-bold text-white block leading-tight">
-                  9:00 AM – 11:00 PM
-                </span>
-              </div>
-            </div>
+          {/* Main Headline (Haven Typography: Centered, Massive, Confident, Clean) */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.8)] max-w-3xl">
+            Swim in peace.
+          </h1>
 
-            <div className="pt-1 space-y-2.5 text-xs">
-              <div className="flex items-center gap-2.5 text-white/90">
-                <Waves className="w-4 h-4 text-cyan-300 shrink-0" />
-                <span>Public Swimming: 9:00 AM – 4:00 PM</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-white/90">
-                <Users2 className="w-4 h-4 text-cyan-300 shrink-0" />
-                <span>Family Bookings: 4:00 PM – 11:00 PM</span>
-              </div>
+          {/* Subtitle (Haven Style: 2 relaxed, poetic lines) */}
+          <p className="text-sm sm:text-base lg:text-lg text-white/95 font-medium leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
+            A clean, private and temperature-controlled indoor pool. <br className="hidden sm:inline" />
+            Designed for peaceful morning laps and exclusive evening family moments.
+          </p>
+
+          {/* Centered CTA Buttons (Haven Style: "Get Started ->" + "Watch Demo") */}
+          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+            <Link
+              href="/book"
+              className="bg-white hover:bg-slate-100 active:scale-95 text-slate-950 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-[0_4px_24px_rgba(255,255,255,0.35),inset_0_1px_1px_rgba(255,255,255,0.9)] transition flex items-center gap-2 group"
+            >
+              <span>Book Your Slot</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setIsPlayingVideo(true)}
+              className="bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur-xl border border-white/30 text-white font-bold px-6 py-3 rounded-full text-xs sm:text-sm transition flex items-center gap-2 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
+            >
+              <Play className="w-3.5 h-3.5 fill-white" />
+              <span>Watch Tour</span>
+            </button>
+          </div>
+
+          {/* Subtle Feature Badges Row */}
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-3 text-xs font-semibold text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-cyan-300" />
+              <span>Clean &amp; Safe</span>
+            </div>
+            <span className="text-white/30">•</span>
+            <div className="flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-cyan-300" />
+              <span>Family Friendly</span>
+            </div>
+            <span className="text-white/30">•</span>
+            <div className="flex items-center gap-1.5">
+              <Droplets className="w-3.5 h-3.5 text-cyan-300" />
+              <span>Well Maintained</span>
+            </div>
+            <span className="text-white/30">•</span>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-cyan-300" />
+              <span>Flexible Booking</span>
             </div>
           </div>
+        </div>
+
+        {/* Bottom Floating "SCROLL ↓" Pill (Exact Haven Match) */}
+        <div className="relative z-10 pt-4">
+          <a
+            href="#about"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 text-[11px] font-bold text-white/90 tracking-widest uppercase shadow-xs transition hover:scale-105 active:scale-95"
+          >
+            <span>SCROLL</span>
+            <ArrowDown className="w-3 h-3 animate-bounce" />
+          </a>
         </div>
       </section>
 
