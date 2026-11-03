@@ -24,7 +24,7 @@ export default function HomePage() {
   return (
     <div className="bg-[#F0F5FA] text-slate-800 space-y-12 sm:space-y-16 pb-16">
       {/* 1. HERO SECTION (Exact Match to Mockup) */}
-      <section className="relative min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] flex items-center overflow-hidden bg-[#0284C7]">
+      <section className="relative min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] flex items-center overflow-hidden bg-[#061426]">
         {/* Background Swimming Pool Photograph */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -32,15 +32,15 @@ export default function HomePage() {
             backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=85')`,
           }}
         />
-        {/* Luminous Aquatic Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0369A1]/85 via-[#0284C7]/70 to-[#38BDF8]/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0284C7]/40 via-transparent to-transparent" />
+        {/* Sleek Deep Oceanic Gradient Overlay (Exact Mockup Match) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#061426]/95 via-[#0A2647]/80 to-[#0A2647]/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#061426]/60 via-transparent to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 z-10 w-full flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
           {/* Left Hero Content */}
           <div className="max-w-2xl space-y-5 text-white">
             {/* Pill Tag */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold text-white shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-white shadow-xs">
               <span>M.A.K Indoor Pool</span>
             </div>
 
@@ -51,7 +51,7 @@ export default function HomePage() {
             </h1>
 
             {/* Subtitle */}
-            <p className="text-xs sm:text-sm text-cyan-100 font-normal leading-relaxed max-w-lg">
+            <p className="text-xs sm:text-sm text-cyan-100/90 font-normal leading-relaxed max-w-lg">
               A clean, safe and family-friendly indoor pool for public swimming and exclusive family bookings.
             </p>
 
@@ -67,38 +67,38 @@ export default function HomePage() {
 
               <Link
                 href="/pricing"
-                className="bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur-md border border-white/30 text-white font-bold px-6 py-2.5 rounded-full text-xs transition"
+                className="bg-white/10 hover:bg-white/20 active:scale-95 backdrop-blur-md border border-white/25 text-white font-bold px-6 py-2.5 rounded-full text-xs transition"
               >
                 View Pricing
               </Link>
             </div>
 
-            {/* 4 Feature Pills Row */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-4 text-xs font-medium text-cyan-100">
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
-                <ShieldCheck className="w-3.5 h-3.5 text-cyan-300" />
+            {/* 4 Feature Badges Row (Exact Mockup Match) */}
+            <div className="flex flex-wrap items-center gap-4 sm:gap-5 pt-3 text-xs font-medium text-white/90">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-cyan-300" />
                 <span>Clean &amp; Safe</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
-                <Users className="w-3.5 h-3.5 text-cyan-300" />
+              <div className="flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-cyan-300" />
                 <span>Family Friendly</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
-                <Droplets className="w-3.5 h-3.5 text-cyan-300" />
+              <div className="flex items-center gap-1.5">
+                <Droplets className="w-4 h-4 text-cyan-300" />
                 <span>Well Maintained</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15">
-                <Calendar className="w-3.5 h-3.5 text-cyan-300" />
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-cyan-300" />
                 <span>Flexible Booking</span>
               </div>
             </div>
           </div>
 
-          {/* Right Floating Frosted Glass Operating Hours Widget */}
-          <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-3xl p-5 text-white shadow-2xl space-y-3.5 w-full max-w-xs shrink-0">
+          {/* Right Floating Frosted Glass Operating Hours Widget (Exact Mockup Match) */}
+          <div className="bg-[#0A2647]/50 backdrop-blur-xl border border-white/20 rounded-3xl p-5 sm:p-6 text-white shadow-2xl space-y-4 w-full max-w-xs shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0 shadow-xs">
-                <Clock className="w-4 h-4 text-white" />
+              <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center shrink-0 shadow-inner">
+                <Clock className="w-5 h-5 text-white" />
               </div>
               <div>
                 <span className="text-[10px] text-cyan-200 uppercase tracking-wider font-semibold block leading-tight">
@@ -110,12 +110,12 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="pt-1 space-y-2 text-xs">
-              <div className="flex items-center gap-2 text-cyan-100">
+            <div className="pt-1 space-y-2.5 text-xs">
+              <div className="flex items-center gap-2.5 text-cyan-100">
                 <Waves className="w-4 h-4 text-cyan-300 shrink-0" />
                 <span>Public Swimming: 9:00 AM – 4:00 PM</span>
               </div>
-              <div className="flex items-center gap-2 text-cyan-100">
+              <div className="flex items-center gap-2.5 text-cyan-100">
                 <Users2 className="w-4 h-4 text-cyan-300 shrink-0" />
                 <span>Family Bookings: 4:00 PM – 11:00 PM</span>
               </div>
@@ -273,51 +273,51 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. STATS RIBBON (Clean White Rounded Floating Container - Exact Match) */}
+      {/* 4. STATS RIBBON (Soft Light Blue Rounded Container - Exact Mockup Match) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)]">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 divide-y sm:divide-y-0 md:divide-x divide-slate-100 text-xs text-slate-700">
+        <div className="bg-[#E4F2FE] rounded-3xl p-5 sm:p-6 border border-sky-200/50 shadow-xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 divide-y sm:divide-y-0 md:divide-x divide-sky-200/60 text-xs text-slate-700">
             {/* Stat 1 */}
             <div className="flex items-center gap-3 px-2 sm:px-4 justify-center">
-              <div className="w-10 h-10 rounded-2xl bg-sky-50 text-[#1D68BD] flex items-center justify-center shrink-0">
-                <Waves className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-2xl bg-white text-[#0284C7] flex items-center justify-center shrink-0 shadow-xs">
+                <Waves className="w-5 h-5 text-[#0284C7]" />
               </div>
               <div>
                 <span className="font-extrabold text-base text-slate-900 block leading-tight">2</span>
-                <span className="text-slate-500 font-medium block text-[11px] leading-tight">Swimming Modes</span>
+                <span className="text-slate-600 font-medium block text-[11px] leading-tight">Swimming Modes</span>
               </div>
             </div>
 
             {/* Stat 2 */}
             <div className="flex items-center gap-3 px-2 sm:px-4 justify-center pt-3 sm:pt-0">
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <Calendar className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-2xl bg-white text-[#0284C7] flex items-center justify-center shrink-0 shadow-xs">
+                <Calendar className="w-5 h-5 text-[#0284C7]" />
               </div>
               <div>
                 <span className="font-extrabold text-base text-slate-900 block leading-tight">12+</span>
-                <span className="text-slate-500 font-medium block text-[11px] leading-tight">Hours Daily</span>
+                <span className="text-slate-600 font-medium block text-[11px] leading-tight">Hours Daily</span>
               </div>
             </div>
 
             {/* Stat 3 */}
             <div className="flex items-center gap-3 px-2 sm:px-4 justify-center pt-3 sm:pt-0">
-              <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                <Users2 className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-2xl bg-white text-[#0284C7] flex items-center justify-center shrink-0 shadow-xs">
+                <Users2 className="w-5 h-5 text-[#0284C7]" />
               </div>
               <div>
                 <span className="font-extrabold text-sm text-slate-900 block leading-tight">Family Friendly</span>
-                <span className="text-slate-500 font-medium block text-[11px] leading-tight">Exclusive Bookings</span>
+                <span className="text-slate-600 font-medium block text-[11px] leading-tight">Exclusive Bookings</span>
               </div>
             </div>
 
             {/* Stat 4 */}
             <div className="flex items-center gap-3 px-2 sm:px-4 justify-center pt-3 sm:pt-0">
-              <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-2xl bg-white text-[#0284C7] flex items-center justify-center shrink-0 shadow-xs">
+                <ShieldCheck className="w-5 h-5 text-[#0284C7]" />
               </div>
               <div>
                 <span className="font-extrabold text-sm text-slate-900 block leading-tight">Safe &amp; Hygienic</span>
-                <span className="text-slate-500 font-medium block text-[11px] leading-tight">Clean &amp; Well Maintained</span>
+                <span className="text-slate-600 font-medium block text-[11px] leading-tight">Clean &amp; Well Maintained</span>
               </div>
             </div>
           </div>
@@ -337,10 +337,10 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
           {/* Pricing Card 1: Public Swimming */}
-          <div className="bg-[#F0F8FF] border border-sky-100 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-6">
+          <div className="bg-white border border-sky-100 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                <div className="w-7 h-7 rounded-xl bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center shrink-0">
                   <Waves className="w-4 h-4" />
                 </div>
                 <span>Public Swimming</span>
@@ -369,17 +369,17 @@ export default function HomePage() {
 
             <Link
               href="/book?type=PUBLIC"
-              className="w-full text-center bg-[#1D68BD] hover:bg-[#155299] text-white font-bold py-2.5 rounded-2xl text-xs shadow-xs transition active:scale-95"
+              className="w-full text-center bg-[#0284C7] hover:bg-[#0369A1] text-white font-bold py-2.5 rounded-2xl text-xs shadow-xs transition active:scale-95"
             >
               Book Public Slot
             </Link>
           </div>
 
           {/* Pricing Card 2: Exclusive Family Booking */}
-          <div className="bg-[#FAF5FF] border border-purple-100 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-6">
+          <div className="bg-white border border-purple-100 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                <div className="w-7 h-7 rounded-xl bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-xl bg-purple-50 text-[#9333EA] flex items-center justify-center shrink-0">
                   <Users2 className="w-4 h-4" />
                 </div>
                 <span>Exclusive Family Booking</span>
@@ -488,7 +488,7 @@ export default function HomePage() {
 
       {/* 7. "READY TO SWIM?" CTA BANNER (Exact Match) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#38BDF8] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+        <div className="bg-gradient-to-r from-[#0077B6] via-[#0096C7] to-[#00B4D8] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
           <div>
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
               Ready to Swim?
@@ -500,7 +500,7 @@ export default function HomePage() {
 
           <Link
             href="/book"
-            className="bg-white hover:bg-sky-50 active:scale-95 text-[#0284C7] font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
+            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
           >
             <span>Book Now</span>
             <ArrowRight className="w-4 h-4" />

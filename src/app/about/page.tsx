@@ -21,15 +21,15 @@ export default function AboutPage() {
   return (
     <div className="bg-[#F0F5FA] text-slate-800 space-y-12 sm:space-y-16 pb-20">
       {/* 1. HERO HEADER BANNER (Consistent with Mockup) */}
-      <section className="relative min-h-[280px] sm:min-h-[340px] flex items-center overflow-hidden bg-[#0284C7]">
+      <section className="relative min-h-[280px] sm:min-h-[340px] flex items-center overflow-hidden bg-[#061426]">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=85')`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0369A1]/85 via-[#0284C7]/70 to-[#38BDF8]/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0284C7]/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#061426]/95 via-[#0A2647]/80 to-[#0A2647]/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#061426]/60 via-transparent to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 z-10 w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="max-w-xl space-y-3 text-white">
@@ -171,7 +171,7 @@ export default function AboutPage() {
 
       {/* 4. "READY TO SWIM?" CTA BANNER (Exact Match) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#38BDF8] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+        <div className="bg-gradient-to-r from-[#0077B6] via-[#0096C7] to-[#00B4D8] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
           <div>
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
               Ready to Swim?
@@ -183,7 +183,7 @@ export default function AboutPage() {
 
           <Link
             href="/book"
-            className="bg-white hover:bg-sky-50 active:scale-95 text-[#0284C7] font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
+            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
           >
             <span>Book Now</span>
             <ArrowRight className="w-4 h-4" />
