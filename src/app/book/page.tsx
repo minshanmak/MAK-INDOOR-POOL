@@ -455,19 +455,19 @@ function BookingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F5FA] text-slate-800 pb-28 lg:pb-16 pt-3 sm:pt-6 selection:bg-cyan-500 selection:text-white">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-4 sm:space-y-5">
+    <div className="min-h-screen bg-gradient-to-b from-[#F0F5FA] via-[#F4F8FC] to-[#EEF4FA] text-slate-800 pb-28 lg:pb-16 pt-4 sm:pt-8 selection:bg-slate-900 selection:text-white">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-5 sm:space-y-6">
 
         {/* =========================================================================
             TOP iOS PROGRESS BAR & NAVIGATION (Steps 1 to 4)
            ========================================================================= */}
         {wizardStep <= 4 && (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             <div className="flex items-center justify-between">
               {wizardStep === 1 ? (
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-950 bg-white/70 hover:bg-white backdrop-blur-xl border border-white px-3 py-1.5 rounded-full shadow-2xs transition active:scale-95"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-950 bg-white/80 hover:bg-white backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-95"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span>Home</span>
@@ -476,7 +476,7 @@ function BookingContent() {
                 <button
                   type="button"
                   onClick={() => goToStep((wizardStep - 1) as any)}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-950 bg-white/70 hover:bg-white backdrop-blur-xl border border-white px-3 py-1.5 rounded-full shadow-2xs transition active:scale-95"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-950 bg-white/80 hover:bg-white backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-95"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -484,10 +484,10 @@ function BookingContent() {
               )}
 
               {/* iOS Step Pill */}
-              <div className="inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white px-3 py-1.5 rounded-full shadow-2xs text-[11px] font-bold text-slate-700">
-                <span className="text-cyan-700 font-extrabold">Step {wizardStep} of 4</span>
+              <div className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] text-[11px] font-bold text-slate-700">
+                <span className="text-[#00838F] font-extrabold">Step {wizardStep} of 4</span>
                 <span className="text-slate-300">•</span>
-                <span className="text-slate-500">
+                <span className="text-slate-600">
                   {wizardStep === 1 && "Experience"}
                   {wizardStep === 2 && "Date & Time"}
                   {wizardStep === 3 && "Swimmers"}
@@ -497,14 +497,14 @@ function BookingContent() {
             </div>
 
             {/* Apple Segmented 4-Step Progress Bar */}
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-4 gap-2">
               {[1, 2, 3, 4].map((s) => (
                 <div
                   key={s}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
                     wizardStep >= s
                       ? "bg-slate-950 shadow-xs"
-                      : "bg-slate-200"
+                      : "bg-slate-200/80"
                   }`}
                 />
               ))}
@@ -524,57 +524,86 @@ function BookingContent() {
             STEP 1: CHOOSE EXPERIENCE (Public Swimming vs Family Exclusive)
            ========================================================================= */}
         {wizardStep === 1 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
-            <div className="text-center space-y-1 pb-1">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300">
+            {/* Header */}
+            <div className="text-center space-y-1.5 pb-1">
               <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
                 Choose Your Experience
               </h1>
-              <p className="text-xs text-slate-500 font-medium">
-                Select between daytime public swimming or an exclusive family session
+              <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto">
+                Select between an exclusive private family session or daytime public swimming
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-3.5">
+            {/* Side-by-Side 2-Column Grid on Desktop, Stacked on Mobile */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               {/* Option 1: Family Exclusive */}
               <button
                 type="button"
                 onClick={() => setBookingType("FAMILY")}
-                className={`w-full text-left p-5 rounded-3xl border-2 transition-all active:scale-[0.99] relative overflow-hidden ${
+                className={`w-full text-left p-5 sm:p-6 rounded-3xl border-2 transition-all duration-200 active:scale-[0.99] flex flex-col justify-between relative overflow-hidden group ${
                   bookingType === "FAMILY"
-                    ? "bg-white border-slate-950 shadow-lg ring-4 ring-cyan-500/10"
-                    : "bg-white/80 hover:bg-white border-white shadow-2xs hover:shadow-sm"
+                    ? "bg-white border-slate-950 shadow-[0_12px_36px_rgba(0,0,0,0.08)] ring-4 ring-slate-950/[0.04]"
+                    : "bg-white/80 hover:bg-white border-slate-200/80 hover:border-slate-300 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md"
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1.5">
-                    <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-50 text-cyan-800 text-[10px] font-black uppercase tracking-wider">
-                      <Sparkles className="w-3 h-3 text-cyan-600" />
+                <div>
+                  {/* Top Bar with Micro Badge & Radio Checkmark */}
+                  <div className="flex items-center justify-between gap-2 pb-4">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-50 text-[#00838F] text-[10px] font-black uppercase tracking-wider border border-cyan-100">
+                      <Sparkles className="w-3 h-3 text-[#00838F]" />
                       <span>100% Private Pool</span>
+                    </span>
+
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                        bookingType === "FAMILY"
+                          ? "bg-slate-950 text-white shadow-xs"
+                          : "border-2 border-slate-300 group-hover:border-slate-400"
+                      }`}
+                    >
+                      {bookingType === "FAMILY" && (
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      )}
                     </div>
+                  </div>
 
-                    <h2 className="text-lg font-black text-slate-950 flex items-center gap-2">
-                      <span>👨‍👩‍👧‍👦 Family Exclusive</span>
+                  {/* Title & Description */}
+                  <div className="space-y-2">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight flex items-center gap-2">
+                      <span>Family Exclusive</span>
                     </h2>
-
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      Entire pool facility locked exclusively for your family and friends. Zero outside visitors.
+                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                      Entire pool facility reserved exclusively for your family and friends. Zero outside visitors.
                     </p>
                   </div>
 
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition ${
-                    bookingType === "FAMILY"
-                      ? "border-slate-950 bg-slate-950 text-white"
-                      : "border-slate-300"
-                  }`}>
-                    {bookingType === "FAMILY" && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  {/* Feature Highlights */}
+                  <div className="pt-4 space-y-2 text-xs text-slate-600 border-t border-slate-100/80 mt-4">
+                    <div className="flex items-center gap-2 font-medium">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Complete privacy &amp; lounge exclusivity</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Users className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <span>Up to 12 guests included in base rate</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span>Evening slots &amp; ambient lighting</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <div className="text-slate-500">
-                    <span className="font-bold text-slate-900 text-sm font-mono">₹1,500</span> / hour (up to 12 guests)
+                {/* Card Footer: Price & Hours */}
+                <div className="mt-5 pt-4 border-t border-slate-100 flex items-baseline justify-between">
+                  <div>
+                    <span className="text-2xl font-black text-slate-950 font-mono tracking-tight">
+                      ₹1,500
+                    </span>
+                    <span className="text-xs text-slate-500 font-medium ml-1">/ hour</span>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">
+                  <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full font-mono">
                     9:00 AM – 11:00 PM
                   </span>
                 </div>
@@ -584,42 +613,69 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={() => setBookingType("PUBLIC")}
-                className={`w-full text-left p-5 rounded-3xl border-2 transition-all active:scale-[0.99] relative overflow-hidden ${
+                className={`w-full text-left p-5 sm:p-6 rounded-3xl border-2 transition-all duration-200 active:scale-[0.99] flex flex-col justify-between relative overflow-hidden group ${
                   bookingType === "PUBLIC"
-                    ? "bg-white border-slate-950 shadow-lg ring-4 ring-cyan-500/10"
-                    : "bg-white/80 hover:bg-white border-white shadow-2xs hover:shadow-sm"
+                    ? "bg-white border-slate-950 shadow-[0_12px_32px_rgba(0,0,0,0.08)] ring-4 ring-slate-950/[0.04]"
+                    : "bg-white/80 hover:bg-white border-slate-200/80 hover:border-slate-300 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md"
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1.5">
-                    <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider">
-                      <Users className="w-3 h-3 text-slate-600" />
-                      <span>Shared Daytime Session</span>
+                <div>
+                  {/* Top Bar with Micro Badge & Radio Checkmark */}
+                  <div className="flex items-center justify-between gap-2 pb-4">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-black uppercase tracking-wider border border-slate-200/60">
+                      <Waves className="w-3 h-3 text-cyan-700" />
+                      <span>Shared Daytime</span>
+                    </span>
+
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                        bookingType === "PUBLIC"
+                          ? "bg-slate-950 text-white shadow-xs"
+                          : "border-2 border-slate-300 group-hover:border-slate-400"
+                      }`}
+                    >
+                      {bookingType === "PUBLIC" && (
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      )}
                     </div>
+                  </div>
 
-                    <h2 className="text-lg font-black text-slate-950 flex items-center gap-2">
-                      <span>🏊 Public Swimming</span>
+                  {/* Title & Description */}
+                  <div className="space-y-2">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight flex items-center gap-2">
+                      <span>Public Swimming</span>
                     </h2>
-
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      Swim in our clean, heated indoor pool during public hours. Strictly capped at 25 swimmers.
+                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                      Individual hourly access to our clean, temperature-balanced indoor pool. Strictly capped at 25 swimmers.
                     </p>
                   </div>
 
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition ${
-                    bookingType === "PUBLIC"
-                      ? "border-slate-950 bg-slate-950 text-white"
-                      : "border-slate-300"
-                  }`}>
-                    {bookingType === "PUBLIC" && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  {/* Feature Highlights */}
+                  <div className="pt-4 space-y-2 text-xs text-slate-600 border-t border-slate-100/80 mt-4">
+                    <div className="flex items-center gap-2 font-medium">
+                      <Waves className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <span>Temperature-controlled indoor pool</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-medium">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>UV filtration &amp; strict hygiene standards</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span>Showers &amp; private lockers included</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <div className="text-slate-500">
-                    <span className="font-bold text-slate-900 text-sm font-mono">₹150</span> / person / hr
+                {/* Card Footer: Price & Hours */}
+                <div className="mt-5 pt-4 border-t border-slate-100 flex items-baseline justify-between">
+                  <div>
+                    <span className="text-2xl font-black text-slate-950 font-mono tracking-tight">
+                      ₹150
+                    </span>
+                    <span className="text-xs text-slate-500 font-medium ml-1">/ person / hr</span>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">
+                  <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full font-mono">
                     9:00 AM – 4:00 PM
                   </span>
                 </div>
@@ -627,14 +683,14 @@ function BookingContent() {
             </div>
 
             {/* Bottom Continue Action */}
-            <div className="pt-2">
+            <div className="pt-2 flex justify-center">
               <button
                 type="button"
                 onClick={() => goToStep(2)}
-                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-black py-4 rounded-full text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto min-w-[280px] bg-slate-950 hover:bg-slate-800 text-white font-black py-4 px-8 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
               >
                 <span>Continue to Date &amp; Time</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
