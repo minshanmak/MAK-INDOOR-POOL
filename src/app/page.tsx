@@ -195,7 +195,7 @@ export default function HomePage() {
           </div>
 
           {/* Main Headline (Haven Typography: Centered, Massive, Confident, Clean) */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.8)] max-w-3xl px-2">
+          <h1 className="text-3xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.8)] max-w-3xl px-2">
             Swim in peace.
           </h1>
 
@@ -347,7 +347,7 @@ export default function HomePage() {
       {/* =========================================================================
           3. ABOUT SECTION (#about) - Exact Match to Reference Mockup
          ========================================================================= */}
-      <section id="about" className="scroll-mt-24 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <section id="about" className="scroll-mt-24 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 overflow-hidden">
         {/* Ambient Decorative Wave Gradient on Right Edge */}
         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[400px] bg-gradient-to-l from-sky-200/40 via-sky-100/20 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 
