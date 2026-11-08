@@ -37,6 +37,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-plus-jakarta)", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        manrope: ["var(--font-manrope)", "sans-serif"],
       },
     },
   },

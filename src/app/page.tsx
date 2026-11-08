@@ -203,8 +203,8 @@ export default function HomePage() {
             />
           </h1>
 
-          {/* Subtitle (Haven Style: 2 relaxed, poetic lines) */}
-          <p className="text-xs sm:text-base lg:text-lg text-white/95 font-medium leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] px-3">
+          {/* Subtitle (Manrope Regular 400) */}
+          <p className="font-manrope font-normal text-xs sm:text-base lg:text-lg text-white/95 leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] px-3">
             A clean, private and temperature-controlled indoor pool. <br className="hidden sm:inline" />
             Designed for peaceful morning laps and exclusive evening family moments.
           </p>
