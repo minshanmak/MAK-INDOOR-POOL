@@ -434,7 +434,7 @@ function BookingContent() {
   const handleShareWhatsApp = (booking: any) => {
     const text = `🏊 *M.A.K INDOOR POOL BOOKING CONFIRMATION*\n\n` +
       `*Pass ID:* ${booking.id}\n` +
-      `*Type:* ${booking.type === "FAMILY" ? "Exclusive Family Slot" : "Public Swimming"}\n` +
+      `*Type:* ${booking.type === "FAMILY" ? "Private Pool Hire" : "Public Swim Session"}\n` +
       `*Date:* ${booking.bookingDate}\n` +
       `*Time:* ${formatTimeSlot(booking.startTime)} – ${formatTimeSlot(booking.endTime)}\n` +
       `*Swimmers:* ${booking.guestCount} Guests\n` +
@@ -469,7 +469,7 @@ function BookingContent() {
                   href="/"
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-950 bg-white/80 hover:bg-white backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-95"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-4 h-4" />
                   <span>Home</span>
                 </Link>
               ) : (
@@ -478,7 +478,7 @@ function BookingContent() {
                   onClick={() => goToStep((wizardStep - 1) as any)}
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-950 bg-white/80 hover:bg-white backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-95"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
                 </button>
               )}
@@ -521,7 +521,7 @@ function BookingContent() {
         )}
 
         {/* =========================================================================
-            STEP 1: CHOOSE EXPERIENCE (Public Swimming vs Family Exclusive)
+            STEP 1: CHOOSE EXPERIENCE (Public Swim Session vs Private Pool Hire)
            ========================================================================= */}
         {wizardStep === 1 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300">
@@ -531,13 +531,13 @@ function BookingContent() {
                 Choose Your Experience
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto">
-                Select between an exclusive private family session or daytime public swimming
+                Select an exclusive private family session or daytime public swimming.
               </p>
             </div>
 
             {/* Side-by-Side 2-Column Grid on Desktop, Stacked on Mobile */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-              {/* Option 1: Family Exclusive */}
+              {/* Option 1: Private Pool Hire */}
               <button
                 type="button"
                 onClick={() => setBookingType("FAMILY")}
@@ -550,8 +550,8 @@ function BookingContent() {
                 <div>
                   {/* Top Bar with Micro Badge & Radio Checkmark */}
                   <div className="flex items-center justify-between gap-2 pb-4">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-50 text-[#00838F] text-[10px] font-black uppercase tracking-wider border border-cyan-100">
-                      <Sparkles className="w-3 h-3 text-[#00838F]" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[10px] font-black uppercase tracking-wider border border-slate-200/80">
+                      <Sparkles className="w-3 h-3 text-slate-700" />
                       <span>100% Private Pool</span>
                     </span>
 
@@ -571,7 +571,7 @@ function BookingContent() {
                   {/* Title & Description */}
                   <div className="space-y-2">
                     <h2 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight flex items-center gap-2">
-                      <span>Family Exclusive</span>
+                      <span>Private Pool Hire</span>
                     </h2>
                     <p className="text-xs text-slate-600 leading-relaxed font-normal">
                       Entire pool facility reserved exclusively for your family and friends. Zero outside visitors.
@@ -579,17 +579,17 @@ function BookingContent() {
                   </div>
 
                   {/* Feature Highlights */}
-                  <div className="pt-4 space-y-2 text-xs text-slate-600 border-t border-slate-100/80 mt-4">
-                    <div className="flex items-center gap-2 font-medium">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="pt-4 space-y-2.5 text-xs text-slate-600 border-t border-slate-100/80 mt-4">
+                    <div className="flex items-center gap-2.5 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                       <span>Complete privacy &amp; lounge exclusivity</span>
                     </div>
-                    <div className="flex items-center gap-2 font-medium">
-                      <Users className="w-4 h-4 text-cyan-700 shrink-0" />
+                    <div className="flex items-center gap-2.5 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                       <span>Up to 12 guests included in base rate</span>
                     </div>
-                    <div className="flex items-center gap-2 font-medium">
-                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <div className="flex items-center gap-2.5 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                       <span>Evening slots &amp; ambient lighting</span>
                     </div>
                   </div>
@@ -597,11 +597,11 @@ function BookingContent() {
 
                 {/* Card Footer: Price & Hours */}
                 <div className="mt-5 pt-4 border-t border-slate-100 flex items-baseline justify-between">
-                  <div>
-                    <span className="text-2xl font-black text-slate-950 font-mono tracking-tight">
+                  <div className="flex items-baseline">
+                    <span className="text-xl sm:text-2xl font-black text-slate-950 font-mono tracking-tight">
                       ₹1,500
                     </span>
-                    <span className="text-xs text-slate-500 font-medium ml-1">/ hour</span>
+                    <span className="text-xs text-slate-500 font-medium">/hour</span>
                   </div>
                   <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full font-mono">
                     9:00 AM – 11:00 PM
@@ -609,7 +609,7 @@ function BookingContent() {
                 </div>
               </button>
 
-              {/* Option 2: Public Swimming */}
+              {/* Option 2: Public Swim Session */}
               <button
                 type="button"
                 onClick={() => setBookingType("PUBLIC")}
@@ -622,8 +622,8 @@ function BookingContent() {
                 <div>
                   {/* Top Bar with Micro Badge & Radio Checkmark */}
                   <div className="flex items-center justify-between gap-2 pb-4">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-black uppercase tracking-wider border border-slate-200/60">
-                      <Waves className="w-3 h-3 text-cyan-700" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[10px] font-black uppercase tracking-wider border border-slate-200/80">
+                      <Waves className="w-3 h-3 text-slate-700" />
                       <span>Shared Daytime</span>
                     </span>
 
@@ -643,7 +643,7 @@ function BookingContent() {
                   {/* Title & Description */}
                   <div className="space-y-2">
                     <h2 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight flex items-center gap-2">
-                      <span>Public Swimming</span>
+                      <span>Public Swim Session</span>
                     </h2>
                     <p className="text-xs text-slate-600 leading-relaxed font-normal">
                       Individual hourly access to our clean, temperature-balanced indoor pool. Strictly capped at 25 swimmers.
@@ -651,29 +651,29 @@ function BookingContent() {
                   </div>
 
                   {/* Feature Highlights */}
-                  <div className="pt-4 space-y-2 text-xs text-slate-600 border-t border-slate-100/80 mt-4">
-                    <div className="flex items-center gap-2 font-medium">
-                      <Waves className="w-4 h-4 text-cyan-700 shrink-0" />
-                      <span>Temperature-controlled indoor pool</span>
+                  <div className="pt-4 space-y-2.5 text-xs text-slate-600 border-t border-slate-100/80 mt-4">
+                    <div className="flex items-center gap-2.5 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                      <span>Heated indoor pool</span>
                     </div>
-                    <div className="flex items-center gap-2 font-medium">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div className="flex items-center gap-2.5 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                       <span>UV filtration &amp; strict hygiene standards</span>
                     </div>
-                    <div className="flex items-center gap-2 font-medium">
-                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
-                      <span>Showers &amp; private lockers included</span>
+                    <div className="flex items-center gap-2.5 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                      <span>Lockers included</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Footer: Price & Hours */}
                 <div className="mt-5 pt-4 border-t border-slate-100 flex items-baseline justify-between">
-                  <div>
-                    <span className="text-2xl font-black text-slate-950 font-mono tracking-tight">
+                  <div className="flex items-baseline">
+                    <span className="text-xl sm:text-2xl font-black text-slate-950 font-mono tracking-tight">
                       ₹150
                     </span>
-                    <span className="text-xs text-slate-500 font-medium ml-1">/ person / hr</span>
+                    <span className="text-xs text-slate-500 font-medium">/person/hr</span>
                   </div>
                   <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full font-mono">
                     9:00 AM – 4:00 PM
@@ -706,7 +706,7 @@ function BookingContent() {
                 Select Date &amp; Time
               </h1>
               <p className="text-xs text-slate-500 font-medium">
-                {isFamily ? "Family Exclusive slots (9:00 AM – 11:00 PM)" : "Public daytime swimming (9:00 AM – 4:00 PM)"}
+                {isFamily ? "Private Pool Hire slots (9:00 AM – 11:00 PM)" : "Public swim sessions (9:00 AM – 4:00 PM)"}
               </p>
             </div>
 
@@ -1093,7 +1093,7 @@ function BookingContent() {
                   Session Summary
                 </span>
                 <span className="text-[10px] font-bold text-cyan-800 bg-cyan-50 px-2.5 py-0.5 rounded-full uppercase">
-                  {isFamily ? "Family Exclusive" : "Public Swimming"}
+                  {isFamily ? "Private Pool Hire" : "Public Swim Session"}
                 </span>
               </div>
 
@@ -1316,7 +1316,7 @@ function BookingContent() {
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Experience</span>
-                  <span className="font-bold text-slate-900">{isFamily ? "Family Exclusive" : "Public Swimming"}</span>
+                  <span className="font-bold text-slate-900">{isFamily ? "Private Pool Hire" : "Public Swim Session"}</span>
                 </div>
                 <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-200">
                   <span>Amount Due Now:</span>
