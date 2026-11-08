@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -18,6 +19,23 @@ const manrope = Manrope({
   display: "swap",
 });
 
+const simplyRounded = localFont({
+  src: [
+    {
+      path: "../../public/fonts/simply-rounded-regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/simply-rounded-bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-simply-rounded",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "M.A.K Indoor Pool | Kerala's Premier Indoor Swimming Pool (Moonniyur)",
   description: "Book public swimming sessions and exclusive family indoor pool slots online. Pristine water quality, temperature control, and complete family privacy in Kalathingalpara, Moonniyur, Malappuram, Kerala.",
@@ -29,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${plusJakarta.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${plusJakarta.variable} ${manrope.variable} ${simplyRounded.variable}`}>
       <body className={`${plusJakarta.className} min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-lagoon-500 selection:text-ocean-950 font-sans`}>
         <Navbar />
         <main className="flex-1">{children}</main>

@@ -188,9 +188,8 @@ export default function HomePage() {
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-auto space-y-5 sm:space-y-6 w-full flex flex-col items-center">
           {/* Top Pill Badge (Operating Hours & Location) */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/25 backdrop-blur-xl border border-white/35 text-[11px] sm:text-xs font-semibold text-white shadow-xs transition hover:scale-105 max-w-[94vw]">
-            <span className="whitespace-nowrap">Open Daily: 9 AM – 11 PM</span>
-            <span className="text-white/40">•</span>
-            <span className="text-cyan-200 truncate">Moonniyur, Kerala</span>
+            <span className="whitespace-nowrap">Open Daily at 9 AM to 11 PM</span>
+
           </div>
 
           {/* Main Headline with Custom Fluid/Liquid Font (ALL-CAPS) */}
@@ -203,8 +202,8 @@ export default function HomePage() {
             />
           </h1>
 
-          {/* Subtitle (Manrope Regular 400) */}
-          <p className="font-manrope font-normal text-xs sm:text-base lg:text-lg text-white/95 leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] px-3">
+          {/* Subtitle with Custom Simply Rounded Font from User Specimen */}
+          <p className="font-rounded font-bold text-[11px] xs:text-xs sm:text-base lg:text-lg text-white/95 leading-relaxed max-w-xl mx-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] px-4 text-center">
             A clean, private and temperature-controlled indoor pool. <br className="hidden sm:inline" />
             Designed for peaceful morning laps and exclusive evening family moments.
           </p>
@@ -694,11 +693,10 @@ export default function HomePage() {
                       key={hrs}
                       type="button"
                       onClick={() => setCalcHours(hrs)}
-                      className={`py-2 text-xs font-bold rounded-xl border transition-all ${
-                        calcHours === hrs
-                          ? "bg-[#0284C7] text-white border-[#0284C7] shadow-xs"
-                          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-                      }`}
+                      className={`py-2 text-xs font-bold rounded-xl border transition-all ${calcHours === hrs
+                        ? "bg-[#0284C7] text-white border-[#0284C7] shadow-xs"
+                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                        }`}
                     >
                       {hrs} hr{hrs > 1 ? "s" : ""}
                     </button>
@@ -772,11 +770,10 @@ export default function HomePage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveGalleryTab(tab.id)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
-                  activeGalleryTab === tab.id
-                    ? "bg-[#0284C7] text-white font-bold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition ${activeGalleryTab === tab.id
+                  ? "bg-[#0284C7] text-white font-bold shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
               >
                 {tab.label}
               </button>
@@ -901,11 +898,10 @@ export default function HomePage() {
                 key={cat.id}
                 type="button"
                 onClick={() => setFaqCategory(cat.id)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
-                  faqCategory === cat.id
-                    ? "bg-[#0284C7] text-white font-bold shadow-2xs"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                }`}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition ${faqCategory === cat.id
+                  ? "bg-[#0284C7] text-white font-bold shadow-2xs"
+                  : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                  }`}
               >
                 {cat.label}
               </button>
@@ -929,9 +925,8 @@ export default function HomePage() {
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-                      isOpen ? "rotate-180 text-[#0284C7]" : ""
-                    }`}
+                    className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180 text-[#0284C7]" : ""
+                      }`}
                   />
                 </button>
                 {isOpen && (
@@ -1190,7 +1185,7 @@ export default function HomePage() {
             onClick={() =>
               setLightboxIndex(
                 (lightboxIndex - 1 + filteredGallery.length) %
-                  filteredGallery.length
+                filteredGallery.length
               )
             }
             className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/20 text-white hover:bg-white/40 transition"
