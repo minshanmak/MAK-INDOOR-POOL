@@ -186,9 +186,8 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/55" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-auto space-y-5 sm:space-y-6 w-full flex flex-col items-center">
-          {/* Top Pill Badge (Operating Hours & Location - Haven "We just raised 20M" style) */}
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/25 backdrop-blur-xl border border-white/35 text-[11px] sm:text-xs font-semibold text-white shadow-xs transition hover:scale-105 max-w-[94vw]">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          {/* Top Pill Badge (Operating Hours & Location) */}
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/25 backdrop-blur-xl border border-white/35 text-[11px] sm:text-xs font-semibold text-white shadow-xs transition hover:scale-105 max-w-[94vw]">
             <span className="whitespace-nowrap">Open Daily: 9 AM – 11 PM</span>
             <span className="text-white/40">•</span>
             <span className="text-cyan-200 truncate">Moonniyur, Kerala</span>
