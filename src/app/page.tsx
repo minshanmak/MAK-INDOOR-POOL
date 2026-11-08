@@ -193,9 +193,14 @@ export default function HomePage() {
             <span className="text-cyan-200 truncate">Moonniyur, Kerala</span>
           </div>
 
-          {/* Main Headline (Haven Typography: Centered, Massive, Confident, Clean) */}
-          <h1 className="text-3xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.8)] max-w-3xl px-2">
-            Swim in peace.
+          {/* Main Headline with Custom Fluid/Liquid Font */}
+          <h1 className="w-full max-w-3xl px-2 mx-auto flex flex-col items-center justify-center">
+            <span className="sr-only">Swim in peace.</span>
+            <img
+              src="/images/hero-swim-in-peace-title.png"
+              alt="Swim in peace."
+              className="h-14 sm:h-20 lg:h-24 w-auto max-w-[92vw] object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)] select-none pointer-events-none"
+            />
           </h1>
 
           {/* Subtitle (Haven Style: 2 relaxed, poetic lines) */}
