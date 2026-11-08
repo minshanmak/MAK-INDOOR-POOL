@@ -32,6 +32,8 @@ import {
   Heart,
   Timer,
   CheckCircle,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { getPoolDate, getPoolHour } from "@/lib/timezone";
 
@@ -432,17 +434,17 @@ function BookingContent() {
   };
 
   const handleShareWhatsApp = (booking: any) => {
-    const text = `🏊 *M.A.K INDOOR POOL BOOKING CONFIRMATION*\n\n` +
+    const text = `*M.A.K INDOOR POOL BOOKING PASS*\n\n` +
       `*Pass ID:* ${booking.id}\n` +
-      `*Type:* ${booking.type === "FAMILY" ? "Private Pool Hire" : "Public Swim Session"}\n` +
+      `*Type:* ${booking.type === "FAMILY" ? "Family & Group (Private)" : "Public Swimming"}\n` +
       `*Date:* ${booking.bookingDate}\n` +
       `*Time:* ${formatTimeSlot(booking.startTime)} – ${formatTimeSlot(booking.endTime)}\n` +
-      `*Swimmers:* ${booking.guestCount} Guests\n` +
+      `*Guests:* ${booking.guestCount} Guests\n` +
       (booking.customerPlace ? `*Place:* ${booking.customerPlace}\n` : "") +
       `*Paid Online:* ₹${booking.totalPaid}\n` +
-      (booking.balanceAmount > 0 ? `*Balance Due at Arrival:* ₹${booking.balanceAmount}\n` : `*Status:* Paid in Full\n`) +
-      `\n📍 Location: Kalathingalpara, Moonniyur, Malappuram, Kerala\n` +
-      `📞 Helpline: +91 98470 12345`;
+      (booking.balanceAmount > 0 ? `*Balance Due at Arrival:* ₹${booking.balanceAmount}\n` : `*Status:* Paid in full\n`) +
+      `\nLocation: Kalathingalpara, Moonniyur, Malappuram, Kerala\n` +
+      `Helpline: +91 98470 12345`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
@@ -469,7 +471,7 @@ function BookingContent() {
                   href="/"
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-950 bg-white/80 hover:bg-white backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-95"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4" />
                   <span>Home</span>
                 </Link>
               ) : (
@@ -478,7 +480,7 @@ function BookingContent() {
                   onClick={() => goToStep((wizardStep - 1) as any)}
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-950 bg-white/80 hover:bg-white backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-95"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4" />
                   <span>Back</span>
                 </button>
               )}
@@ -488,7 +490,7 @@ function BookingContent() {
                 <span className="text-[#00838F] font-extrabold">Step {wizardStep} of 4</span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-600">
-                  {wizardStep === 1 && "Experience"}
+                  {wizardStep === 1 && "Session"}
                   {wizardStep === 2 && "Date & Time"}
                   {wizardStep === 3 && "Swimmers"}
                   {wizardStep === 4 && "Review & Pay"}
@@ -521,23 +523,23 @@ function BookingContent() {
         )}
 
         {/* =========================================================================
-            STEP 1: CHOOSE EXPERIENCE (Public Swim Session vs Private Pool Hire)
+            STEP 1: SELECT SESSION (Family & Group vs Public Swimming)
            ========================================================================= */}
         {wizardStep === 1 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300">
             {/* Header */}
             <div className="text-center space-y-1.5 pb-1">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-                Choose Your Experience
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+                Select Session
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto">
-                Select an exclusive private family session or daytime public swimming.
+              <p className="text-xs sm:text-sm text-slate-500 font-normal max-w-md mx-auto">
+                Private pool rental for groups, or individual daytime swimming
               </p>
             </div>
 
             {/* Side-by-Side 2-Column Grid on Desktop, Stacked on Mobile */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-              {/* Option 1: Private Pool Hire */}
+              {/* Option 1: Family & Group */}
               <button
                 type="button"
                 onClick={() => setBookingType("FAMILY")}
@@ -548,15 +550,19 @@ function BookingContent() {
                 }`}
               >
                 <div>
-                  {/* Top Bar with Micro Badge & Radio Checkmark */}
-                  <div className="flex items-center justify-between gap-2 pb-4">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[10px] font-black uppercase tracking-wider border border-slate-200/80">
-                      <Sparkles className="w-3 h-3 text-slate-700" />
-                      <span>100% Private Pool</span>
-                    </span>
+                  {/* Top Bar: Title on left, Radio Checkmark on right (No eyebrow badge) */}
+                  <div className="flex items-start justify-between gap-3 pb-3">
+                    <div className="space-y-1">
+                      <h2 className="text-lg sm:text-xl font-bold text-slate-950 tracking-tight">
+                        Family &amp; Group
+                      </h2>
+                      <p className="text-xs text-slate-500 leading-normal">
+                        Exclusive access to the pool and lounge for your group.
+                      </p>
+                    </div>
 
                     <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all shrink-0 mt-0.5 ${
                         bookingType === "FAMILY"
                           ? "bg-slate-950 text-white shadow-xs"
                           : "border-2 border-slate-300 group-hover:border-slate-400"
@@ -568,40 +574,30 @@ function BookingContent() {
                     </div>
                   </div>
 
-                  {/* Title & Description */}
-                  <div className="space-y-2">
-                    <h2 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight flex items-center gap-2">
-                      <span>Private Pool Hire</span>
-                    </h2>
-                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                      Entire pool facility reserved exclusively for your family and friends. Zero outside visitors.
-                    </p>
-                  </div>
-
                   {/* Feature Highlights */}
-                  <div className="pt-4 space-y-2.5 text-xs text-slate-600 border-t border-slate-100/80 mt-4">
-                    <div className="flex items-center gap-2.5 font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                      <span>Complete privacy &amp; lounge exclusivity</span>
+                  <div className="pt-3.5 space-y-2 text-xs text-slate-600 border-t border-slate-100/90 mt-2">
+                    <div className="flex items-center gap-2 font-medium">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Full private access — entire facility reserved</span>
                     </div>
-                    <div className="flex items-center gap-2.5 font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                      <span>Up to 12 guests included in base rate</span>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Users className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <span>Up to 12 guests included (₹100/extra)</span>
                     </div>
-                    <div className="flex items-center gap-2.5 font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                      <span>Evening slots &amp; ambient lighting</span>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span>Morning to night slots (9:00 AM – 11:00 PM)</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Footer: Price & Hours */}
                 <div className="mt-5 pt-4 border-t border-slate-100 flex items-baseline justify-between">
-                  <div className="flex items-baseline">
-                    <span className="text-xl sm:text-2xl font-black text-slate-950 font-mono tracking-tight">
+                  <div>
+                    <span className="text-2xl font-black text-slate-950 font-mono tracking-tight">
                       ₹1,500
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">/hour</span>
+                    <span className="text-xs text-slate-500 font-medium ml-1">/ hour</span>
                   </div>
                   <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full font-mono">
                     9:00 AM – 11:00 PM
@@ -609,7 +605,7 @@ function BookingContent() {
                 </div>
               </button>
 
-              {/* Option 2: Public Swim Session */}
+              {/* Option 2: Public Swimming */}
               <button
                 type="button"
                 onClick={() => setBookingType("PUBLIC")}
@@ -620,15 +616,19 @@ function BookingContent() {
                 }`}
               >
                 <div>
-                  {/* Top Bar with Micro Badge & Radio Checkmark */}
-                  <div className="flex items-center justify-between gap-2 pb-4">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[10px] font-black uppercase tracking-wider border border-slate-200/80">
-                      <Waves className="w-3 h-3 text-slate-700" />
-                      <span>Shared Daytime</span>
-                    </span>
+                  {/* Top Bar: Title on left, Radio Checkmark on right (No eyebrow badge) */}
+                  <div className="flex items-start justify-between gap-3 pb-3">
+                    <div className="space-y-1">
+                      <h2 className="text-lg sm:text-xl font-bold text-slate-950 tracking-tight">
+                        Public Swimming
+                      </h2>
+                      <p className="text-xs text-slate-500 leading-normal">
+                        Hourly passes for individual swimmers during open hours.
+                      </p>
+                    </div>
 
                     <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all shrink-0 mt-0.5 ${
                         bookingType === "PUBLIC"
                           ? "bg-slate-950 text-white shadow-xs"
                           : "border-2 border-slate-300 group-hover:border-slate-400"
@@ -640,40 +640,30 @@ function BookingContent() {
                     </div>
                   </div>
 
-                  {/* Title & Description */}
-                  <div className="space-y-2">
-                    <h2 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight flex items-center gap-2">
-                      <span>Public Swim Session</span>
-                    </h2>
-                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                      Individual hourly access to our clean, temperature-balanced indoor pool. Strictly capped at 25 swimmers.
-                    </p>
-                  </div>
-
                   {/* Feature Highlights */}
-                  <div className="pt-4 space-y-2.5 text-xs text-slate-600 border-t border-slate-100/80 mt-4">
-                    <div className="flex items-center gap-2.5 font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                      <span>Heated indoor pool</span>
+                  <div className="pt-3.5 space-y-2 text-xs text-slate-600 border-t border-slate-100/90 mt-2">
+                    <div className="flex items-center gap-2 font-medium">
+                      <Waves className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <span>Shared pool access during daytime hours</span>
                     </div>
-                    <div className="flex items-center gap-2.5 font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                      <span>UV filtration &amp; strict hygiene standards</span>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Users className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <span>Priced per swimmer per hour</span>
                     </div>
-                    <div className="flex items-center gap-2.5 font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                      <span>Lockers included</span>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span>Showers &amp; private lockers included</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Footer: Price & Hours */}
                 <div className="mt-5 pt-4 border-t border-slate-100 flex items-baseline justify-between">
-                  <div className="flex items-baseline">
-                    <span className="text-xl sm:text-2xl font-black text-slate-950 font-mono tracking-tight">
+                  <div>
+                    <span className="text-2xl font-black text-slate-950 font-mono tracking-tight">
                       ₹150
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">/person/hr</span>
+                    <span className="text-xs text-slate-500 font-medium ml-1">/ person / hr</span>
                   </div>
                   <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full font-mono">
                     9:00 AM – 4:00 PM
@@ -687,9 +677,9 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={() => goToStep(2)}
-                className="w-full sm:w-auto min-w-[280px] bg-slate-950 hover:bg-slate-800 text-white font-black py-4 px-8 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
+                className="w-full sm:w-auto min-w-[260px] bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 px-8 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
               >
-                <span>Continue to Date &amp; Time</span>
+                <span>Continue</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -702,20 +692,20 @@ function BookingContent() {
         {wizardStep === 2 && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
             <div className="text-center space-y-1 pb-1">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                 Select Date &amp; Time
               </h1>
-              <p className="text-xs text-slate-500 font-medium">
-                {isFamily ? "Private Pool Hire slots (9:00 AM – 11:00 PM)" : "Public swim sessions (9:00 AM – 4:00 PM)"}
+              <p className="text-xs text-slate-500 font-normal">
+                {isFamily ? "Private slots available between 9:00 AM and 11:00 PM" : "Public swimming open from 9:00 AM to 4:00 PM"}
               </p>
             </div>
 
             {/* Date Selection Card */}
             <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-cyan-700" />
-                  <span>Choose Date</span>
+                  <span>Date</span>
                 </label>
                 <span className="text-[11px] font-bold text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded-full">
                   {formatDateLabel(date)}
@@ -729,12 +719,12 @@ function BookingContent() {
                   onClick={() => setDate(todayIST)}
                   className={`py-2.5 px-2 rounded-2xl border text-center transition active:scale-95 ${
                     date === todayIST
-                      ? "bg-slate-950 text-white border-slate-950 shadow-xs font-black"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold"
+                      ? "bg-slate-950 text-white border-slate-950 shadow-xs font-bold"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
                   }`}
                 >
-                  <div className="text-[10px] opacity-75 uppercase">Today</div>
-                  <div className="text-xs">{todayIST.split("-")[2]} {formatDateLabel(todayIST).split(" ")[2]}</div>
+                  <div className="text-[10px] text-slate-400 font-medium">Today</div>
+                  <div className="text-xs font-bold">{todayIST.split("-")[2]} {formatDateLabel(todayIST).split(" ")[2]}</div>
                 </button>
 
                 <button
@@ -742,12 +732,12 @@ function BookingContent() {
                   onClick={() => setDate(tomorrowIST)}
                   className={`py-2.5 px-2 rounded-2xl border text-center transition active:scale-95 ${
                     date === tomorrowIST
-                      ? "bg-slate-950 text-white border-slate-950 shadow-xs font-black"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold"
+                      ? "bg-slate-950 text-white border-slate-950 shadow-xs font-bold"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
                   }`}
                 >
-                  <div className="text-[10px] opacity-75 uppercase">Tomorrow</div>
-                  <div className="text-xs">{tomorrowIST.split("-")[2]} {formatDateLabel(tomorrowIST).split(" ")[2]}</div>
+                  <div className="text-[10px] text-slate-400 font-medium">Tomorrow</div>
+                  <div className="text-xs font-bold">{tomorrowIST.split("-")[2]} {formatDateLabel(tomorrowIST).split(" ")[2]}</div>
                 </button>
 
                 <button
@@ -755,18 +745,18 @@ function BookingContent() {
                   onClick={() => setDate(dayAfterIST)}
                   className={`py-2.5 px-2 rounded-2xl border text-center transition active:scale-95 ${
                     date === dayAfterIST
-                      ? "bg-slate-950 text-white border-slate-950 shadow-xs font-black"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold"
+                      ? "bg-slate-950 text-white border-slate-950 shadow-xs font-bold"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
                   }`}
                 >
-                  <div className="text-[10px] opacity-75 uppercase">Next Day</div>
-                  <div className="text-xs">{dayAfterIST.split("-")[2]} {formatDateLabel(dayAfterIST).split(" ")[2]}</div>
+                  <div className="text-[10px] text-slate-400 font-medium">Next Day</div>
+                  <div className="text-xs font-bold">{dayAfterIST.split("-")[2]} {formatDateLabel(dayAfterIST).split(" ")[2]}</div>
                 </button>
               </div>
 
               {/* Calendar Input for other dates */}
               <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
-                <span className="text-[11px] font-medium">Or choose a future date:</span>
+                <span className="text-[11px] font-medium">Pick another date:</span>
                 <input
                   type="date"
                   min={todayIST}
@@ -780,9 +770,9 @@ function BookingContent() {
             {/* Time Slot Selection Card */}
             <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-cyan-700" />
-                  <span>Choose Start Slot</span>
+                  <span>Start Time</span>
                 </label>
                 <span className="text-[11px] font-mono font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-full">
                   Selected: {formatTimeSlot(startTime)}
@@ -791,27 +781,29 @@ function BookingContent() {
 
               {/* Day/Evening filter for Family */}
               {isFamily && (
-                <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl text-[11px] font-bold">
+                <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl text-[11px] font-medium">
                   <button
                     type="button"
                     onClick={() => setSlotFilter("ALL")}
-                    className={`flex-1 py-1.5 rounded-xl transition ${slotFilter === "ALL" ? "bg-white text-slate-950 shadow-2xs font-extrabold" : "text-slate-600"}`}
+                    className={`flex-1 py-1.5 rounded-xl transition ${slotFilter === "ALL" ? "bg-white text-slate-950 shadow-xs font-bold" : "text-slate-600"}`}
                   >
                     All Slots
                   </button>
                   <button
                     type="button"
                     onClick={() => setSlotFilter("DAY")}
-                    className={`flex-1 py-1.5 rounded-xl transition ${slotFilter === "DAY" ? "bg-white text-slate-950 shadow-2xs font-extrabold" : "text-slate-600"}`}
+                    className={`flex-1 py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 ${slotFilter === "DAY" ? "bg-white text-slate-950 shadow-xs font-bold" : "text-slate-600"}`}
                   >
-                    ☀️ Daytime (9–4)
+                    <Sun className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Day (9–4)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setSlotFilter("EVENING")}
-                    className={`flex-1 py-1.5 rounded-xl transition ${slotFilter === "EVENING" ? "bg-white text-slate-950 shadow-2xs font-extrabold" : "text-slate-600"}`}
+                    className={`flex-1 py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 ${slotFilter === "EVENING" ? "bg-white text-slate-950 shadow-xs font-bold" : "text-slate-600"}`}
                   >
-                    🌙 Evening (4–11)
+                    <Moon className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Evening (4–11)</span>
                   </button>
                 </div>
               )}
@@ -864,7 +856,7 @@ function BookingContent() {
                         }`}
                       >
                         {isSelected
-                          ? "Selected ✓"
+                          ? "Selected"
                           : isPast
                           ? "Past"
                           : isBooked
@@ -902,10 +894,10 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={handleValidateStep2}
-                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-black py-4 rounded-full text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2"
+                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
               >
-                <span>Continue to Swimmers &amp; Duration</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Continue</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
@@ -917,22 +909,22 @@ function BookingContent() {
         {wizardStep === 3 && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
             <div className="text-center space-y-1 pb-1">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                 Swimmers &amp; Duration
               </h1>
-              <p className="text-xs text-slate-500 font-medium">
-                Choose the party size and how many hours you want to swim
+              <p className="text-xs text-slate-500 font-normal">
+                Select number of guests and booking duration
               </p>
             </div>
 
             {/* Swimmer Count Card (iOS Stepper) */}
             <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-cyan-700" />
-                  <span>Number of Swimmers / Guests</span>
+                  <span>Number of Swimmers</span>
                 </label>
-                <span className="text-[10px] text-slate-500 font-semibold">
+                <span className="text-[11px] text-slate-500 font-semibold">
                   {isFamily ? "Max 30 Guests" : "Max 25 Swimmers"}
                 </span>
               </div>
@@ -997,20 +989,20 @@ function BookingContent() {
 
               <p className="text-[11px] text-slate-500 leading-tight">
                 {isFamily
-                  ? "Base rate ₹1,500/hr covers up to 12 people. ₹100/hr for each additional guest."
-                  : "₹150 per swimmer per hour. Full payment required online."}
+                  ? "Base rate covers up to 12 guests. ₹100/hr for each additional guest."
+                  : "₹150 per swimmer per hour."}
               </p>
             </div>
 
             {/* Duration Selector Card (1-Tap Pills) */}
             <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-cyan-700" />
-                  <span>Session Duration</span>
+                  <span>Duration</span>
                 </label>
-                <span className="text-[10px] text-slate-500 font-bold">
-                  Finishes at {formatTimeSlot(endTime)}
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Until {formatTimeSlot(endTime)}
                 </span>
               </div>
 
@@ -1024,8 +1016,8 @@ function BookingContent() {
                       onClick={() => setDurationHours(h)}
                       className={`py-3 px-2 rounded-2xl border text-center transition active:scale-95 ${
                         durationHours === h
-                          ? "bg-slate-950 text-white border-slate-950 font-black shadow-xs ring-2 ring-cyan-400/30"
-                          : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold"
+                          ? "bg-slate-950 text-white border-slate-950 font-bold shadow-xs ring-2 ring-cyan-400/30"
+                          : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
                       }`}
                     >
                       <div className="text-xs font-mono">{h} Hour{h > 1 ? "s" : ""}</div>
@@ -1040,8 +1032,8 @@ function BookingContent() {
             {/* Live Price Estimation Pill */}
             <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-white shadow-2xs flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
-                  {isFamily ? "Advance Due Online" : "Total Admission"}
+                <span className="text-[10px] text-slate-500 font-semibold block">
+                  {isFamily ? "Advance Online" : "Total Admission"}
                 </span>
                 <span className="text-xl font-black text-slate-950 font-mono">
                   ₹{requiredPaymentAmount}
@@ -1063,10 +1055,10 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={handleValidateStep3}
-                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-black py-4 rounded-full text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2"
+                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
               >
-                <span>Continue to Contact &amp; Review</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Continue</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
@@ -1078,35 +1070,35 @@ function BookingContent() {
         {wizardStep === 4 && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
             <div className="text-center space-y-1 pb-1">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                 Review &amp; Contact
               </h1>
-              <p className="text-xs text-slate-500 font-medium">
-                Enter primary guest contact to receive instant confirmation pass
+              <p className="text-xs text-slate-500 font-normal">
+                Enter your details to receive your booking confirmation pass
               </p>
             </div>
 
             {/* Order Review Card */}
             <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-900">
                   Session Summary
                 </span>
-                <span className="text-[10px] font-bold text-cyan-800 bg-cyan-50 px-2.5 py-0.5 rounded-full uppercase">
-                  {isFamily ? "Private Pool Hire" : "Public Swim Session"}
+                <span className="text-[11px] font-bold text-cyan-800 bg-cyan-50 px-2.5 py-0.5 rounded-full">
+                  {isFamily ? "Family & Group" : "Public Swimming"}
                 </span>
               </div>
 
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between text-slate-600">
-                  <span>Date &amp; Slot</span>
+                  <span>Date &amp; Time</span>
                   <span className="font-bold text-slate-900 font-mono">
                     {date} ({formatTimeSlot(startTime)} – {formatTimeSlot(endTime)})
                   </span>
                 </div>
 
                 <div className="flex justify-between text-slate-600">
-                  <span>Party Size</span>
+                  <span>Guests &amp; Duration</span>
                   <span className="font-bold text-slate-900">
                     {guestCount} Guests ({durationHours} Hour{durationHours > 1 ? "s" : ""})
                   </span>
@@ -1117,14 +1109,14 @@ function BookingContent() {
                   <span className="font-mono text-slate-900">₹{computedTotal}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-xs font-black text-emerald-700 bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200/80">
-                  <span>{isFamily ? "Online Advance Required:" : "Total Payable Now:"}</span>
-                  <span className="text-base font-mono">₹{requiredPaymentAmount}</span>
+                <div className="flex justify-between items-center text-xs font-bold text-emerald-700 bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200/80">
+                  <span>{isFamily ? "Advance Payment:" : "Total Payable Now:"}</span>
+                  <span className="text-base font-mono font-black">₹{requiredPaymentAmount}</span>
                 </div>
 
                 {isFamily && remainingArrivalBalance > 0 && (
                   <p className="text-[11px] text-slate-500 leading-tight">
-                    * Remaining balance of <strong>₹{remainingArrivalBalance}</strong> is payable at reception upon arrival (Cash / UPI).
+                    * Remaining balance of <strong>₹{remainingArrivalBalance}</strong> is payable at the counter on arrival (Cash / UPI).
                   </p>
                 )}
               </div>
@@ -1132,9 +1124,9 @@ function BookingContent() {
 
             {/* Contact Details Card */}
             <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3.5">
-              <label className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                 <User className="w-4 h-4 text-cyan-700" />
-                <span>Primary Guest Contact</span>
+                <span>Guest Details</span>
               </label>
 
               <div className="space-y-3">
@@ -1256,20 +1248,21 @@ function BookingContent() {
                 type="button"
                 disabled={loading}
                 onClick={handleProceedToPayment}
-                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-black py-4 rounded-full text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2"
+                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
               >
                 {loading ? (
-                  <span>Reserving Slot for 15 Minutes...</span>
+                  <span>Holding slot for 15 minutes...</span>
                 ) : (
                   <>
-                    <span>Lock Slot &amp; Pay ₹{requiredPaymentAmount}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Proceed to Payment (₹{requiredPaymentAmount})</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
-              <p className="text-[11px] text-slate-400 text-center mt-2">
-                🔒 Locks this slot exclusively for 15 minutes while you verify payment
-              </p>
+              <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 mt-2.5">
+                <Lock className="w-3.5 h-3.5 text-slate-400" />
+                <span>Your slot is held for 15 minutes during checkout</span>
+              </div>
             </div>
           </div>
         )}
@@ -1281,9 +1274,9 @@ function BookingContent() {
           <div className="max-w-xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Live 15-Minute Hold Timer Banner */}
             <div className="bg-slate-950 text-white rounded-3xl p-5 sm:p-6 text-center space-y-2 shadow-xl border border-slate-800">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 text-[10px] font-black uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                <span>Slot Temporarily Reserved</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-xs font-semibold">
+                <Timer className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Slot held for 15 minutes</span>
               </div>
 
               <div className="text-4xl font-black font-mono tracking-widest text-cyan-400 pt-1">
@@ -1291,14 +1284,14 @@ function BookingContent() {
               </div>
 
               <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                Your pool slot is locked. Please complete verification before the timer expires.
+                Your pool slot is held. Complete checkout before the timer expires to confirm your reservation.
               </p>
             </div>
 
             {/* Booking Details Card */}
             <div className="bg-white rounded-3xl p-5 sm:p-6 border border-white shadow-sm space-y-3.5">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                Order Review
+              <h3 className="text-xs font-bold text-slate-900">
+                Booking Review
               </h3>
 
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-2.5 text-xs">
@@ -1315,8 +1308,8 @@ function BookingContent() {
                   <span className="font-bold font-mono text-slate-900">{date} • {formatTimeSlot(startTime)} ({durationHours}h)</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
-                  <span>Experience</span>
-                  <span className="font-bold text-slate-900">{isFamily ? "Private Pool Hire" : "Public Swim Session"}</span>
+                  <span>Session Type</span>
+                  <span className="font-bold text-slate-900">{isFamily ? "Family & Group" : "Public Swimming"}</span>
                 </div>
                 <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-200">
                   <span>Amount Due Now:</span>
@@ -1324,7 +1317,7 @@ function BookingContent() {
                 </div>
                 {isFamily && remainingArrivalBalance > 0 && (
                   <div className="flex justify-between text-[11px] text-slate-500">
-                    <span>Counter Balance at Pool:</span>
+                    <span>Balance on Arrival:</span>
                     <span className="font-mono font-bold text-slate-800">₹{remainingArrivalBalance}</span>
                   </div>
                 )}
@@ -1333,7 +1326,7 @@ function BookingContent() {
               {/* Payment Method Selector */}
               <div className="space-y-2 pt-1">
                 <label className="block text-[11px] font-bold text-slate-700">
-                  Payment Method (Sandbox Mode)
+                  Payment Method
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
@@ -1383,14 +1376,14 @@ function BookingContent() {
                   type="button"
                   disabled={loading}
                   onClick={handleCompletePayment}
-                  className="w-full bg-slate-950 hover:bg-slate-800 text-white font-black py-4 rounded-full text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
                 >
                   {loading ? (
                     <span>Confirming Transaction...</span>
                   ) : (
                     <>
                       <span>Pay ₹{requiredPaymentAmount} &amp; Confirm Booking</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
                 </button>

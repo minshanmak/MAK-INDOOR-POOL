@@ -1345,8 +1345,9 @@ export default function AdminReportsPage() {
                           <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1.5 flex-wrap">
                             <span>{b.customerPhone}</span>
                             {b.customerPlace && (
-                              <span className="text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded font-sans font-semibold text-[10px]">
-                                📍 {b.customerPlace}
+                              <span className="inline-flex items-center gap-1 text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded font-sans font-semibold text-[10px]">
+                                <MapPin className="w-2.5 h-2.5" />
+                                <span>{b.customerPlace}</span>
                               </span>
                             )}
                           </div>

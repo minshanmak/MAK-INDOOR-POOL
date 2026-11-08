@@ -89,7 +89,7 @@ export default function AdminWalkinsPage() {
       }
 
       setSuccessMsg(
-        `✓ ${visitorCount} Swimmer${visitorCount > 1 ? "s" : ""} admitted successfully! Collected ₹${calculatedCharge.toFixed(2)} via ${paymentMethod}.`
+        `${visitorCount} Swimmer${visitorCount > 1 ? "s" : ""} admitted successfully! Collected ₹${calculatedCharge.toFixed(2)} via ${paymentMethod}.`
       );
       fetchWalkIns();
     } catch (err: any) {
