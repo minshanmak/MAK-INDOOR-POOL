@@ -193,13 +193,13 @@ export default function HomePage() {
             <span className="text-cyan-200 truncate">Moonniyur, Kerala</span>
           </div>
 
-          {/* Main Headline with Custom Fluid/Liquid Font */}
+          {/* Main Headline with Custom Fluid/Liquid Font (ALL-CAPS) */}
           <h1 className="w-full max-w-3xl px-2 mx-auto flex flex-col items-center justify-center">
-            <span className="sr-only">Swim in peace.</span>
+            <span className="sr-only">SWIM IN PEACE.</span>
             <img
-              src="/images/hero-swim-in-peace-title.png"
-              alt="Swim in peace."
-              className="h-14 sm:h-20 lg:h-24 w-auto max-w-[92vw] object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)] select-none pointer-events-none"
+              src="/images/hero-swim-in-peace-caps.png"
+              alt="SWIM IN PEACE."
+              className="h-8 xs:h-9 sm:h-14 lg:h-18 w-auto max-w-[92vw] object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)] select-none pointer-events-none"
             />
           </h1>
 
