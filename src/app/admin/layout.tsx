@@ -62,7 +62,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         const res = await fetch("/api/auth/me");
         const data = await res.json();
         if (!res.ok || !data.authenticated) {
-          router.push("/admin/login");
+          const currentUrl = typeof window !== "undefined"
+            ? window.location.pathname + window.location.search
+            : "/admin";
+          router.push(`/admin/login?redirect=${encodeURIComponent(currentUrl)}`);
         } else {
           setUser(data.user);
         }

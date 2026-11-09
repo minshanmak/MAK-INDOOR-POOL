@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Waves, Lock, Phone, AlertCircle, ShieldCheck } from "lucide-react";
+import React, { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Waves, Lock, Phone, AlertCircle } from "lucide-react";
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams.get("redirect") || "/admin";
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +28,7 @@ export default function AdminLoginPage() {
       if (!res.ok) {
         throw new Error(data.error || "Login failed.");
       }
-      router.push("/admin");
+      router.push(redirectTarget);
       router.refresh();
     } catch (err: any) {
       setError(err.message || "Invalid credentials.");
@@ -140,5 +143,19 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#071322] flex items-center justify-center text-white text-xs">
+          Loading login portal...
+        </div>
+      }
+    >
+      <AdminLoginForm />
+    </Suspense>
   );
 }

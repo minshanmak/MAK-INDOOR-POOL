@@ -1,44 +1,102 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, Suspense, Component, ErrorInfo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Camera,
   Search,
   CheckCircle2,
   AlertTriangle,
-  Users,
   Clock,
-  Calendar,
-  CreditCard,
-  Phone,
   RefreshCw,
   X,
   Volume2,
   VolumeX,
-  Smartphone,
   ShieldCheck,
-  ArrowRight,
-  User,
+  RotateCcw,
 } from "lucide-react";
 import { formatSlotTime } from "@/lib/timezone";
 
-export default function AdminScanPage() {
+// ==========================================
+// 1. Error Boundary Component
+// Prevents any camera/DOM exception from crashing the React tree
+// ==========================================
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ScanErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("ScanErrorBoundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="max-w-xl mx-auto p-6 bg-white rounded-3xl border border-red-200 shadow-sm text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900">Scanner Encountered an Issue</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Your device camera or browser may have restricted scanner access. You can still look up passes manually.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              window.location.reload();
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1D68BD] hover:bg-[#155299] text-white rounded-xl text-xs font-bold transition shadow-xs"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reload Scanner</span>
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ==========================================
+// 2. Main Scan Page Content
+// ==========================================
+function AdminScanContent() {
+  const searchParams = useSearchParams();
+  const urlCode = searchParams.get("code") || searchParams.get("ref");
+
   const [activeTab, setActiveTab] = useState<"CAMERA" | "MANUAL">("CAMERA");
   const [manualCode, setManualCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [scanResult, setScanResult] = useState<any | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   // Admission state
   const [collectPaymentMethod, setCollectPaymentMethod] = useState<"CASH" | "UPI">("CASH");
   const [admitting, setAdmitting] = useState(false);
 
   // Camera scanner state
-  const [cameraActive, setCameraActive] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const scannerRef = useRef<any>(null);
   const isProcessingRef = useRef(false);
+  const isStoppingRef = useRef(false);
 
   // Web Audio API beep sound for feedback
   const playBeep = useCallback((isSuccess = true) => {
@@ -47,14 +105,17 @@ export default function AdminScanPage() {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
+      if (ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+      }
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       if (isSuccess) {
-        osc.frequency.setValueAtTime(880, ctx.currentTime); // High pitch A5
-        osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15); // A6
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
         gain.gain.setValueAtTime(0.2, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
         osc.start();
@@ -67,25 +128,58 @@ export default function AdminScanPage() {
         osc.stop(ctx.currentTime + 0.3);
       }
     } catch {
-      // AudioContext policy
+      // AudioContext policy safe catch
     }
   }, [soundEnabled]);
 
+  // Safely stop scanner instance
+  const stopScannerSafely = useCallback(async () => {
+    if (!scannerRef.current || isStoppingRef.current) return;
+    isStoppingRef.current = true;
+    try {
+      const scanner = scannerRef.current;
+      const isScanning =
+        scanner.isScanning ||
+        (typeof scanner.getState === "function" && scanner.getState() === 2);
+      if (isScanning) {
+        await scanner.stop();
+      }
+    } catch (err) {
+      console.warn("Scanner stop safely handled", err);
+    } finally {
+      scannerRef.current = null;
+      isStoppingRef.current = false;
+    }
+  }, []);
+
+  // Verify Pass by code/ID
   const verifyCode = useCallback(async (codeToVerify: string) => {
     if (!codeToVerify || isProcessingRef.current) return;
     isProcessingRef.current = true;
     setLoading(true);
     setErrorMsg(null);
     setSuccessMsg(null);
-    setScanResult(null);
 
-    // Haptic feedback
+    // Haptic feedback on mobile devices
     if (typeof navigator !== "undefined" && navigator.vibrate) {
-      navigator.vibrate([80, 40, 80]);
+      try {
+        navigator.vibrate([80, 40, 80]);
+      } catch {}
+    }
+
+    // Extract raw code if a full URL was scanned
+    let cleanCode = codeToVerify.trim();
+    if (cleanCode.includes("http://") || cleanCode.includes("https://")) {
+      try {
+        const url = new URL(cleanCode);
+        cleanCode = url.searchParams.get("code") || url.searchParams.get("ref") || cleanCode;
+      } catch {
+        // Continue with raw code
+      }
     }
 
     try {
-      const res = await fetch(`/api/admin/bookings/scan?code=${encodeURIComponent(codeToVerify)}`);
+      const res = await fetch(`/api/admin/bookings/scan?code=${encodeURIComponent(cleanCode)}`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -103,22 +197,28 @@ export default function AdminScanPage() {
     }
   }, [playBeep]);
 
-  // Setup HTML5 QR Code Scanner
+  // Handle URL query parameter (?code=...) on page load
   useEffect(() => {
+    if (urlCode && !scanResult) {
+      setActiveTab("MANUAL");
+      setManualCode(urlCode);
+      verifyCode(urlCode);
+    }
+  }, [urlCode, scanResult, verifyCode]);
+
+  // Setup and Manage HTML5 QR Code Scanner
+  useEffect(() => {
+    let isMounted = true;
+
+    // If on MANUAL tab or if a scanResult is already showing, stop camera
     if (activeTab !== "CAMERA" || scanResult) {
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {}).finally(() => {
-          scannerRef.current = null;
-          setCameraActive(false);
-        });
-      }
+      stopScannerSafely();
       return;
     }
 
-    let isMounted = true;
-
     async function initScanner() {
       try {
+        setCameraError(null);
         const { Html5Qrcode } = await import("html5-qrcode");
         if (!isMounted) return;
 
@@ -126,52 +226,50 @@ export default function AdminScanPage() {
         const element = document.getElementById(scannerId);
         if (!element) return;
 
-        // Clean any old scanner
-        if (scannerRef.current) {
-          try {
-            await scannerRef.current.stop();
-          } catch {}
-          scannerRef.current = null;
-        }
+        // Clean any old scanner first
+        await stopScannerSafely();
+        if (!isMounted) return;
 
         const html5QrCode = new Html5Qrcode(scannerId);
         scannerRef.current = html5QrCode;
 
         await html5QrCode.start(
-          { facingMode: "environment" }, // Prefer back camera on phones
+          { facingMode: "environment" }, // Back camera on mobile
           {
-            fps: 15,
+            fps: 10,
             qrbox: { width: 250, height: 250 },
             aspectRatio: 1.0,
           },
           (decodedText) => {
-            // Found QR Code
-            if (!isProcessingRef.current) {
+            // QR code detected: safely pause/freeze camera before processing
+            if (!isProcessingRef.current && isMounted) {
+              try {
+                if (html5QrCode.isScanning) {
+                  html5QrCode.pause(true);
+                }
+              } catch {}
               verifyCode(decodedText);
             }
           },
-          () => {} // Suppress continuous frame errors
+          () => {} // Safe suppression of frame scanning errors
         );
-
-        if (isMounted) setCameraActive(true);
-      } catch (err) {
-        console.warn("Camera init warning", err);
-        if (isMounted) setCameraActive(false);
+      } catch (err: any) {
+        if (!isMounted) return;
+        console.warn("Camera init notification:", err?.message || err);
+        setCameraError(
+          "Camera unavailable or permission denied. Please allow camera access or use Manual Lookup below."
+        );
       }
     }
 
-    const timer = setTimeout(initScanner, 300);
+    const timer = setTimeout(initScanner, 350);
 
     return () => {
       isMounted = false;
       clearTimeout(timer);
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {}).finally(() => {
-          scannerRef.current = null;
-        });
-      }
+      stopScannerSafely();
     };
-  }, [activeTab, scanResult, verifyCode]);
+  }, [activeTab, scanResult, stopScannerSafely, verifyCode]);
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +307,7 @@ export default function AdminScanPage() {
           balanceAmount > 0 ? ` Collected balance ₹${balanceAmount} via ${collectPaymentMethod}.` : ""
         }`
       );
+
       // Update local state to show already admitted
       setScanResult((prev: any) => ({
         ...prev,
@@ -233,6 +332,7 @@ export default function AdminScanPage() {
     setErrorMsg(null);
     setSuccessMsg(null);
     setManualCode("");
+    isProcessingRef.current = false;
   };
 
   return (
@@ -298,43 +398,60 @@ export default function AdminScanPage() {
         </div>
       </div>
 
-      {/* Camera Viewport (Shown when tab is CAMERA and no active result) */}
-      {activeTab === "CAMERA" && !scanResult && (
-        <div className="bg-slate-900 rounded-3xl p-4 shadow-xl border border-slate-800 text-center relative overflow-hidden">
-          <div className="text-[11px] font-bold text-slate-400 mb-2 flex items-center justify-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Point camera at customer's Booking Pass QR</span>
-          </div>
-
-          <div className="relative mx-auto rounded-2xl overflow-hidden bg-black/60 max-w-sm aspect-square flex items-center justify-center">
-            {/* HTML5 QR Code Container */}
-            <div id="qr-reader-viewport" className="w-full h-full" />
-
-            {/* Target Reticle Overlay */}
-            <div className="absolute inset-8 border-2 border-dashed border-sky-400/60 rounded-2xl pointer-events-none flex items-center justify-center">
-              <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent animate-pulse" />
-            </div>
-
-            {loading && (
-              <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center text-white text-xs font-bold gap-2">
-                <RefreshCw className="w-6 h-6 animate-spin text-sky-400" />
-                <span>Verifying Booking Pass...</span>
-              </div>
-            )}
-          </div>
-
-          <p className="text-[10px] text-slate-400 mt-3">
-            Supports mobile phone camera, tablet, or webcams.
-          </p>
+      {/* CAMERA VIEWPORT CONTAINER:
+          Kept persistently in DOM to prevent html5-qrcode crashes on unmount.
+          Hidden via CSS when not on CAMERA tab or when viewing scan results. */}
+      <div
+        className={`bg-slate-900 rounded-3xl p-4 shadow-xl border border-slate-800 text-center relative overflow-hidden transition-all ${
+          activeTab === "CAMERA" && !scanResult ? "block" : "hidden"
+        }`}
+      >
+        <div className="text-[11px] font-bold text-slate-400 mb-2 flex items-center justify-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Point camera at customer's Booking Pass QR</span>
         </div>
-      )}
+
+        <div className="relative mx-auto rounded-2xl overflow-hidden bg-black/60 max-w-sm aspect-square flex items-center justify-center">
+          {/* HTML5 QR Code Container (Always mounted) */}
+          <div id="qr-reader-viewport" className="w-full h-full min-h-[250px]" />
+
+          {/* Target Reticle Overlay */}
+          <div className="absolute inset-8 border-2 border-dashed border-sky-400/60 rounded-2xl pointer-events-none flex items-center justify-center">
+            <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent animate-pulse" />
+          </div>
+
+          {loading && (
+            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center text-white text-xs font-bold gap-2">
+              <RefreshCw className="w-6 h-6 animate-spin text-sky-400" />
+              <span>Verifying Booking Pass...</span>
+            </div>
+          )}
+        </div>
+
+        {cameraError && (
+          <div className="mt-3 p-3 bg-amber-500/20 border border-amber-400/30 rounded-xl text-amber-200 text-xs space-y-2">
+            <p className="font-semibold">{cameraError}</p>
+            <button
+              type="button"
+              onClick={() => setActiveTab("MANUAL")}
+              className="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold rounded-lg text-xs transition"
+            >
+              Switch to Manual Lookup
+            </button>
+          </div>
+        )}
+
+        <p className="text-[10px] text-slate-400 mt-3">
+          Supports mobile phone camera, tablet, or webcams.
+        </p>
+      </div>
 
       {/* Manual Lookup Form (Shown when tab is MANUAL and no active result) */}
       {activeTab === "MANUAL" && !scanResult && (
         <div className="bg-white rounded-3xl p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
           <h3 className="font-extrabold text-sm text-slate-900">Enter Booking ID or Phone Number</h3>
           <p className="text-xs text-slate-500">
-            If customer's phone battery is drained or screen is cracked, enter their Pass ID (e.g. MAK-20261109-001) or mobile number.
+            If customer's phone battery is drained or camera is unavailable, enter their Pass ID (e.g. MAK-20261109-001) or mobile number.
           </p>
 
           <form onSubmit={handleManualSubmit} className="space-y-3">
@@ -572,5 +689,28 @@ export default function AdminScanPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// Fallback skeleton while Suspense resolves
+function ScanPageSkeleton() {
+  return (
+    <div className="max-w-xl mx-auto space-y-4 pb-16 animate-pulse">
+      <div className="bg-white rounded-3xl p-5 h-32 border border-slate-100" />
+      <div className="bg-slate-900 rounded-3xl p-4 h-80 border border-slate-800" />
+    </div>
+  );
+}
+
+// ==========================================
+// 3. Exported Component wrapped in Error Boundary and Suspense
+// ==========================================
+export default function AdminScanPage() {
+  return (
+    <ScanErrorBoundary>
+      <Suspense fallback={<ScanPageSkeleton />}>
+        <AdminScanContent />
+      </Suspense>
+    </ScanErrorBoundary>
   );
 }
