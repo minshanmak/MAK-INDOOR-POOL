@@ -128,6 +128,13 @@ export async function checkAvailability(
 
   // 1. FAMILY BOOKINGS: Must be 100% exclusive.
   if (query.bookingType === "FAMILY") {
+    const maxCap = settings?.maxCapacity || 25;
+    if (query.guestCount > maxCap) {
+      return {
+        available: false,
+        reason: `Guest count (${query.guestCount}) exceeds pool maximum capacity limit of ${maxCap} swimmers.`,
+      };
+    }
     // Check overlapping confirmed or in-progress bookings
     const confirmedBookings = await db.booking.findMany({
       where: {

@@ -43,10 +43,53 @@ export async function GET(req: NextRequest) {
 
   const maxCapacity = settings?.maxCapacity || 25;
   const defaultRate = settings?.defaultPublicRate || 150;
-  const currentActiveVisitors = activeCount._sum.visitorCount || 0;
-  const remainingSpots = Math.max(0, maxCapacity - currentActiveVisitors);
 
   const now = new Date();
+  const todayStr = getPoolDate(now);
+  const currentTimeStr = getPoolTime(now);
+
+  // Fetch today's confirmed bookings to detect sessions currently in the pool
+  const activeBookings = await prisma.booking.findMany({
+    where: {
+      bookingDate: todayStr,
+      status: "CONFIRMED",
+    },
+    include: {
+      customer: true,
+    },
+  });
+
+  const currentFamilyBooking = activeBookings.find(
+    (b) => b.type === "FAMILY" && b.startTime <= currentTimeStr && currentTimeStr < b.endTime
+  );
+
+  const currentOnlinePublicGuests = activeBookings
+    .filter((b) => b.type === "PUBLIC" && b.startTime <= currentTimeStr && currentTimeStr < b.endTime)
+    .reduce((sum, b) => sum + b.guestCount, 0);
+
+  const activeWalkInVisitors = activeCount._sum.visitorCount || 0;
+
+  let isFamilySessionActive = false;
+  let activeFamilyDetails = null;
+  let currentActiveVisitors = 0;
+  let remainingSpots = 0;
+
+  if (currentFamilyBooking) {
+    isFamilySessionActive = true;
+    activeFamilyDetails = {
+      customerName: currentFamilyBooking.customer?.name || "Private Family",
+      customerPhone: currentFamilyBooking.customer?.phone || null,
+      guestCount: currentFamilyBooking.guestCount,
+      startTime: currentFamilyBooking.startTime,
+      endTime: currentFamilyBooking.endTime,
+    };
+    currentActiveVisitors = currentFamilyBooking.guestCount;
+    remainingSpots = 0; // Exclusively reserved!
+  } else {
+    currentActiveVisitors = activeWalkInVisitors + currentOnlinePublicGuests;
+    remainingSpots = Math.max(0, maxCapacity - currentActiveVisitors);
+  }
+
   const enrichedWalkIns = walkIns.map((w) => {
     const { remainingMinutes, isExpired, targetEndTime } = getWalkInRemainingMinutes(w, now);
     return {
@@ -60,6 +103,10 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     walkIns: enrichedWalkIns,
     currentActiveVisitors,
+    activeWalkInVisitors,
+    onlinePublicVisitors: currentOnlinePublicGuests,
+    isFamilySessionActive,
+    activeFamilyDetails,
     maxCapacity,
     defaultRate,
     remainingSpots,

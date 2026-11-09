@@ -23,6 +23,8 @@ export default function AdminWalkinsPage() {
   const [currentOccupancy, setCurrentOccupancy] = useState(0);
   const [maxCapacity, setMaxCapacity] = useState(25);
   const [remainingSpots, setRemainingSpots] = useState(25);
+  const [isFamilyActive, setIsFamilyActive] = useState(false);
+  const [activeFamily, setActiveFamily] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // Mode: "FULL" (Track customer details, duration) vs "QUICK" (Speedy entry & payment)
@@ -66,6 +68,8 @@ export default function AdminWalkinsPage() {
       const data = await res.json();
       setWalkIns(data.walkIns || []);
       setCurrentOccupancy(data.currentActiveVisitors || 0);
+      setIsFamilyActive(!!data.isFamilySessionActive);
+      setActiveFamily(data.activeFamilyDetails || null);
       if (data.maxCapacity) setMaxCapacity(data.maxCapacity);
       if (data.defaultRate) setRatePerHour(data.defaultRate);
       if (data.remainingSpots !== undefined) {
@@ -214,6 +218,26 @@ export default function AdminWalkinsPage() {
             style={{ width: `${occupancyPercent}%` }}
           />
         </div>
+
+        {/* Active Private Family Session Alert */}
+        {isFamilyActive && (
+          <div className="mt-4 p-4 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-ping shrink-0" />
+              <div>
+                <p className="font-extrabold text-xs">
+                  Exclusive Family Session In Progress ({activeFamily?.guestCount || 0} Guests)
+                </p>
+                <p className="text-[11px] text-purple-700 mt-0.5">
+                  Slot: {activeFamily?.startTime} – {activeFamily?.endTime} • Booked by: {activeFamily?.customerName || "Private Family Booking"}
+                </p>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full text-[10px] font-black bg-purple-200 text-purple-900 uppercase tracking-wide shrink-0">
+              100% Private Pool (Walk-ins Paused)
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Mode Selection Cards */}
@@ -449,17 +473,23 @@ export default function AdminWalkinsPage() {
             </div>
           </div>
 
-          {/* Big Solid Blue Check In Button */}
+          {/* Big Solid Check In Button */}
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || isFamilyActive}
             className={`w-full text-white font-extrabold py-3.5 rounded-2xl shadow-md transition-all text-sm mt-3 ${
-              entryMode === "QUICK"
+              isFamilyActive
+                ? "bg-slate-400 cursor-not-allowed shadow-none"
+                : entryMode === "QUICK"
                 ? "bg-[#9333EA] hover:bg-[#7e22ce] shadow-purple-700/20"
                 : "bg-[#1D68BD] hover:bg-[#155299] shadow-blue-700/20"
             }`}
           >
-            {submitting ? "Admitting Swimmers..." : `Check In (${visitorCount} Swimmers • ₹${calculatedCharge})`}
+            {isFamilyActive
+              ? "Cannot Admit: Pool Reserved for Family Session"
+              : submitting
+              ? "Admitting Swimmers..."
+              : `Check In (${visitorCount} Swimmers • ₹${calculatedCharge})`}
           </button>
         </div>
       </form>
