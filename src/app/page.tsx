@@ -173,22 +173,27 @@ export default function HomePage() {
         id="home"
         className="scroll-mt-24 relative min-h-[660px] sm:min-h-[720px] lg:min-h-[780px] pt-28 sm:pt-36 lg:pt-40 pb-16 flex flex-col justify-between items-center overflow-hidden bg-slate-950 text-center"
       >
-        {/* Background Indoor Swimming Pool Photograph - 2400x1600 Ultra HD, Edge-to-Edge Full Bleed */}
-        <img
-          src="/images/mak-indoor-pool.jpg?v=1"
-          alt="M.A.K Indoor Pool Facility & Experience"
-          className="absolute inset-0 w-full h-full object-cover object-center brightness-[1.04] contrast-[1.05] select-none pointer-events-none"
-          loading="eager"
-        />
+        {/* Background Video (Real M.A.K Indoor Pool Footage) with Poster Fallback */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/images/hero-video-poster.jpg"
+          className="absolute inset-0 w-full h-full object-cover object-center brightness-[0.95] contrast-[1.05] select-none pointer-events-none"
+        >
+          <source src="/videos/hero-bg.mp4" type="video/mp4" />
+        </video>
 
-        {/* Pure Neutral Scrim (Preserves real photo colors & clarity, zero blue wash) */}
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/55" />
+        {/* Pure Neutral Scrim (Ensures text contrast & legibility over dynamic video motion) */}
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/65" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-auto space-y-5 sm:space-y-6 w-full flex flex-col items-center">
           {/* Top Pill Badge (Operating Hours & Location) */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/25 backdrop-blur-xl border border-white/35 text-[11px] sm:text-xs font-semibold text-white shadow-xs transition hover:scale-105 max-w-[94vw]">
-            <span className="whitespace-nowrap">Open Daily at 9 AM to 11 PM</span>
+            <span className="whitespace-nowrap">Open Daily At 9 AM To 11 PM</span>
 
           </div>
 
@@ -202,8 +207,8 @@ export default function HomePage() {
             />
           </h1>
 
-          {/* Subtitle with Custom Simply Rounded Font from User Specimen */}
-          <p className="font-rounded font-bold text-[11px] xs:text-xs sm:text-base lg:text-lg text-white/95 leading-relaxed max-w-xl mx-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] px-4 text-center">
+          {/* Subtitle (Manrope Regular 400) */}
+          <p className="font-manrope font-normal text-xs sm:text-base lg:text-lg text-white/95 leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] px-3">
             A clean, private and temperature-controlled indoor pool. <br className="hidden sm:inline" />
             Designed for peaceful morning laps and exclusive evening family moments.
           </p>
@@ -1243,20 +1248,14 @@ export default function HomePage() {
               <p className="text-xs text-slate-300">
                 Experience our pristine indoor pool, changing suites, and family environment.
               </p>
-              <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-black flex items-center justify-center relative">
-                <img
-                  src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1200&q=80"
-                  alt="Video thumbnail"
-                  className="w-full h-full object-cover opacity-60"
+              <div className="aspect-[9/16] sm:aspect-video max-h-[70vh] rounded-2xl overflow-hidden bg-black flex items-center justify-center relative">
+                <video
+                  src="/videos/hero-bg.mp4"
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain"
                 />
-                <div className="absolute inset-0 flex flex-col items-center justify-center space-y-2">
-                  <div className="w-16 h-16 rounded-full bg-[#0284C7] text-white flex items-center justify-center shadow-lg animate-pulse">
-                    <Play className="w-6 h-6 fill-white translate-x-0.5" />
-                  </div>
-                  <span className="text-xs font-semibold text-white bg-black/50 px-3 py-1 rounded-full">
-                    Facility Walkthrough Preview
-                  </span>
-                </div>
               </div>
             </div>
           </div>
