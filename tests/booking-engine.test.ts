@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { prisma } from "@/lib/prisma";
-import { autoCheckoutExpiredWalkIns } from "@/lib/walkins";
+import { autoCheckoutExpiredWalkIns, isWalkInOverlapping } from "@/lib/walkins";
+import { getPoolDate, getPoolTime } from "@/lib/timezone";
 import {
   checkAvailability,
   createTemporaryHold,
@@ -346,6 +347,93 @@ describe("Booking Engine & Concurrency Safety", () => {
         where: { id: activeEntry.id },
       });
       expect(refreshedActive?.status).toBe("ACTIVE");
+    });
+
+    it("ensures active walk-in swimmers only block overlapping family slots, not unrelated time slots", async () => {
+      const now = new Date();
+      const todayStr = getPoolDate(now);
+
+      // Create an active walk-in starting right now for 1 hour
+      await prisma.walkIn.create({
+        data: {
+          visitorCount: 4,
+          durationHours: 1,
+          ratePerHour: 150,
+          calculatedCharge: 600,
+          collectedAmount: 600,
+          paymentMethod: "CASH",
+          status: "ACTIVE",
+          checkInTime: now,
+        },
+      });
+
+      // 1. Query an evening family session tonight: 19:00 - 21:00
+      // This MUST BE AVAILABLE! (The old bug wrongly rejected this session!)
+      const eveningAvail = await checkAvailability({
+        bookingType: "FAMILY",
+        date: todayStr,
+        startTime: "19:00",
+        endTime: "21:00",
+        guestCount: 8,
+      });
+      expect(eveningAvail.available).toBe(true);
+
+      // 2. Query a family session that overlaps with the walk-in right now
+      const currentH = now.getHours();
+      const slotStart = `${String(currentH).padStart(2, "0")}:00`;
+      const slotEnd = `${String(currentH + 1).padStart(2, "0")}:00`;
+      const overlappingAvail = await checkAvailability({
+        bookingType: "FAMILY",
+        date: todayStr,
+        startTime: slotStart,
+        endTime: slotEnd,
+        guestCount: 8,
+      });
+      expect(overlappingAvail.available).toBe(false);
+      expect(overlappingAvail.reason).toContain("public walk-in swimmers are currently in the pool");
+    });
+
+    it("ensures public capacity correctly incorporates overlapping walk-in swimmers without impacting non-overlapping slots", async () => {
+      const now = new Date();
+      const todayStr = getPoolDate(now);
+
+      // Create an active walk-in with 20 visitors right now for 1 hour
+      await prisma.walkIn.create({
+        data: {
+          visitorCount: 20,
+          durationHours: 1,
+          ratePerHour: 150,
+          calculatedCharge: 3000,
+          collectedAmount: 3000,
+          paymentMethod: "UPI",
+          status: "ACTIVE",
+          checkInTime: now,
+        },
+      });
+
+      // Query slot overlapping with current walk-in for 10 guests: 20 + 10 = 30 > 25 (Capacity limit!)
+      const currentH = now.getHours();
+      const slotStart = `${String(currentH).padStart(2, "0")}:00`;
+      const slotEnd = `${String(currentH + 1).padStart(2, "0")}:00`;
+
+      // If current hour is within public hours (e.g. 09:00 - 16:00), test capacity warning
+      if (currentH >= 9 && currentH < 16) {
+        const queryNow = await checkAvailability({
+          bookingType: "PUBLIC",
+          date: todayStr,
+          startTime: slotStart,
+          endTime: slotEnd,
+          guestCount: 10,
+        });
+        expect(queryNow.available).toBe(false);
+        expect(queryNow.isCapacityWarning).toBe(true);
+        expect(queryNow.reason).toContain("Only 5 spots left");
+      }
+
+      // Check isWalkInOverlapping directly
+      const walkInMock = { checkInTime: now, durationHours: 1, status: "ACTIVE" };
+      expect(isWalkInOverlapping(walkInMock, todayStr, slotStart, slotEnd)).toBe(true);
+      expect(isWalkInOverlapping(walkInMock, todayStr, "19:00", "20:00")).toBe(false);
     });
   });
 });

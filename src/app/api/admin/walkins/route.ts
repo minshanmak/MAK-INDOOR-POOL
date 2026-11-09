@@ -4,11 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
 import { getPoolDate, getPoolTime } from "@/lib/timezone";
 import { isTimeOverlapping, timeToMinutes } from "@/lib/booking-engine";
-import { autoCheckoutExpiredWalkIns } from "@/lib/walkins";
+import { autoCheckoutExpiredWalkIns, isWalkInOverlapping, getWalkInRemainingMinutes } from "@/lib/walkins";
 
 export const dynamic = "force-dynamic";
 
-// GET: List active and past walk-ins
+// GET: List active and past walk-ins with live occupancy and countdowns
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
@@ -26,24 +26,47 @@ export async function GET(req: NextRequest) {
     whereClause.status = status;
   }
 
-  const walkIns = await prisma.walkIn.findMany({
-    where: whereClause,
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const [walkIns, activeCount, settings] = await Promise.all([
+    prisma.walkIn.findMany({
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
+      take: 60,
+    }),
+    prisma.walkIn.aggregate({
+      where: { status: "ACTIVE" },
+      _sum: { visitorCount: true },
+    }),
+    prisma.poolSetting.findUnique({
+      where: { id: "singleton_settings" },
+    }),
+  ]);
 
-  const activeCount = await prisma.walkIn.aggregate({
-    where: { status: "ACTIVE" },
-    _sum: { visitorCount: true },
+  const maxCapacity = settings?.maxCapacity || 25;
+  const defaultRate = settings?.defaultPublicRate || 150;
+  const currentActiveVisitors = activeCount._sum.visitorCount || 0;
+  const remainingSpots = Math.max(0, maxCapacity - currentActiveVisitors);
+
+  const now = new Date();
+  const enrichedWalkIns = walkIns.map((w) => {
+    const { remainingMinutes, isExpired, targetEndTime } = getWalkInRemainingMinutes(w, now);
+    return {
+      ...w,
+      remainingMinutes,
+      isExpired,
+      targetCheckoutTime: targetEndTime.toISOString(),
+    };
   });
 
   return NextResponse.json({
-    walkIns,
-    currentActiveVisitors: activeCount._sum.visitorCount || 0,
+    walkIns: enrichedWalkIns,
+    currentActiveVisitors,
+    maxCapacity,
+    defaultRate,
+    remainingSpots,
   });
 }
 
-// POST: Create Walk-in (Quick-Entry or Full Check-In)
+// POST: Create Walk-in (Quick-Entry or Full Check-In) or Check-Out
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
@@ -59,7 +82,7 @@ export async function POST(req: NextRequest) {
     walkInId,
     visitorCount,
     durationHours,
-    ratePerHour = 150,
+    ratePerHour,
     overrideCharge,
     overrideReason,
     collectedAmount,
@@ -68,32 +91,74 @@ export async function POST(req: NextRequest) {
     customerPhone,
   } = body;
 
-  const count = Number(visitorCount) || 1;
-  const duration = Number(durationHours) || 1;
-  const rate = Number(ratePerHour) || 150;
-  const calculatedCharge = Math.round(count * duration * rate * 100) / 100;
+  if (action === "QUICK_ENTRY" || action === "CHECK_IN") {
+    const count = Math.max(1, parseInt(String(visitorCount || 1), 10));
+    const duration = Math.max(0.5, Math.min(12, parseFloat(String(durationHours || 1))));
 
-  // Charge override requires mandatory reason
-  if (overrideCharge !== undefined && overrideCharge !== null && overrideCharge !== calculatedCharge) {
-    if (!overrideReason || !overrideReason.trim()) {
+    const settings = await prisma.poolSetting.findUnique({
+      where: { id: "singleton_settings" },
+    });
+
+    if (settings?.maintenanceMode) {
       return NextResponse.json(
-        { error: "Authorized charge overrides require a mandatory explanation reason." },
+        { error: settings.maintenanceMessage || "Pool is temporarily closed for maintenance." },
         { status: 400 }
       );
     }
-  }
 
-  const finalCharge = overrideCharge !== undefined && overrideCharge !== null ? Number(overrideCharge) : calculatedCharge;
-  const collected = collectedAmount !== undefined && collectedAmount !== null ? Number(collectedAmount) : finalCharge;
+    const rate = Number(ratePerHour) || settings?.defaultPublicRate || 150;
+    const calculatedCharge = Math.round(count * duration * rate * 100) / 100;
 
-  if (action === "QUICK_ENTRY" || action === "CHECK_IN") {
+    // Charge override requires mandatory reason
+    if (overrideCharge !== undefined && overrideCharge !== null && overrideCharge !== calculatedCharge) {
+      if (!overrideReason || !overrideReason.trim()) {
+        return NextResponse.json(
+          { error: "Authorized charge overrides require a mandatory explanation reason." },
+          { status: 400 }
+        );
+      }
+    }
+
+    const finalCharge = overrideCharge !== undefined && overrideCharge !== null ? Number(overrideCharge) : calculatedCharge;
+    const collected = collectedAmount !== undefined && collectedAmount !== null ? Number(collectedAmount) : finalCharge;
+
     const now = new Date();
     const todayStr = getPoolDate(now);
     const currentTimeStr = getPoolTime(now);
-    const endMinutes = timeToMinutes(currentTimeStr) + duration * 60;
-    const targetEndTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+    const startMinutes = timeToMinutes(currentTimeStr);
+    const endMinutes = startMinutes + Math.round(duration * 60);
+    const targetEndH = Math.floor(endMinutes / 60);
+    const targetEndM = endMinutes % 60;
+    const targetEndTime = `${String(targetEndH).padStart(2, "0")}:${String(targetEndM).padStart(2, "0")}`;
 
-    // 1. Check if pool is currently reserved for a private family booking
+    const openHour = settings?.openHour ?? 9;
+    const closeHour = settings?.closeHour ?? 23;
+    const publicEndHour = settings?.publicEndHour ?? 16;
+    const maxCapacity = settings?.maxCapacity ?? 25;
+
+    // Check operating hours
+    if (startMinutes < openHour * 60) {
+      return NextResponse.json(
+        { error: `Pool has not opened yet. Operating hours start at ${openHour}:00 AM.` },
+        { status: 400 }
+      );
+    }
+    if (startMinutes >= publicEndHour * 60) {
+      return NextResponse.json(
+        {
+          error: `Public walk-ins are only permitted during public swimming hours (${openHour}:00 AM – ${publicEndHour > 12 ? publicEndHour - 12 : publicEndHour}:00 PM). Evening hours are reserved exclusively for private family bookings.`,
+        },
+        { status: 400 }
+      );
+    }
+    if (endMinutes > closeHour * 60) {
+      return NextResponse.json(
+        { error: `Duration extends past pool closing time (${closeHour > 12 ? closeHour - 12 : closeHour}:00 PM).` },
+        { status: 400 }
+      );
+    }
+
+    // 1. Check if pool is reserved for a private family booking during this time
     const activeFamilyBookings = await prisma.booking.findMany({
       where: {
         bookingDate: todayStr,
@@ -113,19 +178,39 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Check active unexpired private family holds
+    const activeFamilyHolds = await prisma.slotHold.findMany({
+      where: {
+        date: todayStr,
+        bookingType: "FAMILY",
+        status: "ACTIVE",
+        expiresAt: { gt: now },
+      },
+    });
+
+    for (const hold of activeFamilyHolds) {
+      if (isTimeOverlapping(currentTimeStr, targetEndTime, hold.startTime, hold.endTime)) {
+        return NextResponse.json(
+          {
+            error: `Cannot admit public walk-ins: A private family checkout is currently in progress (${hold.startTime} – ${hold.endTime}).`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // 2. Automatically release expired walk-ins before checking capacity
     await autoCheckoutExpiredWalkIns();
 
-    const settings = await prisma.poolSetting.findUnique({
-      where: { id: "singleton_settings" },
-    });
-    const maxCapacity = settings?.maxCapacity || 25;
-
+    // Check overlapping active walk-ins
     const activeWalkIns = await prisma.walkIn.findMany({
       where: { status: "ACTIVE" },
     });
-    const currentActiveWalkIns = activeWalkIns.reduce((sum, w) => sum + w.visitorCount, 0);
+    const overlappingActiveWalkIns = activeWalkIns
+      .filter((w) => isWalkInOverlapping(w, todayStr, currentTimeStr, targetEndTime))
+      .reduce((sum, w) => sum + w.visitorCount, 0);
 
+    // Check overlapping confirmed public bookings
     const overlappingPublicBookings = await prisma.booking.findMany({
       where: {
         bookingDate: todayStr,
@@ -137,13 +222,26 @@ export async function POST(req: NextRequest) {
       .filter((b) => isTimeOverlapping(currentTimeStr, targetEndTime, b.startTime, b.endTime))
       .reduce((sum, b) => sum + b.guestCount, 0);
 
-    const currentTotalOccupancy = currentActiveWalkIns + overlappingPublicGuests;
+    // Check active public slot holds
+    const activePublicHolds = await prisma.slotHold.findMany({
+      where: {
+        date: todayStr,
+        bookingType: "PUBLIC",
+        status: "ACTIVE",
+        expiresAt: { gt: now },
+      },
+    });
+    const overlappingPublicHoldGuests = activePublicHolds
+      .filter((h) => isTimeOverlapping(currentTimeStr, targetEndTime, h.startTime, h.endTime))
+      .reduce((sum, h) => sum + h.guestCount, 0);
+
+    const currentTotalOccupancy = overlappingActiveWalkIns + overlappingPublicGuests + overlappingPublicHoldGuests;
 
     if (currentTotalOccupancy + count > maxCapacity) {
       const remainingSpots = Math.max(0, maxCapacity - currentTotalOccupancy);
       return NextResponse.json(
         {
-          error: `Capacity limit reached: Pool currently has ${currentTotalOccupancy} swimmers (${overlappingPublicGuests} online bookings + ${currentActiveWalkIns} active walk-ins) out of ${maxCapacity} maximum. Only ${remainingSpots} spot(s) remaining.`,
+          error: `Capacity limit reached: Pool currently has ${currentTotalOccupancy} swimmers (${overlappingActiveWalkIns} active walk-ins + ${overlappingPublicGuests} online bookings${overlappingPublicHoldGuests > 0 ? ` + ${overlappingPublicHoldGuests} checkouts` : ""}) out of ${maxCapacity} maximum. Only ${remainingSpots} spot(s) remaining.`,
         },
         { status: 400 }
       );
@@ -156,13 +254,13 @@ export async function POST(req: NextRequest) {
           durationHours: duration,
           ratePerHour: rate,
           calculatedCharge,
-          overrideCharge: overrideCharge !== undefined ? Number(overrideCharge) : null,
+          overrideCharge: overrideCharge !== undefined && overrideCharge !== null ? Number(overrideCharge) : null,
           overrideReason: overrideReason || null,
           collectedAmount: collected,
           paymentMethod,
-          status: "ACTIVE", // Always ACTIVE during duration so live occupancy and capacity are 100% accurate!
-          customerName: customerName || null,
-          customerPhone: customerPhone || null,
+          status: "ACTIVE",
+          customerName: customerName?.trim() || null,
+          customerPhone: customerPhone?.trim() || null,
           staffUserId: user.userId,
         },
       });
@@ -188,7 +286,7 @@ export async function POST(req: NextRequest) {
           action: "CREATE",
           performedByUserId: user.userId,
           userRole: user.role,
-          details: `Walk-in ${action} created for ${count} visitor(s). Collected ₹${collected} via ${paymentMethod}.${overrideReason ? ` (Override: ${overrideReason})` : ""}`,
+          details: `Walk-in ${action} created for ${count} visitor(s) (${duration}h). Collected ₹${collected} via ${paymentMethod}.${overrideReason ? ` (Override: ${overrideReason})` : ""}`,
         },
       });
 

@@ -3,7 +3,7 @@ import { calculateBookingPrice, calculateRemainingBalance, DEFAULT_PRICING, Pric
 import { hasPermission, PERMISSIONS } from "./permissions";
 import { getPoolDate, getPoolHour } from "./timezone";
 import { notificationService } from "./notifications";
-import { autoCheckoutExpiredWalkIns } from "./walkins";
+import { autoCheckoutExpiredWalkIns, isWalkInOverlapping } from "./walkins";
 
 export interface SlotAvailabilityQuery {
   bookingType: "PUBLIC" | "FAMILY";
@@ -204,15 +204,19 @@ export async function checkAvailability(
 
     // E) Check active walk-in visitors if query is for today
     const todayStr = getPoolDate(now);
+
     if (query.date === todayStr) {
       await autoCheckoutExpiredWalkIns(db);
       const activeWalkIns = await db.walkIn.findMany({
         where: { status: "ACTIVE" },
       });
-      if (activeWalkIns.length > 0) {
+      const overlappingWalkIn = activeWalkIns.find((w: any) =>
+        isWalkInOverlapping(w, query.date, query.startTime, query.endTime)
+      );
+      if (overlappingWalkIn) {
         return {
           available: false,
-          reason: "Cannot book exclusive family session because public walk-in swimmers are currently in the pool.",
+          reason: "Cannot book exclusive family session because public walk-in swimmers are currently in the pool during this time slot.",
         };
       }
     }
@@ -292,12 +296,15 @@ export async function checkAvailability(
 
   // Add active walk-ins for today if query.date is today
   const todayStr = getPoolDate(now);
+
   if (query.date === todayStr) {
     await autoCheckoutExpiredWalkIns(db);
     const activeWalkIns = await db.walkIn.findMany({
       where: { status: "ACTIVE" },
     });
-    const currentActiveWalkInGuests = activeWalkIns.reduce((sum: number, w: any) => sum + w.visitorCount, 0);
+    const currentActiveWalkInGuests = activeWalkIns
+      .filter((w: any) => isWalkInOverlapping(w, query.date, query.startTime, query.endTime))
+      .reduce((sum: number, w: any) => sum + w.visitorCount, 0);
     currentOverlapGuests += currentActiveWalkInGuests;
   }
 
@@ -351,6 +358,7 @@ export async function getDaySlotsAvailability(
 
   const now = new Date();
   const todayStr = getPoolDate(now);
+
   const currentISTHour = getPoolHour(now);
 
   await db.slotHold.updateMany({
@@ -376,13 +384,14 @@ export async function getDaySlotsAvailability(
     },
   });
 
-  let activeWalkInGuests = 0;
+
+  let activeWalkIns: any[] = [];
   if (date === todayStr) {
     await autoCheckoutExpiredWalkIns(db);
-    const activeWalkIns = await db.walkIn.findMany({
+    activeWalkIns = await db.walkIn.findMany({
       where: { status: "ACTIVE" },
     });
-    activeWalkInGuests = activeWalkIns.reduce((sum: number, w: any) => sum + w.visitorCount, 0);
+
   }
 
   const result: Record<string, SlotStatusInfo> = {};
@@ -453,7 +462,7 @@ export async function getDaySlotsAvailability(
         continue;
       }
 
-      if (date === todayStr && activeWalkInGuests > 0 && slot === (String(currentISTHour).padStart(2, "0") + ":00")) {
+      if (date === todayStr && activeWalkIns.some((w: any) => isWalkInOverlapping(w, date, slot, slotEnd))) {
         result[slot] = {
           slot,
           status: "BOOKED",
@@ -499,8 +508,11 @@ export async function getDaySlotsAvailability(
           overlapGuests += hold.guestCount;
         }
       }
-      if (date === todayStr && slot === (String(currentISTHour).padStart(2, "0") + ":00")) {
-        overlapGuests += activeWalkInGuests;
+      if (date === todayStr) {
+        const overlappingWalkInGuests = activeWalkIns
+          .filter((w: any) => isWalkInOverlapping(w, date, slot, slotEnd))
+          .reduce((sum: number, w: any) => sum + w.visitorCount, 0);
+        overlapGuests += overlappingWalkInGuests;
       }
 
       if (overlapGuests >= maxCap) {

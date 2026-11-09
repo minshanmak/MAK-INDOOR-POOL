@@ -2,6 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: {
+    cpus: 1,
+    workerThreads: false,
+  },
   async redirects() {
     return [
       {
@@ -14,4 +18,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-
