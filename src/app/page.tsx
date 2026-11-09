@@ -173,7 +173,7 @@ export default function HomePage() {
         id="home"
         className="scroll-mt-24 relative min-h-[660px] sm:min-h-[720px] lg:min-h-[780px] pt-28 sm:pt-36 lg:pt-40 pb-16 flex flex-col justify-between items-center overflow-hidden bg-slate-950 text-center"
       >
-        {/* Background Video (Real M.A.K Indoor Pool Footage) with Poster Fallback */}
+        {/* Background Video (Real M.A.K Indoor Pool Footage) - Crystal Clear High Vibrancy */}
         <video
           autoPlay
           muted
@@ -181,14 +181,14 @@ export default function HomePage() {
           playsInline
           preload="auto"
           poster="/images/hero-video-poster.jpg"
-          className="absolute inset-0 w-full h-full object-cover object-center brightness-[0.95] contrast-[1.05] select-none pointer-events-none"
+          className="absolute inset-0 w-full h-full object-cover object-center brightness-[1.02] contrast-[1.03] saturate-[1.05] will-change-transform transform-gpu select-none pointer-events-none"
         >
           <source src="/videos/hero-bg.mp4" type="video/mp4" />
         </video>
 
-        {/* Pure Neutral Scrim (Ensures text contrast & legibility over dynamic video motion) */}
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/65" />
+        {/* Minimal Gradient Scrim (Keeps pool water crystal clear & vibrant while ensuring text contrast) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-slate-950/75 pointer-events-none" />
+        <div className="absolute inset-0 bg-radial from-transparent via-transparent to-black/40 pointer-events-none" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-auto space-y-5 sm:space-y-6 w-full flex flex-col items-center">
           {/* Top Pill Badge (Operating Hours & Location) */}
