@@ -32,3 +32,4 @@ dev.db-journal
 *.tsbuildinfo
 next-env.d.ts
 
+.neon
