@@ -23,6 +23,7 @@ model User {
   updatedAt           DateTime             @updatedAt
 
   createdBookings     Booking[]            @relation("StaffBookings")
+  admittedBookings    Booking[]            @relation("AdmittedBookings")
   recordedPayments    Payment[]
   approvedRefunds     Refund[]
   walkIns             WalkIn[]
@@ -103,6 +104,12 @@ model Booking {
   isStaffCreated    Boolean      @default(false)
   createdByUserId   String?
   createdByUser     User?        @relation("StaffBookings", fields: [createdByUserId], references: [id])
+
+  checkInStatus     String       @default("PENDING") // PENDING, CHECKED_IN, CHECKED_OUT
+  admittedAt        DateTime?
+  admittedByUserId  String?
+  admittedByUser    User?        @relation("AdmittedBookings", fields: [admittedByUserId], references: [id])
+  qrToken           String?      @unique
 
   cancellationReason String?
   cancelledAt       DateTime?

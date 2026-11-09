@@ -27,6 +27,7 @@ import {
   ChevronDown,
   User,
   CreditCard,
+  QrCode,
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -107,6 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Bookings", href: "/admin/bookings", icon: CalendarDays, hasSubmenu: true },
     { name: "Customers", href: "/admin/customers", icon: User },
     { name: "Walk-ins", href: "/admin/walkins", icon: UserCheck },
+    { name: "QR Scanner", href: "/admin/scan", icon: QrCode },
     { name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Cancellations & Refunds", href: "/admin/cancellations", icon: XCircle },
     { name: "Complaints & Feedback", href: "/admin/complaints", icon: MessageSquareWarning },
@@ -148,6 +150,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return {
         title: "Walk-ins",
         subtitle: "Record and manage walk-in visitors",
+      };
+    }
+    if (pathname.startsWith("/admin/scan")) {
+      return {
+        title: "QR Admission Scanner",
+        subtitle: "Instant mobile admission and counter balance check",
       };
     }
     if (pathname.startsWith("/admin/payments")) {

@@ -726,6 +726,8 @@ export async function confirmBooking(input: ConfirmBookingInput) {
         customerEmail: input.customerEmail || null,
         customerPlace: input.customerPlace || null,
         notes: input.notes || null,
+        qrToken: `MAKPASS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        checkInStatus: "PENDING",
         isStaffCreated: !!input.isStaffCreated,
         createdByUserId: input.createdByUserId || null,
       },

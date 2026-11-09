@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, useMemo } from "react";
+import BookingPassCard from "@/components/BookingPassCard";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -1418,124 +1419,24 @@ function BookingContent() {
               </p>
             </div>
 
-            {/* Apple Wallet Style Pass */}
-            <div className="bg-white rounded-3xl border border-white shadow-xl overflow-hidden">
-              <div className="bg-slate-950 text-white p-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Waves className="w-5 h-5 text-cyan-400" />
-                    <span className="font-black text-sm tracking-wider uppercase">M.A.K Indoor Pool</span>
-                  </div>
-                  <span className="text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 px-2.5 py-0.5 rounded-full">
-                    Confirmed Pass
-                  </span>
-                </div>
+            {/* High-Resolution QR Booking Pass with Instant Download & WhatsApp Sharing */}
+            <BookingPassCard booking={confirmedBooking} showActions={true} />
 
-                <div className="flex items-center justify-between pt-2">
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-cyan-300 block">
-                      Booking Reference ID
-                    </span>
-                    <span className="text-xl font-mono font-black tracking-wider">
-                      {confirmedBooking.id}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyCode(confirmedBooking.id)}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition"
-                  >
-                    {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedCode ? "Copied" : "Copy"}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Perforated Divider */}
-              <div className="relative h-4 bg-white flex items-center justify-between px-2 overflow-hidden">
-                <div className="w-4 h-4 rounded-full bg-[#F0F5FA] -ml-4" />
-                <div className="w-full border-t-2 border-dashed border-slate-200" />
-                <div className="w-4 h-4 rounded-full bg-[#F0F5FA] -mr-4" />
-              </div>
-
-              {/* Pass Details */}
-              <div className="p-5 space-y-3 text-xs">
-                <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-100">
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Date</span>
-                    <span className="font-bold font-mono text-slate-900">{confirmedBooking.bookingDate}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Session Time</span>
-                    <span className="font-bold font-mono text-slate-900">
-                      {formatTimeSlot(confirmedBooking.startTime)} – {formatTimeSlot(confirmedBooking.endTime)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-100">
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Guest Name &amp; Place</span>
-                    <span className="font-bold text-slate-900">
-                      {confirmedBooking.customerName} {confirmedBooking.customerPlace ? `(${confirmedBooking.customerPlace})` : ""}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Swimmer Count</span>
-                    <span className="font-bold text-slate-900">{confirmedBooking.guestCount} Guests</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Paid Online</span>
-                    <span className="font-bold font-mono text-emerald-700 text-sm">₹{confirmedBooking.totalPaid}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Balance on Arrival</span>
-                    <span className="font-bold font-mono text-slate-900 text-sm">
-                      {confirmedBooking.balanceAmount > 0 ? `₹${confirmedBooking.balanceAmount}` : "₹0 (Fully Paid)"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons: WhatsApp Share + Print + Manage */}
-            <div className="space-y-2.5">
-              <button
-                type="button"
-                onClick={() => handleShareWhatsApp(confirmedBooking)}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3.5 rounded-full text-xs shadow-md transition flex items-center justify-center gap-2"
+            <div className="pt-2 text-center space-y-2">
+              <Link
+                href={`/booking-status?ref=${confirmedBooking.id}&phone=${customerPhone}`}
+                className="inline-block text-xs text-[#1D68BD] hover:underline font-bold"
               >
-                <Share2 className="w-4 h-4" />
-                <span>Share Booking Pass on WhatsApp</span>
-              </button>
-
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold py-2.5 rounded-full text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-2xs"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>Print Receipt</span>
-                </button>
-
+                Go to Self-Service &amp; Reschedule Portal &rarr;
+              </Link>
+              <div>
                 <Link
-                  href={`/booking-status?ref=${confirmedBooking.id}&phone=${customerPhone}`}
-                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold py-2.5 rounded-full text-xs text-center flex items-center justify-center transition active:scale-95 shadow-2xs"
+                  href="/"
+                  className="inline-block text-center text-xs text-slate-500 hover:text-slate-900 font-semibold py-1.5 transition"
                 >
-                  <span>Self-Service</span>
+                  &larr; Return to Home Page
                 </Link>
               </div>
-
-              <Link
-                href="/"
-                className="block text-center text-xs text-slate-500 hover:text-slate-900 font-semibold py-2 transition"
-              >
-                &larr; Return to Home Page
-              </Link>
             </div>
           </div>
         )}

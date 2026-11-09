@@ -46,6 +46,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Auto-generate qrToken if missing on legacy records
+    if (!booking.qrToken) {
+      const generatedToken = `MAKPASS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: { qrToken: generatedToken },
+      });
+      (booking as any).qrToken = generatedToken;
+    }
+
     const settings = await prisma.poolSetting.findUnique({
       where: { id: "singleton_settings" },
     });

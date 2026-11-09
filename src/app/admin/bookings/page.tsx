@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { getPoolDate, formatSlotTime } from "@/lib/timezone";
 import {
   Calendar,
@@ -16,6 +17,7 @@ import {
   Clock,
   Users,
   MapPin,
+  Camera,
 } from "lucide-react";
 
 export default function AdminBookingsPage() {
@@ -209,16 +211,26 @@ export default function AdminBookingsPage() {
           </button>
         </div>
 
-        <button
-          onClick={() => {
-            setModalError(null);
-            setShowCreateModal(true);
-          }}
-          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2 shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Booking</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/scan"
+            className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold px-3.5 py-2 rounded-2xl text-xs shadow-md shadow-emerald-700/20 transition flex items-center gap-1.5 shrink-0"
+          >
+            <Camera className="w-4 h-4" />
+            <span>Scan QR</span>
+          </Link>
+
+          <button
+            onClick={() => {
+              setModalError(null);
+              setShowCreateModal(true);
+            }}
+            className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2 shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Booking</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar (Date Picker, Status, Search) */}

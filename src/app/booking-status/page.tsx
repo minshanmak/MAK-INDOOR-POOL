@@ -17,6 +17,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import BookingPassCard from "@/components/BookingPassCard";
 
 function BookingStatusContent() {
   const searchParams = useSearchParams();
@@ -236,6 +237,13 @@ function BookingStatusContent() {
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
             <div>{cancelMsg}</div>
+          </div>
+        )}
+
+        {/* Official QR Booking Pass */}
+        {bookingData && bookingData.booking.status !== "CANCELLED" && (
+          <div className="pb-2">
+            <BookingPassCard booking={bookingData.booking} showActions={true} />
           </div>
         )}
 
