@@ -396,11 +396,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </span>
             </div>
 
-            {/* Language Pill */}
-            <div className="bg-white rounded-2xl px-2.5 py-1.5 border border-white shadow-xs flex items-center gap-1 text-xs font-semibold text-slate-600 cursor-pointer">
-              <span>EN</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
-            </div>
+
 
             {/* Owner Profile Pill in Top Bar (Shown on Subpages as in Mockup Image 2) */}
             {pathname !== "/admin" && (
