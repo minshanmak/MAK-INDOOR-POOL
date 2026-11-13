@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import QRCode from "qrcode";
+import MakLogo from "@/components/MakLogo";
 import {
   Download,
   Share2,
@@ -116,13 +117,27 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
       ctx.roundRect(30, 30, 540, 110, [24, 24, 0, 0]);
       ctx.fill();
 
+      // Official Logo on Ticket
+      try {
+        const logoImg = new Image();
+        logoImg.crossOrigin = "anonymous";
+        await new Promise((resolve) => {
+          logoImg.onload = resolve;
+          logoImg.onerror = resolve;
+          logoImg.src = "/images/mak-logo-white.png";
+        });
+        if (logoImg.width > 0) {
+          ctx.drawImage(logoImg, 50, 48, 120, 65);
+        }
+      } catch {}
+
       ctx.fillStyle = "#FFFFFF";
-      ctx.font = "bold 24px system-ui, sans-serif";
-      ctx.fillText("M.A.K INDOOR POOL", 50, 75);
+      ctx.font = "bold 20px system-ui, sans-serif";
+      ctx.fillText("M.A.K INDOOR POOL", 185, 75);
 
       ctx.fillStyle = "#94A3B8";
-      ctx.font = "13px system-ui, sans-serif";
-      ctx.fillText("Digital Entry Pass • Moonniyur, Malappuram", 50, 105);
+      ctx.font = "12px system-ui, sans-serif";
+      ctx.fillText("Digital Entry Pass • Moonniyur, Malappuram", 185, 100);
 
       // Pass Type Badge
       const isFamily = booking.type === "FAMILY";
@@ -260,11 +275,11 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
           <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl" />
           <div className="flex items-center justify-between relative z-10">
             <div>
-              <span className="text-[10px] uppercase tracking-wider font-extrabold text-sky-400 block">
+              <span className="text-[10px] uppercase tracking-wider font-extrabold text-sky-400 block mb-1">
                 Official Entry Pass
               </span>
-              <h3 className="text-lg font-black tracking-tight">M.A.K INDOOR POOL</h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">Moonniyur, Malappuram, Kerala</p>
+              <MakLogo light={true} size="md" />
+              <p className="text-[11px] text-slate-400 mt-1">Moonniyur, Malappuram, Kerala</p>
             </div>
             <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-sky-400 backdrop-blur-md">
               <ShieldCheck className="w-5 h-5" />

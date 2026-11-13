@@ -28,7 +28,7 @@ export default function Footer() {
           {/* Column 1: Brand Info */}
           <div className="space-y-3 lg:col-span-1">
             <Link href="/" aria-label="M.A.K Indoor Pool">
-              <MakLogo size="md" light={true} />
+              <MakLogo size="lg" light={true} />
             </Link>
             <p className="text-slate-400 text-xs leading-relaxed max-w-xs pt-1">
               A clean, safe and family-friendly indoor pool experience.

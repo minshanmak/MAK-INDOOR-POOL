@@ -18,6 +18,7 @@ import {
   Sliders,
   Waves,
 } from "lucide-react";
+import MakLogo from "@/components/MakLogo";
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<any>(null);
@@ -187,10 +188,8 @@ export default function AdminSettingsPage() {
                   <div className="space-y-2 pt-2">
                     <label className="block font-bold text-slate-700">Pool Logo</label>
                     <div className="flex items-center gap-4">
-                      <div className="w-24 h-20 rounded-2xl bg-slate-900 text-white flex flex-col items-center justify-center p-2 text-center shadow-xs">
-                        <Waves className="w-6 h-6 text-sky-400" />
-                        <span className="text-[10px] font-black leading-tight mt-1">M.A.K</span>
-                        <span className="text-[8px] text-slate-300">Indoor Pool</span>
+                      <div className="w-28 h-20 rounded-2xl bg-white border border-slate-200 text-slate-900 flex flex-col items-center justify-center p-2 text-center shadow-xs">
+                        <MakLogo size="sm" />
                       </div>
                       <div className="flex items-center gap-2">
                         <button

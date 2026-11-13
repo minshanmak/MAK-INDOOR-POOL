@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { formatPoolDate, formatPoolTime } from "@/lib/timezone";
+import MakLogo from "@/components/MakLogo";
 import {
   Waves,
   LayoutDashboard,
@@ -62,6 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         const res = await fetch("/api/auth/me");
         const data = await res.json();
         if (!res.ok || !data.authenticated) {
+          router.push("/admin/login");
           const currentUrl = typeof window !== "undefined"
             ? window.location.pathname + window.location.search
             : "/admin";
@@ -226,14 +228,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-[#EBF2FA] flex flex-col lg:flex-row text-slate-900 font-sans antialiased p-0 lg:p-4 gap-0 lg:gap-5 selection:bg-[#1D68BD] selection:text-white">
       {/* Mobile Top Header */}
-      <div className="lg:hidden bg-white/95 backdrop-blur-md text-slate-900 p-3.5 flex justify-between items-center border-b border-slate-200 sticky top-0 z-50 shadow-2xs">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#1D68BD] flex items-center justify-center text-white shadow-sm">
-            <Waves className="w-4 h-4" />
-          </div>
+      <div className="lg:hidden bg-white/95 backdrop-blur-md text-slate-900 p-3 flex justify-between items-center border-b border-slate-200 sticky top-0 z-50 shadow-2xs">
+        <div className="flex items-center gap-2">
+          <MakLogo variant="mark" size="sm" />
           <div>
-            <span className="font-extrabold text-sm tracking-tight block leading-tight">M.A.K Indoor Pool</span>
-            <span className="text-[10px] text-slate-500 font-medium block">Ops Manager</span>
+            <span className="font-extrabold text-xs tracking-tight block leading-tight text-slate-900">M.A.K Indoor Pool</span>
+            <span className="text-[9px] text-slate-500 font-medium block">Ops Manager</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -268,14 +268,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1">
           {/* Brand Header */}
-          <div className="flex items-center gap-3 px-2 py-2 mb-3 border-b border-slate-100/90 pb-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#1D68BD] flex items-center justify-center text-white shadow-md shadow-blue-600/25 shrink-0">
-              <Waves className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="font-black text-sm text-slate-900 leading-tight block tracking-tight">M.A.K</span>
-              <span className="font-bold text-xs text-slate-700 leading-tight block">Indoor Pool</span>
-            </div>
+          <div className="flex items-center justify-center px-2 py-2 mb-3 border-b border-slate-100/90 pb-3">
+            <MakLogo variant="full" size="lg" />
           </div>
 
           {/* Navigation Links */}

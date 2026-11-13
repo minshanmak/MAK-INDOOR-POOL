@@ -2,7 +2,8 @@
 
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Waves, Lock, Phone, AlertCircle } from "lucide-react";
+import { Lock, Phone, AlertCircle } from "lucide-react";
+import MakLogo from "@/components/MakLogo";
 
 function AdminLoginForm() {
   const router = useRouter();
@@ -45,14 +46,16 @@ function AdminLoginForm() {
 
   return (
     <div className="min-h-screen bg-[#071322] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
-        <div className="w-12 h-12 rounded-xl bg-cyan-600 flex items-center justify-center mx-auto text-white shadow-sm">
-          <Waves className="w-6 h-6" />
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-3">
+        <div className="flex justify-center pb-1">
+          <MakLogo light={true} size="xl" />
         </div>
-        <h2 className="text-2xl font-black text-white tracking-tight">Staff & Ops Portal</h2>
-        <p className="text-xs text-slate-400">
-          M.A.K Indoor Pool Operational Access Control
-        </p>
+        <div>
+          <h2 className="text-xl font-black text-white tracking-tight">Staff &amp; Ops Portal</h2>
+          <p className="text-xs text-slate-400 mt-1">
+            M.A.K Indoor Pool Operational Access Control
+          </p>
+        </div>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4">

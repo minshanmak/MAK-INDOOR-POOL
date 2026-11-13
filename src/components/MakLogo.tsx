@@ -1,86 +1,107 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 interface MakLogoProps {
   light?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  variant?: "full" | "horizontal" | "mark";
   showTagline?: boolean;
   className?: string;
+  priority?: boolean;
 }
 
 export default function MakLogo({
   light = false,
   size = "md",
+  variant = "full",
   showTagline = true,
   className = "",
+  priority = false,
 }: MakLogoProps) {
-  const iconSizes = {
-    sm: "w-6 h-6",
-    md: "w-8 h-8",
-    lg: "w-10 h-10",
+  // Height presets for the logo
+  const heightStyles = {
+    xs: { h: "h-6", px: 24, wFull: 44, wMark: 28 },
+    sm: { h: "h-8 sm:h-9", px: 34, wFull: 62, wMark: 38 },
+    md: { h: "h-10", px: 40, wFull: 73, wMark: 48 },
+    lg: { h: "h-12 sm:h-14", px: 52, wFull: 95, wMark: 62 },
+    xl: { h: "h-16 sm:h-20", px: 76, wFull: 138, wMark: 90 },
   };
 
+  const selectedSize = heightStyles[size] || heightStyles.md;
+
+  // 1. Full Stacked Logo (Official swimmer + M.A.K INDOOR POOL)
+  if (variant === "full") {
+    const logoSrc = light ? "/images/mak-logo-white.png" : "/images/mak-logo.png";
+    return (
+      <div className={`inline-flex items-center select-none ${className}`}>
+        <img
+          src={logoSrc}
+          alt="M.A.K Indoor Pool"
+          className={`${selectedSize.h} w-auto object-contain transition-transform duration-200 group-hover:scale-102`}
+          loading={priority ? "eager" : "lazy"}
+        />
+      </div>
+    );
+  }
+
+  // 2. Mark Only (Swimmer + Waves)
+  if (variant === "mark") {
+    const markSrc = light ? "/images/mak-logo-mark-white.png" : "/images/mak-logo-mark.png";
+    return (
+      <div className={`inline-flex items-center justify-center select-none ${className}`}>
+        <img
+          src={markSrc}
+          alt="M.A.K Indoor Pool Mark"
+          className={`${selectedSize.h} w-auto object-contain transition-transform duration-200 group-hover:scale-105`}
+          loading={priority ? "eager" : "lazy"}
+        />
+      </div>
+    );
+  }
+
+  // 3. Horizontal Lockup (Swimmer mark on left + Brand typography on right)
+  const markSrc = light ? "/images/mak-logo-mark-white.png" : "/images/mak-logo-mark.png";
+
   const titleSizes = {
-    sm: "text-xs tracking-tight",
-    md: "text-sm tracking-tight",
-    lg: "text-base tracking-tight",
+    xs: "text-xs tracking-tight",
+    sm: "text-sm tracking-tight",
+    md: "text-base tracking-tight",
+    lg: "text-lg tracking-tight",
+    xl: "text-2xl tracking-tight",
   };
 
   const subtitleSizes = {
-    sm: "text-[9px] tracking-wider",
-    md: "text-[10px] tracking-wider",
-    lg: "text-xs tracking-wide",
+    xs: "text-[8px] tracking-wider",
+    sm: "text-[9px] tracking-widest",
+    md: "text-[10px] tracking-widest",
+    lg: "text-xs tracking-widest",
+    xl: "text-sm tracking-widest",
   };
 
   return (
-    <div className={`flex items-center gap-2.5 select-none ${className}`}>
-      <div className={`${iconSizes[size]} flex items-center justify-center shrink-0`}>
-        <svg
-          viewBox="0 0 36 36"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full transition-transform duration-200 group-hover:scale-105"
-        >
-          {/* Top Wave */}
-          <path
-            d="M3 11.5C7 8 11.5 14 16 11C20.5 8 25 14 29.5 11C31 10 32.5 10.5 33.5 11"
-            stroke={light ? "#38BDF8" : "#00838F"}
-            strokeWidth="2.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {/* Middle Wave */}
-          <path
-            d="M2.5 18C6.5 14.5 11 20.5 15.5 17.5C20 14.5 24.5 20.5 29 17.5C30.5 16.5 32 17 33.5 17.5"
-            stroke={light ? "#00BCD4" : "#0097A7"}
-            strokeWidth="2.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {/* Bottom Wave */}
-          <path
-            d="M3.5 24.5C7.5 21 12 27 16.5 24C21 21 25.5 27 30 24C31.5 23 32.5 23.5 33.5 24"
-            stroke={light ? "#67E8F9" : "#00ACC1"}
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeOpacity={light ? "0.9" : "0.75"}
-          />
-        </svg>
+    <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
+      <div className="shrink-0 flex items-center justify-center">
+        <img
+          src={markSrc}
+          alt="M.A.K Indoor Pool Mark"
+          className={`${selectedSize.h} w-auto object-contain transition-transform duration-200 group-hover:scale-105`}
+          loading={priority ? "eager" : "lazy"}
+        />
       </div>
       <div className="leading-tight">
         <div
-          className={`font-black ${titleSizes[size]} ${
-            light ? "text-white" : "text-[#0A192F]"
+          className={`font-black font-sans ${titleSizes[size]} ${
+            light ? "text-white" : "text-[#002F67]"
           }`}
         >
           M.A.K
         </div>
         {showTagline && (
           <div
-            className={`font-semibold uppercase ${subtitleSizes[size]} ${
-              light ? "text-cyan-300" : "text-[#00838F]"
+            className={`font-bold uppercase ${subtitleSizes[size]} ${
+              light ? "text-sky-400" : "text-[#0284C7]"
             }`}
           >
             Indoor Pool
