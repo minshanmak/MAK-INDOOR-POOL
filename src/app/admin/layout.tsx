@@ -29,6 +29,7 @@ import {
   User,
   CreditCard,
   QrCode,
+  CheckCircle2,
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [livePoolClock, setLivePoolClock] = useState({ date: "", time: "" });
+  const [notificationData, setNotificationData] = useState<{ unreadCount: number; notifications: any[] }>({
+    unreadCount: 0,
+    notifications: [],
+  });
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
     const updateClock = () => {
@@ -51,6 +57,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (pathname === "/admin/login") return;
+
+    const fetchNotificationsSummary = async () => {
+      try {
+        const res = await fetch("/api/admin/notifications");
+        if (res.ok) {
+          const json = await res.json();
+          setNotificationData(json);
+        }
+      } catch (err) {
+        // Safe catch
+      }
+    };
+
+    fetchNotificationsSummary();
+    const interval = setInterval(fetchNotificationsSummary, 30000);
+    return () => clearInterval(interval);
+  }, [pathname]);
 
   useEffect(() => {
     if (pathname === "/admin/login") {
@@ -117,17 +143,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Cancellations & Refunds", href: "/admin/cancellations", icon: XCircle },
     { name: "Complaints & Feedback", href: "/admin/complaints", icon: MessageSquareWarning },
+    {
+      name: "Notifications",
+      href: "/admin/notifications",
+      icon: Bell,
+      badge: notificationData.unreadCount > 0 ? notificationData.unreadCount : undefined,
+    },
     { name: "Maintenance", href: "/admin/maintenance", icon: Droplets },
     { name: "Reports", href: "/admin/reports", icon: BarChart3 },
     ...(isOwnerOrAdmin
       ? [
           { name: "Staff & Permissions", href: "/admin/staff", icon: Users2 },
-          { name: "Notifications", href: "/admin/complaints", icon: Bell, badge: 3 },
           { name: "System Settings", href: "/admin/settings", icon: Settings },
         ]
-      : [
-          { name: "Notifications", href: "/admin/complaints", icon: Bell, badge: 3 },
-        ]),
+      : []),
     { name: "Daily Closing", href: "/admin/closing", icon: FileCheck2 },
     { name: "Offline Sync", href: "/admin/offline", icon: WifiOff },
   ];
@@ -167,6 +196,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return {
         title: "Payments",
         subtitle: "Track and manage all payments",
+      };
+    }
+    if (pathname.startsWith("/admin/notifications")) {
+      return {
+        title: "Notifications Center",
+        subtitle: "Live operational alerts, water quality tests, and balances",
       };
     }
     if (pathname.startsWith("/admin/cancellations")) {
@@ -386,12 +421,93 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
 
 
-            {/* Notifications Bell */}
-            <div className="w-8 h-8 rounded-2xl bg-white border border-white shadow-xs flex items-center justify-center relative text-slate-600 hover:text-slate-900 cursor-pointer transition">
-              <Bell className="w-4 h-4" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                3
-              </span>
+            {/* Notifications Bell & Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                className="w-8 h-8 rounded-2xl bg-white border border-white shadow-xs flex items-center justify-center relative text-slate-600 hover:text-slate-900 cursor-pointer transition active:scale-95"
+                title="Operational Notifications"
+              >
+                <Bell className="w-4 h-4 stroke-[1.75]" />
+                {notificationData.unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 px-1 min-w-[16px] h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+                    {notificationData.unreadCount > 9 ? "9+" : notificationData.unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Floating Dropdown Popover */}
+              {notificationsOpen && (
+                <>
+                  <div
+                    onClick={() => setNotificationsOpen(false)}
+                    className="fixed inset-0 z-40 bg-transparent"
+                  />
+                  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl p-4 shadow-xl border border-slate-100 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-[#1D68BD] stroke-[1.75]" />
+                        <span className="font-extrabold text-xs text-slate-900">
+                          Operational Alerts ({notificationData.unreadCount})
+                        </span>
+                      </div>
+                      <Link
+                        href="/admin/notifications"
+                        onClick={() => setNotificationsOpen(false)}
+                        className="text-[11px] font-bold text-[#1D68BD] hover:underline"
+                      >
+                        View all
+                      </Link>
+                    </div>
+
+                    <div className="space-y-2 max-h-72 overflow-y-auto">
+                      {notificationData.notifications.length === 0 ? (
+                        <div className="p-6 text-center text-slate-400 text-xs">
+                          <CheckCircle2 className="w-6 h-6 mx-auto text-emerald-500 mb-1" />
+                          <p className="font-bold text-slate-600">No active alerts</p>
+                          <p className="text-[10px]">Operations running smoothly</p>
+                        </div>
+                      ) : (
+                        notificationData.notifications.slice(0, 4).map((n) => (
+                          <Link
+                            key={n.id}
+                            href={n.actionUrl}
+                            onClick={() => setNotificationsOpen(false)}
+                            className="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 transition block text-left space-y-0.5 border border-slate-100"
+                          >
+                            <div className="flex items-center justify-between gap-1">
+                              <span
+                                className={`text-[9px] font-black uppercase px-1.5 py-0.2 rounded-md ${
+                                  n.priority === "URGENT"
+                                    ? "bg-rose-100 text-rose-700"
+                                    : "bg-slate-200 text-slate-700"
+                                }`}
+                              >
+                                {n.priority}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-mono">{n.time}</span>
+                            </div>
+                            <h5 className="font-bold text-xs text-slate-900 truncate">{n.title}</h5>
+                            <p className="text-[11px] text-slate-500 line-clamp-1">{n.message}</p>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100">
+                      <Link
+                        href="/admin/notifications"
+                        onClick={() => setNotificationsOpen(false)}
+                        className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                      >
+                        <span>Open Notifications Center</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
 
