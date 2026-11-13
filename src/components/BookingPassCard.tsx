@@ -17,8 +17,6 @@ import {
   ShieldCheck,
   Lock,
   Waves,
-  Info,
-  X,
 } from "lucide-react";
 import { formatSlotTime } from "@/lib/timezone";
 
@@ -47,14 +45,6 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [appleLoading, setAppleLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [walletModal, setWalletModal] = useState<{
-    open: boolean;
-    provider: "Apple" | "Google";
-    message: string;
-    missing?: string[];
-  } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Generate QR code data URL (encodes the booking verification URL)
@@ -79,84 +69,6 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
     navigator.clipboard.writeText(booking.id);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleAddToAppleWallet = async () => {
-    setAppleLoading(true);
-    try {
-      const res = await fetch(
-        `/api/passes/apple?bookingId=${encodeURIComponent(booking.id)}&token=${encodeURIComponent(
-          booking.qrToken || booking.customerPhone
-        )}`
-      );
-
-      if (res.status === 412) {
-        const data = await res.json();
-        setWalletModal({
-          open: true,
-          provider: "Apple",
-          message:
-            data.message ||
-            "Apple Wallet pass signing requires Apple Developer Certificate configuration.",
-          missing: data.missing,
-        });
-        return;
-      }
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to generate Apple Wallet pass.");
-      }
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `mak-pass-${booking.id}.pkpass`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err: any) {
-      alert(err.message || "Could not generate Apple Wallet pass.");
-    } finally {
-      setAppleLoading(false);
-    }
-  };
-
-  const handleAddToGoogleWallet = async () => {
-    setGoogleLoading(true);
-    try {
-      const res = await fetch(
-        `/api/passes/google?bookingId=${encodeURIComponent(booking.id)}&token=${encodeURIComponent(
-          booking.qrToken || booking.customerPhone
-        )}`
-      );
-
-      if (res.status === 412) {
-        const data = await res.json();
-        setWalletModal({
-          open: true,
-          provider: "Google",
-          message:
-            data.message ||
-            "Google Wallet integration requires Google Cloud Service Account configuration.",
-          missing: data.missing,
-        });
-        return;
-      }
-
-      const data = await res.json();
-      if (!res.ok || !data.saveUrl) {
-        throw new Error(data.error || "Failed to generate Google Wallet save link.");
-      }
-
-      window.open(data.saveUrl, "_blank", "noopener,noreferrer");
-    } catch (err: any) {
-      alert(err.message || "Could not generate Google Wallet pass.");
-    } finally {
-      setGoogleLoading(false);
-    }
   };
 
   const handleWhatsAppShare = () => {
@@ -478,7 +390,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
         </div>
       </div>
 
-      {/* Action Buttons: WhatsApp + Download + Apple & Google Wallets */}
+      {/* Action Buttons: Download + WhatsApp */}
       {showActions && (
         <div className="space-y-2.5 pt-1">
           {/* WhatsApp Share Button */}
@@ -487,7 +399,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
             onClick={handleWhatsAppShare}
             className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold py-3.5 rounded-2xl text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center gap-2"
           >
-            <Share2 className="w-4 h-4 stroke-[1.75]" />
+            <Share2 className="w-4 h-4" />
             <span>Share Pass on WhatsApp</span>
           </button>
 
@@ -498,94 +410,9 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
             disabled={downloading}
             className="w-full bg-white hover:bg-slate-50 active:scale-98 border border-slate-200 text-slate-900 font-extrabold py-3 rounded-2xl text-xs shadow-sm transition flex items-center justify-center gap-2"
           >
-            <Download className="w-4 h-4 text-slate-600 stroke-[1.75]" />
+            <Download className="w-4 h-4 text-slate-600" />
             <span>{downloading ? "Preparing Pass..." : "Download Pass (Save to Photos / Files)"}</span>
           </button>
-
-          {/* Digital Mobile Wallets: Apple Wallet & Google Wallet */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-            {/* Apple Wallet Button */}
-            <button
-              type="button"
-              onClick={handleAddToAppleWallet}
-              disabled={appleLoading}
-              className="min-h-[46px] w-full bg-black hover:bg-slate-900 active:scale-98 text-white font-bold py-2.5 px-4 rounded-2xl text-xs shadow-sm transition flex items-center justify-center gap-2 border border-black cursor-pointer"
-            >
-              <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 170 170">
-                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.73-7.98-12.13-14.71-6.19-9.51-11.08-20.2-14.67-32.06-3.59-11.86-5.39-23.2-5.39-34.02 0-14.88 3.73-27.24 11.19-37.07 7.46-9.84 16.92-14.85 28.38-15.04 4.58 0 9.8 1.18 15.66 3.55 5.86 2.37 9.53 3.61 11.01 3.72 1.83-.24 5.76-1.63 11.78-4.17 6.02-2.54 11.23-3.67 15.63-3.39 12.35.61 22.38 5.16 30.08 13.66-10.74 6.54-16.03 15.53-15.86 26.97.17 9.17 3.79 16.89 10.86 23.16 7.07 6.27 15.42 9.69 25.05 10.26-2.19 6.72-4.99 13.65-8.41 20.81zM119.22 33.11c0-7.46 2.65-14.43 7.95-20.91 5.3-6.48 11.83-10.42 19.59-11.82.25 1.54.38 2.88.38 4.02 0 7.37-2.73 14.39-8.19 21.05-5.46 6.66-12.06 10.59-19.8 11.79-.12-1.37-.18-2.61-.18-3.73l.25-.4z" />
-              </svg>
-              <span>{appleLoading ? "Preparing Pass..." : "Add to Apple Wallet"}</span>
-            </button>
-
-            {/* Google Wallet Button */}
-            <button
-              type="button"
-              onClick={handleAddToGoogleWallet}
-              disabled={googleLoading}
-              className="min-h-[46px] w-full bg-white hover:bg-slate-50 active:scale-98 text-slate-800 font-bold py-2.5 px-4 rounded-2xl text-xs shadow-sm transition flex items-center justify-center gap-2 border border-slate-300 cursor-pointer"
-            >
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 48 48">
-                <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
-                <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
-                <path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.91l7.35-5.73z"/>
-                <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
-              </svg>
-              <span>{googleLoading ? "Preparing Pass..." : "Add to Google Wallet"}</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Wallet Information / Diagnostic Modal */}
-      {walletModal?.open && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 space-y-4 animate-in fade-in duration-200">
-            <div className="flex items-start justify-between gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-sky-50 text-[#0284C7] flex items-center justify-center shrink-0">
-                <Info className="w-5 h-5 stroke-[1.75]" />
-              </div>
-              <button
-                type="button"
-                onClick={() => setWalletModal(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl transition cursor-pointer"
-              >
-                <X className="w-5 h-5 stroke-[1.75]" />
-              </button>
-            </div>
-            <div>
-              <h3 className="font-extrabold text-sm text-slate-900">
-                {walletModal.provider} Wallet Pass Setup
-              </h3>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                {walletModal.message}
-              </p>
-            </div>
-            {walletModal.missing && walletModal.missing.length > 0 && (
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                  Required Environment Variables:
-                </span>
-                <ul className="text-[11px] font-mono text-slate-700 space-y-0.5">
-                  {walletModal.missing.map((key) => (
-                    <li key={key} className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                      <span>{key}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <p className="text-[11px] text-slate-400">
-              Your instant entry QR code above is active and accepted at the pool counter. You can also tap "Download Pass" or "Share on WhatsApp".
-            </p>
-            <button
-              type="button"
-              onClick={() => setWalletModal(null)}
-              className="w-full py-2.5 bg-[#0284C7] hover:bg-[#0369a1] text-white font-bold text-xs rounded-xl transition shadow-xs cursor-pointer"
-            >
-              Understood
-            </button>
-          </div>
         </div>
       )}
     </div>

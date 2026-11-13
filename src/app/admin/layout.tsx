@@ -387,11 +387,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <ChevronDown className="w-3 h-3 text-slate-400" />
             </div>
 
-            {/* Pool Operational Status Pill */}
-            <div className="bg-[#E8F8F0] text-emerald-700 border border-emerald-200/60 rounded-2xl px-3 py-1.5 text-xs font-bold shadow-xs flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Pool Operational</span>
-            </div>
 
             {/* Notifications Bell */}
             <div className="w-8 h-8 rounded-2xl bg-white border border-white shadow-xs flex items-center justify-center relative text-slate-600 hover:text-slate-900 cursor-pointer transition">
