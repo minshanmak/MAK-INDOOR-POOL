@@ -9,21 +9,25 @@ import {
   Sparkles,
   QrCode,
   UserCheck,
+  CalendarClock,
   Coins,
   CreditCard,
   AlertTriangle,
   CheckCircle2,
   AlertCircle,
   RefreshCw,
+  LogOut,
   Droplets,
   ChevronRight,
   Wifi,
   WifiOff,
-  PhoneCall,
-  Plus,
+  Flame,
+  ArrowUpRight,
   ShieldCheck,
-  ArrowRight,
-  SlidersHorizontal,
+  Layers,
+  PhoneCall,
+  Activity,
+  Plus,
 } from "lucide-react";
 import { formatSlotTime } from "@/lib/timezone";
 import { offlineStore } from "@/lib/offline-store";
@@ -43,16 +47,13 @@ export default function AdminCounterDashboard() {
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  // Operational Mode Toggle (Auto-detect from IST time, or manual preview for front desk)
-  const [modeView, setModeView] = useState<"AUTO" | "PUBLIC" | "PRIVATE">("AUTO");
-
   // Modals Visibility
   const [isWalkInOpen, setIsWalkInOpen] = useState(false);
   const [isHoldOpen, setIsHoldOpen] = useState(false);
   const [isWaterLogOpen, setIsWaterLogOpen] = useState(false);
   const [isClosingOpen, setIsClosingOpen] = useState(false);
 
-  // Connectivity State
+  // Offline / Connectivity State
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(0);
 
@@ -90,6 +91,7 @@ export default function AdminCounterDashboard() {
       }
     } catch (err: any) {
       console.warn("Metrics load error:", err);
+      // Fallback: If offline, retrieve cached data
       if (!isOnline) {
         const cachedBookings = offlineStore.getCachedTodayBookings();
         setData((prev: any) => ({
@@ -112,7 +114,7 @@ export default function AdminCounterDashboard() {
     return () => clearInterval(interval);
   }, [fetchDashboardMetrics]);
 
-  // Session Actions: Check Out (Toast/Resy host-stand pattern)
+  // Session Actions: Check Out
   const handleCheckoutSession = async (session: any) => {
     if (!confirm(`Confirm check-out for ${session.customerName} (${session.guests} guests)?`)) {
       return;
@@ -128,6 +130,7 @@ export default function AdminCounterDashboard() {
         });
         if (!res.ok) throw new Error("Could not check out walk-in.");
       } else {
+        // Online booking checkout
         const res = await fetch("/api/admin/bookings", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -201,15 +204,15 @@ export default function AdminCounterDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-[460px] flex flex-col items-center justify-center gap-3 bg-white rounded-[12px] p-6 border-[0.5px] border-slate-200 shadow-xs">
-        <div className="w-8 h-8 border-2 border-[#0284C7] border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-semibold text-slate-600">Loading counter operations...</p>
+      <div className="min-h-[500px] flex flex-col items-center justify-center gap-3 bg-white rounded-3xl p-8 border border-white shadow-xs">
+        <div className="w-9 h-9 border-3 border-[#0284C7] border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-bold text-slate-600">Loading counter operations...</p>
       </div>
     );
   }
 
   const {
-    currentMode: serverMode = "PUBLIC",
+    currentMode = "PUBLIC",
     modeChangeInfo = "Operating normally",
     currentTimeStr = "12:00",
     todayStr = "",
@@ -223,119 +226,79 @@ export default function AdminCounterDashboard() {
     todayBookings = [],
   } = data || {};
 
-  // Active operational mode: either auto-detected from server or staff manual toggle
-  const activeMode: "PUBLIC" | "PRIVATE" | "CLOSED" =
-    modeView === "AUTO" ? serverMode : modeView;
-
   const publicGauge = metrics.publicGauge || {
-    currentSwimmers: 14,
+    currentSwimmers: 0,
     maxCapacity: 25,
-    spotsRemaining: 11,
-    cells: Array.from({ length: 25 }, (_, i) => ({
-      index: i + 1,
-      isOccupied: i < 14,
-      colorTier: i >= 23 ? "red" : i >= 19 ? "amber" : "sky",
-    })),
-    onlineBookingsCount: 8,
-    walkInsCount: 6,
-    todayCash: 2400,
-    todayUpi: 3600,
-    todayTotal: 6000,
+    spotsRemaining: 25,
+    cells: Array.from({ length: 25 }, (_, i) => ({ index: i + 1, isOccupied: false, colorTier: "sky" })),
+    onlineBookingsCount: 0,
+    walkInsCount: 0,
+    todayCash: 0,
+    todayUpi: 0,
+    todayTotal: 0,
   };
 
-  const privateModeStatus = metrics.privateModeStatus || {
-    bookingId: "MAK-20261113-004",
-    customerName: "Rashid Ali & Family",
-    customerPhone: "+91 98471 23456",
-    guestCount: 16,
-    includedCount: 12,
-    extraGuests: 4,
-    extraBillingAmount: 400,
-    totalAmount: 1900,
-    totalPaid: 750,
-    balanceDue: 1150,
-    startTime: "16:00",
-    endTime: "17:00",
-    bufferMinutes: 15,
-    bufferConflict: false,
-    bufferConflictMessage: "",
-    nextBooking: {
-      id: "MAK-20261113-005",
-      customerName: "Kareem Thottathil",
-      startTime: "17:15",
-      guestCount: 10,
-    },
-  };
-
+  const privateModeStatus = metrics.privateModeStatus;
   const overdueSessions = activeSessions.filter((s: any) => s.urgency === "OVERDUE");
 
-  // Public gauge color status label
-  const getOccupancyStatus = (count: number) => {
-    if (count >= 24) return { label: "Hard cap reached", colorClass: "text-red-700 bg-red-50 border-red-200" };
-    if (count >= 20) return { label: "Busy capacity", colorClass: "text-amber-700 bg-amber-50 border-amber-200" };
-    return { label: "Normal capacity", colorClass: "text-[#0284C7] bg-sky-50 border-sky-200" };
-  };
-
-  const occupancyStatus = getOccupancyStatus(publicGauge.currentSwimmers);
-
   return (
-    <div className="space-y-4 max-w-7xl mx-auto pb-12 font-sans selection:bg-[#0284C7] selection:text-white">
+    <div className="space-y-4 max-w-7xl mx-auto pb-12 font-sans">
       {/* 1. Offline Alert Strip (Persistent Amber Bar when offline) */}
       {!isOnline && (
-        <div className="p-3 bg-amber-500 text-white rounded-[12px] border-[0.5px] border-amber-600 flex items-center justify-between text-xs font-semibold shadow-xs">
-          <div className="flex items-center gap-2">
-            <WifiOff className="w-4 h-4 shrink-0" strokeWidth={1.75} />
-            <span>Offline. Admissions are saved on this device.</span>
+        <div className="p-3.5 bg-amber-500 text-white rounded-2xl flex items-center justify-between text-xs font-bold shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <WifiOff className="w-4 h-4 shrink-0" />
+            <span>Offline. Admissions and walk-ins are saved on this device.</span>
           </div>
-          <span className="px-2 py-0.5 bg-amber-600 rounded-[12px] text-[11px] font-mono font-bold">
+          <span className="px-2.5 py-1 bg-amber-600/70 rounded-xl text-[11px] font-mono">
             {pendingSyncCount} pending sync
           </span>
         </div>
       )}
 
-      {/* 2. Operations Status Bar (Visual System: 0.5px border, 12px radius, restrained palette) */}
-      <div className="bg-white rounded-[12px] p-4 border-[0.5px] border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+      {/* 2. Operations Status Bar */}
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.04)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Left: Mode Badge & Change Notice */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3.5">
           <div
-            className={`w-11 h-11 rounded-[12px] flex items-center justify-center font-bold text-xs shrink-0 ${
-              activeMode === "PUBLIC"
-                ? "bg-sky-50 text-[#0284C7] border-[0.5px] border-sky-200"
-                : activeMode === "PRIVATE"
-                ? "bg-indigo-50 text-indigo-700 border-[0.5px] border-indigo-200"
-                : "bg-slate-100 text-slate-700 border-[0.5px] border-slate-200"
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xs shrink-0 ${
+              currentMode === "PUBLIC"
+                ? "bg-sky-50 text-[#0284C7] border border-sky-100"
+                : currentMode === "PRIVATE"
+                ? "bg-indigo-50 text-indigo-700 border border-indigo-100"
+                : "bg-slate-100 text-slate-700 border border-slate-200"
             }`}
           >
-            {activeMode === "PUBLIC" ? (
-              <Users className="w-5 h-5" strokeWidth={1.75} />
-            ) : activeMode === "PRIVATE" ? (
-              <Sparkles className="w-5 h-5" strokeWidth={1.75} />
+            {currentMode === "PUBLIC" ? (
+              <Users className="w-6 h-6 stroke-[1.75]" />
+            ) : currentMode === "PRIVATE" ? (
+              <Sparkles className="w-6 h-6 stroke-[1.75]" />
             ) : (
-              <Clock className="w-5 h-5" strokeWidth={1.75} />
+              <Clock className="w-6 h-6 stroke-[1.75]" />
             )}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-900 tracking-tight">
-                {activeMode === "PUBLIC"
-                  ? "Public swimming"
-                  : activeMode === "PRIVATE"
-                  ? "Private family session"
-                  : "Pool closed"}
+              <span className="text-base font-black text-slate-900 tracking-tight">
+                {currentMode === "PUBLIC"
+                  ? "Public Swimming"
+                  : currentMode === "PRIVATE"
+                  ? "Private Family Session"
+                  : "Pool Closed"}
               </span>
               <span
-                className={`px-2 py-0.5 rounded-[12px] text-[10px] font-bold uppercase tracking-wider border-[0.5px] ${
-                  activeMode === "PUBLIC"
-                    ? "bg-sky-50 text-[#0284C7] border-sky-200"
-                    : activeMode === "PRIVATE"
-                    ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                    : "bg-slate-100 text-slate-600 border-slate-200"
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                  currentMode === "PUBLIC"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : currentMode === "PRIVATE"
+                    ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                    : "bg-slate-100 text-slate-600 border border-slate-200"
                 }`}
               >
-                {activeMode}
+                {currentMode}
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-normal mt-0.5 flex items-center gap-1.5">
+            <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-1.5">
               <span>{modeChangeInfo}</span>
               <span className="text-slate-300">•</span>
               <span className="font-mono text-slate-600">{currentTimeStr} IST</span>
@@ -343,74 +306,36 @@ export default function AdminCounterDashboard() {
           </div>
         </div>
 
-        {/* Center/Right: View Switcher (Inspect Public vs Private shell) & Sync Chip */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Tablet Mode Preview Switcher */}
-          <div className="inline-flex p-1 bg-slate-100 rounded-[12px] border-[0.5px] border-slate-200 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => setModeView("AUTO")}
-              className={`min-h-[36px] px-2.5 py-1 rounded-[8px] transition ${
-                modeView === "AUTO"
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Live auto
-            </button>
-            <button
-              type="button"
-              onClick={() => setModeView("PUBLIC")}
-              className={`min-h-[36px] px-2.5 py-1 rounded-[8px] transition ${
-                modeView === "PUBLIC"
-                  ? "bg-white text-[#0284C7] shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Public mode
-            </button>
-            <button
-              type="button"
-              onClick={() => setModeView("PRIVATE")}
-              className={`min-h-[36px] px-2.5 py-1 rounded-[8px] transition ${
-                modeView === "PRIVATE"
-                  ? "bg-white text-indigo-700 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Private mode
-            </button>
-          </div>
-
-          {/* Sync Status Indicator (with required text label) */}
+        {/* Right: Sync Status & Refresh */}
+        <div className="flex items-center gap-2 self-start md:self-auto">
           <div
-            className={`min-h-[44px] px-3 py-1.5 rounded-[12px] text-xs font-semibold border-[0.5px] flex items-center gap-2 ${
+            className={`px-3 py-1.5 rounded-2xl text-xs font-bold border flex items-center gap-2 ${
               isOnline
-                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                : "bg-amber-50 text-amber-800 border-amber-200"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : "bg-amber-50 text-amber-700 border-amber-200"
             }`}
           >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isOnline ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
-              }`}
-            />
-            <span>{isOnline ? "Synced" : `${pendingSyncCount} pending sync`}</span>
+            {isOnline ? (
+              <>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Synced</span>
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span>{pendingSyncCount} pending sync</span>
+              </>
+            )}
           </div>
 
-          {/* Refresh Button */}
           <button
             type="button"
             onClick={() => fetchDashboardMetrics()}
             disabled={refreshing}
-            className="min-h-[44px] min-w-[44px] p-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-[12px] border-[0.5px] border-slate-200 transition flex items-center justify-center active:scale-95"
+            className="p-2.5 bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-600 rounded-2xl border border-slate-200 transition"
             title="Refresh dashboard data"
-            aria-label="Refresh dashboard data"
           >
-            <RefreshCw
-              className={`w-4 h-4 ${refreshing ? "animate-spin text-[#0284C7]" : ""}`}
-              strokeWidth={1.75}
-            />
+            <RefreshCw className={`w-4 h-4 stroke-[1.75] ${refreshing ? "animate-spin text-[#0284C7]" : ""}`} />
           </button>
         </div>
       </div>
@@ -418,56 +343,56 @@ export default function AdminCounterDashboard() {
       {/* 3. Notification Toast */}
       {notification && (
         <div
-          className={`p-3 rounded-[12px] text-xs font-semibold flex items-center justify-between gap-3 border-[0.5px] ${
+          className={`p-4 rounded-2xl text-xs font-bold flex items-center justify-between gap-3 border ${
             notification.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-900"
-              : "bg-red-50 border-red-200 text-red-900"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : "bg-red-50 border-red-200 text-red-800"
           }`}
         >
           <div className="flex items-center gap-2">
             {notification.type === "success" ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 stroke-[1.75]" />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" strokeWidth={1.75} />
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 stroke-[1.75]" />
             )}
             <span>{notification.message}</span>
           </div>
           <button
             type="button"
             onClick={() => setNotification(null)}
-            className="text-xs font-bold underline cursor-pointer ml-auto"
+            className="text-xs font-black underline ml-auto cursor-pointer"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* 4. Alert Strip (Overstays, 3:45 PM Clearing Notice, Water Safety) */}
+      {/* 4. Alert Strip (Overstays, 3:45 PM Clearing Warning, Water Safety Alert) */}
       <div className="space-y-2">
         {/* Overdue Alert */}
         {overdueSessions.length > 0 && (
-          <div className="p-3 bg-rose-50 border-[0.5px] border-rose-300 rounded-[12px] flex items-center justify-between text-xs text-rose-900 font-medium">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" strokeWidth={1.75} />
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-xs text-rose-900 font-bold">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 stroke-[1.75]" />
               <span>
-                {overdueSessions.length} session{overdueSessions.length > 1 ? "s" : ""} overdue. Grace period
-                exceeded.
+                {overdueSessions.length} session{overdueSessions.length > 1 ? "s" : ""} overdue! Grace period exceeded.
+                Review overtime billings below.
               </span>
             </div>
-            <a href="#active-sessions" className="underline text-rose-700 text-xs font-bold">
-              Review overstays
+            <a href="#active-sessions" className="underline text-rose-700 text-xs font-black">
+              View overdue
             </a>
           </div>
         )}
 
         {/* 3:45 PM Turnover Alert */}
         {turnoverWarning?.active && (
-          <div className="p-3 bg-amber-50 border-[0.5px] border-amber-300 rounded-[12px] flex items-center justify-between text-xs text-amber-900 font-medium">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-600 shrink-0" strokeWidth={1.75} />
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs text-amber-900 font-bold">
+            <div className="flex items-center gap-2.5">
+              <Clock className="w-4 h-4 text-amber-600 shrink-0 stroke-[1.75]" />
               <span>{turnoverWarning.message}</span>
             </div>
-            <span className="px-2 py-0.5 bg-amber-200/80 rounded-[8px] text-[11px] font-bold uppercase text-amber-900">
+            <span className="px-2.5 py-1 bg-amber-200/80 rounded-xl text-[11px] font-black uppercase text-amber-900">
               Clear pool
             </span>
           </div>
@@ -475,15 +400,15 @@ export default function AdminCounterDashboard() {
 
         {/* Water Log Due Alert */}
         {waterLogDue && (
-          <div className="p-3 bg-sky-50 border-[0.5px] border-sky-300 rounded-[12px] flex items-center justify-between text-xs text-sky-900 font-medium">
-            <div className="flex items-center gap-2">
-              <Droplets className="w-4 h-4 text-[#0284C7] shrink-0" strokeWidth={1.75} />
-              <span>Water safety reading is due now (chlorine and pH verification).</span>
+          <div className="p-3.5 bg-sky-50 border border-sky-200 rounded-2xl flex items-center justify-between text-xs text-sky-900 font-bold">
+            <div className="flex items-center gap-2.5">
+              <Droplets className="w-4 h-4 text-[#0284C7] shrink-0 stroke-[1.75]" />
+              <span>Water safety reading is due now (chlorine &amp; pH verification).</span>
             </div>
             <button
               type="button"
               onClick={() => setIsWaterLogOpen(true)}
-              className="min-h-[44px] px-3.5 bg-[#0284C7] hover:bg-[#0369a1] text-white rounded-[12px] text-xs font-bold transition shadow-xs"
+              className="px-3 py-1.5 bg-[#0284C7] hover:bg-[#0369a1] text-white rounded-xl text-xs font-bold transition shadow-xs"
             >
               Log water
             </button>
@@ -492,15 +417,15 @@ export default function AdminCounterDashboard() {
 
         {/* Water Out of Range Alert */}
         {outOfRangeAlert && (
-          <div className="p-3 bg-red-50 border-[0.5px] border-red-300 rounded-[12px] flex items-center justify-between text-xs text-red-900 font-medium">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" strokeWidth={1.75} />
+          <div className="p-3.5 bg-red-50 border border-red-300 rounded-2xl flex items-center justify-between text-xs text-red-900 font-bold">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 stroke-[1.75]" />
               <span>{outOfRangeAlert.message}</span>
             </div>
             <button
               type="button"
               onClick={() => setIsWaterLogOpen(true)}
-              className="min-h-[44px] px-3.5 bg-red-600 hover:bg-red-700 text-white rounded-[12px] text-xs font-bold transition shadow-xs"
+              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
             >
               Re-test now
             </button>
@@ -508,345 +433,293 @@ export default function AdminCounterDashboard() {
         )}
       </div>
 
-      {/* 5. Quick Actions Row (Touch targets >= 44px, Sentence case, 1-2 words) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-        {/* Action 1: Walk in */}
+      {/* 5. Quick Actions Row (>= 44px Touch Targets for Standing Tablet Staff) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
+        {/* Quick Action 1: Walk-in */}
         <button
           type="button"
           onClick={() => setIsWalkInOpen(true)}
-          disabled={activeMode === "PRIVATE"}
-          className={`min-h-[48px] p-3 rounded-[12px] font-bold text-xs flex items-center justify-center gap-2 transition border-[0.5px] active:scale-98 ${
-            activeMode === "PRIVATE"
-              ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
-              : "bg-[#0284C7] hover:bg-[#0369a1] text-white border-[#0284C7] shadow-xs"
+          disabled={currentMode === "PRIVATE"}
+          className={`min-h-[50px] p-3.5 rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 transition shadow-xs active:scale-98 ${
+            currentMode === "PRIVATE"
+              ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+              : "bg-[#0284C7] hover:bg-[#0369a1] text-white border border-[#0284C7]"
           }`}
         >
-          <UserCheck className="w-4 h-4" strokeWidth={1.75} />
-          <span>Walk in</span>
+          <UserCheck className="w-4 h-4 stroke-[1.75]" />
+          <span>Walk-in</span>
         </button>
 
-        {/* Action 2: Scan QR */}
+        {/* Quick Action 2: Scan QR */}
         <Link
           href="/admin/scan"
-          className="min-h-[48px] p-3 bg-white hover:bg-slate-50 active:scale-98 text-slate-900 border-[0.5px] border-slate-200 rounded-[12px] font-bold text-xs flex items-center justify-center gap-2 transition shadow-xs"
+          className="min-h-[50px] p-3.5 bg-white hover:bg-slate-50 active:scale-98 text-slate-900 border border-slate-200/90 rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 transition shadow-xs"
         >
-          <QrCode className="w-4 h-4 text-[#0284C7]" strokeWidth={1.75} />
+          <QrCode className="w-4 h-4 text-[#0284C7] stroke-[1.75]" />
           <span>Scan QR</span>
         </Link>
 
-        {/* Action 3: Hold slot */}
+        {/* Quick Action 3: Hold Slot */}
         <button
           type="button"
           onClick={() => setIsHoldOpen(true)}
-          className="min-h-[48px] p-3 bg-white hover:bg-slate-50 active:scale-98 text-slate-900 border-[0.5px] border-slate-200 rounded-[12px] font-bold text-xs flex items-center justify-center gap-2 transition shadow-xs"
+          className="min-h-[50px] p-3.5 bg-white hover:bg-slate-50 active:scale-98 text-slate-900 border border-slate-200/90 rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 transition shadow-xs"
         >
-          <PhoneCall className="w-4 h-4 text-purple-600" strokeWidth={1.75} />
+          <PhoneCall className="w-4 h-4 text-purple-600 stroke-[1.75]" />
           <span>Hold slot</span>
         </button>
 
-        {/* Action 4: Cash balance */}
+        {/* Quick Action 4: Cash Balance */}
         <button
           type="button"
           onClick={() => setIsClosingOpen(true)}
-          className="min-h-[48px] p-3 bg-white hover:bg-slate-50 active:scale-98 text-slate-900 border-[0.5px] border-slate-200 rounded-[12px] font-bold text-xs flex items-center justify-center gap-2 transition shadow-xs"
+          className="min-h-[50px] p-3.5 bg-white hover:bg-slate-50 active:scale-98 text-slate-900 border border-slate-200/90 rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 transition shadow-xs"
         >
-          <Coins className="w-4 h-4 text-emerald-600" strokeWidth={1.75} />
+          <Coins className="w-4 h-4 text-emerald-600 stroke-[1.75]" />
           <span>Cash balance</span>
         </button>
 
-        {/* Action 5: Log water */}
+        {/* Quick Action 5: Log Water */}
         <button
           type="button"
           onClick={() => setIsWaterLogOpen(true)}
-          className="col-span-2 sm:col-span-1 min-h-[48px] p-3 bg-white hover:bg-slate-50 active:scale-98 text-slate-900 border-[0.5px] border-slate-200 rounded-[12px] font-bold text-xs flex items-center justify-center gap-2 transition shadow-xs"
+          className="col-span-2 sm:col-span-1 min-h-[50px] p-3.5 bg-white hover:bg-slate-50 active:scale-98 text-slate-900 border border-slate-200/90 rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 transition shadow-xs"
         >
-          <Droplets className="w-4 h-4 text-[#0284C7]" strokeWidth={1.75} />
+          <Droplets className="w-4 h-4 text-[#0284C7] stroke-[1.75]" />
           <span>Log water</span>
         </button>
       </div>
 
       {/* 6. MODE-SPECIFIC OPERATIONAL PANELS */}
 
-      {/* SCREEN 1: PUBLIC MODE DASHBOARD */}
-      {activeMode !== "PRIVATE" && (
-        <div className="space-y-4">
-          {/* Occupancy Gauge Card (25-Cell Segmented Bar) */}
-          <div className="bg-white rounded-[12px] p-4 sm:p-5 border-[0.5px] border-slate-200 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-                  Public occupancy
-                </span>
-                <div className="flex items-baseline gap-2 mt-0.5">
-                  <h3 className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-                    {publicGauge.currentSwimmers}
-                    <span className="text-lg font-normal text-slate-400"> / 25</span>
-                  </h3>
-                  <span className="text-xs text-slate-600">
-                    ({publicGauge.spotsRemaining} spot{publicGauge.spotsRemaining === 1 ? "" : "s"} free)
-                  </span>
-                </div>
-              </div>
-
-              {/* Status indicator always paired with text label */}
+      {/* A. PUBLIC MODE: 25-Cell Segmented Bar & Counter Summary */}
+      {currentMode !== "PRIVATE" && (
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.04)] space-y-5">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
               <div className="flex items-center gap-2">
-                <span
-                  className={`px-2.5 py-1 rounded-[12px] text-xs font-semibold border-[0.5px] flex items-center gap-1.5 ${occupancyStatus.colorClass}`}
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      publicGauge.currentSwimmers >= 24
-                        ? "bg-red-500"
-                        : publicGauge.currentSwimmers >= 20
-                        ? "bg-amber-500"
-                        : "bg-[#0284C7]"
-                    }`}
-                  />
-                  <span>{occupancyStatus.label}</span>
+                <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+                  Public Occupancy Meter
+                </span>
+                <span className="text-[10px] bg-sky-50 text-[#0284C7] font-bold px-2 py-0.5 rounded-full">
+                  Cap: 25 Max
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tight">
+                  {publicGauge.currentSwimmers}
+                  <span className="text-lg font-bold text-slate-400"> / 25</span>
+                </h3>
+                <span className="text-xs font-bold text-slate-500">
+                  ({publicGauge.spotsRemaining} spot{publicGauge.spotsRemaining === 1 ? "" : "s"} remaining)
                 </span>
               </div>
             </div>
 
-            {/* 25-Cell Segmented Bar: 0-19 sky, 20-23 amber, 24-25 red */}
-            <div className="space-y-2">
-              <div className="grid grid-cols-25 gap-1 h-9 w-full rounded-[10px] p-1 bg-slate-100 border-[0.5px] border-slate-200">
-                {publicGauge.cells.map((cell: any) => {
-                  let cellClass = "bg-slate-200";
-                  if (cell.isOccupied) {
-                    if (cell.colorTier === "red") cellClass = "bg-red-500";
-                    else if (cell.colorTier === "amber") cellClass = "bg-amber-500";
-                    else cellClass = "bg-[#0284C7]";
-                  }
+            {/* Quick Chips */}
+            <div className="flex items-center gap-2 flex-wrap text-xs">
+              <span className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 font-semibold flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-slate-400 stroke-[1.75]" />
+                <span>{publicGauge.onlineBookingsCount} online</span>
+              </span>
+              <span className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 font-semibold flex items-center gap-1.5">
+                <UserCheck className="w-3.5 h-3.5 text-slate-400 stroke-[1.75]" />
+                <span>{publicGauge.walkInsCount} walk-in</span>
+              </span>
+            </div>
+          </div>
 
-                  return (
-                    <div
-                      key={cell.index}
-                      className={`h-full rounded-[6px] transition-colors ${cellClass}`}
-                      title={`Spot ${cell.index} of 25: ${cell.isOccupied ? "Occupied" : "Available"}`}
-                    >
-                      <span className="sr-only">Spot {cell.index}</span>
-                    </div>
-                  );
-                })}
+          {/* 25-CELL SEGMENTED BAR: 0-19 sky, 20-23 amber, 24-25 red */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-25 gap-1 sm:gap-1.5 h-10 w-full rounded-2xl p-1.5 bg-slate-100 border border-slate-200/60">
+              {publicGauge.cells.map((cell: any) => {
+                let cellClass = "bg-slate-200/80"; // Empty cell default
+                if (cell.isOccupied) {
+                  if (cell.colorTier === "red") cellClass = "bg-red-500 shadow-xs shadow-red-500/40";
+                  else if (cell.colorTier === "amber") cellClass = "bg-amber-500 shadow-xs shadow-amber-500/40";
+                  else cellClass = "bg-[#0284C7] shadow-xs shadow-sky-600/40";
+                }
+
+                return (
+                  <div
+                    key={cell.index}
+                    className={`h-full rounded-md transition-all duration-300 relative group ${cellClass}`}
+                    title={`Spot ${cell.index} of 25: ${cell.isOccupied ? "Occupied" : "Available"}`}
+                  >
+                    <span className="sr-only">Spot {cell.index}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Color Legend */}
+            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 px-1 pt-1">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#0284C7]" />
+                <span>Normal (1–19)</span>
               </div>
-
-              {/* Segmented Color Legend paired with numbers & text labels */}
-              <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 pt-0.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-[4px] bg-[#0284C7]" />
-                  <span>Normal (1–19)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-[4px] bg-amber-500" />
-                  <span>Busy (20–23)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-[4px] bg-red-500" />
-                  <span>Hard cap (24–25)</span>
-                </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
+                <span>Busy (20–23)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-red-500" />
+                <span>Hard Cap (24–25)</span>
               </div>
             </div>
           </div>
 
-          {/* Reference Pattern 3: KPI Tiles (Stripe / Behance pattern: Large number, small label, muted secondary line, restrained color, text-labeled status indicator) */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* KPI 1: Online bookings */}
-            <div className="bg-white rounded-[12px] p-4 border-[0.5px] border-slate-200 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-                  <span>Online bookings</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-[6px] border-[0.5px] border-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>Confirmed</span>
-                  </span>
-                </div>
-                <div className="text-2xl font-extrabold text-slate-900 font-mono mt-1">
-                  {publicGauge.onlineBookingsCount}
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-2 pt-2 border-t border-slate-100">
-                Scheduled for today
-              </p>
+          {/* Today's Collections Preview */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-xs">
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">Cash counter</span>
+              <span className="text-base font-black text-slate-900 font-mono mt-0.5 block">
+                ₹{publicGauge.todayCash.toLocaleString("en-IN")}
+              </span>
             </div>
-
-            {/* KPI 2: Walk-ins */}
-            <div className="bg-white rounded-[12px] p-4 border-[0.5px] border-slate-200 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-                  <span>Walk-in swimmers</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0284C7] bg-sky-50 px-1.5 py-0.5 rounded-[6px] border-[0.5px] border-sky-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0284C7]" />
-                    <span>Counter</span>
-                  </span>
-                </div>
-                <div className="text-2xl font-extrabold text-slate-900 font-mono mt-1">
-                  {publicGauge.walkInsCount}
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-2 pt-2 border-t border-slate-100">
-                Admitted at front desk
-              </p>
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+              <span className="text-[10px] text-slate-400 font-bold uppercase block">UPI collections</span>
+              <span className="text-base font-black text-purple-700 font-mono mt-0.5 block">
+                ₹{publicGauge.todayUpi.toLocaleString("en-IN")}
+              </span>
             </div>
-
-            {/* KPI 3: Cash collected */}
-            <div className="bg-white rounded-[12px] p-4 border-[0.5px] border-slate-200 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-                  <span>Cash drawer</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded-[6px] border-[0.5px] border-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                    <span>Physical</span>
-                  </span>
-                </div>
-                <div className="text-2xl font-extrabold text-slate-900 font-mono mt-1">
-                  ₹{publicGauge.todayCash.toLocaleString("en-IN")}
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-2 pt-2 border-t border-slate-100">
-                Ready for blind closing
-              </p>
-            </div>
-
-            {/* KPI 4: UPI collected */}
-            <div className="bg-white rounded-[12px] p-4 border-[0.5px] border-slate-200 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-                  <span>UPI collections</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded-[6px] border-[0.5px] border-indigo-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                    <span>Instant</span>
-                  </span>
-                </div>
-                <div className="text-2xl font-extrabold text-indigo-700 font-mono mt-1">
-                  ₹{publicGauge.todayUpi.toLocaleString("en-IN")}
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-2 pt-2 border-t border-slate-100">
-                QR counter settlements
-              </p>
+            <div className="col-span-2 sm:col-span-1 p-3 rounded-2xl bg-sky-50/60 border border-sky-100">
+              <span className="text-[10px] text-sky-700 font-bold uppercase block">Today total</span>
+              <span className="text-base font-black text-[#0284C7] font-mono mt-0.5 block">
+                ₹{publicGauge.todayTotal.toLocaleString("en-IN")}
+              </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* SCREEN 2: PRIVATE MODE DASHBOARD (Same shell, public gauge hidden, active booking, headcount, buffer) */}
-      {activeMode === "PRIVATE" && (
-        <div className="bg-white rounded-[12px] p-4 sm:p-5 border-[0.5px] border-indigo-200 shadow-xs space-y-4">
-          {/* Header */}
+      {/* B. PRIVATE MODE: Active Exclusive Booking & Headcount Billing */}
+      {currentMode === "PRIVATE" && (
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-indigo-100 shadow-[0_4px_20px_rgba(20,60,110,0.04)] space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 block">
-                Active private session
+              <span className="text-xs font-black uppercase tracking-wider text-indigo-700 block">
+                Exclusive Private Session
               </span>
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-                {privateModeStatus ? privateModeStatus.customerName : "No active private booking"}
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">
+                {privateModeStatus ? privateModeStatus.customerName : "No Active Private Booking"}
               </h3>
               {privateModeStatus && (
-                <p className="text-xs text-slate-500 font-normal">
-                  {privateModeStatus.startTime} – {privateModeStatus.endTime} IST • Ref: {privateModeStatus.bookingId}
+                <p className="text-xs text-slate-500 font-medium">
+                  {privateModeStatus.startTime} – {privateModeStatus.endTime} IST ({privateModeStatus.bookingId})
                 </p>
               )}
             </div>
 
             {privateModeStatus?.balanceDue > 0 && (
-              <div className="px-3.5 py-1.5 bg-rose-50 border-[0.5px] border-rose-200 rounded-[12px] text-rose-800 text-xs font-bold text-right">
-                <span className="text-[10px] uppercase block text-rose-600 font-bold">Balance due at counter</span>
-                <span className="text-base font-extrabold font-mono">₹{privateModeStatus.balanceDue}</span>
+              <div className="px-4 py-2 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs font-bold text-right">
+                <span className="text-[10px] uppercase block text-rose-600">Balance due</span>
+                <span className="text-lg font-black font-mono">₹{privateModeStatus.balanceDue}</span>
               </div>
             )}
           </div>
 
-          {/* Buffer Conflict Banner */}
-          {privateModeStatus?.bufferConflict && (
-            <div className="p-3 bg-red-600 text-white rounded-[12px] text-xs font-semibold flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={1.75} />
-              <div>
-                <strong className="block font-bold">Turnover buffer conflict</strong>
-                <span>{privateModeStatus.bufferConflictMessage}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Headcount breakdown against 12 included & 25 cap */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-3 rounded-[12px] bg-slate-50 border-[0.5px] border-slate-200">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Total headcount</span>
-              <span className="text-lg font-extrabold text-slate-900 font-mono mt-0.5 block">
-                {privateModeStatus.guestCount}
-                <span className="text-xs text-slate-400 font-normal"> / 25 cap</span>
-              </span>
-            </div>
-
-            <div className="p-3 rounded-[12px] bg-slate-50 border-[0.5px] border-slate-200">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Included in base</span>
-              <span className="text-lg font-extrabold text-emerald-700 font-mono mt-0.5 block">
-                12 <span className="text-xs text-slate-400 font-normal">guests</span>
-              </span>
-            </div>
-
-            <div className="p-3 rounded-[12px] bg-slate-50 border-[0.5px] border-slate-200">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Extra guests</span>
-              <span className="text-lg font-extrabold text-amber-700 font-mono mt-0.5 block">
-                {privateModeStatus.extraGuests} <span className="text-xs text-slate-400 font-normal">@ ₹100/hr</span>
-              </span>
-            </div>
-
-            <div className="p-3 rounded-[12px] bg-slate-50 border-[0.5px] border-slate-200">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Extra billing</span>
-              <span className="text-lg font-extrabold text-slate-900 font-mono mt-0.5 block">
-                ₹{privateModeStatus.extraBillingAmount}
-              </span>
-            </div>
-          </div>
-
-          {/* Next Booking & Turnover Buffer Card */}
-          {privateModeStatus.nextBooking && (
-            <div className="p-3.5 rounded-[12px] bg-indigo-50/60 border-[0.5px] border-indigo-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-[8px] bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4" strokeWidth={1.75} />
+          {privateModeStatus ? (
+            <div className="space-y-4">
+              {/* Buffer Overrun Conflict Banner */}
+              {privateModeStatus.bufferConflict && (
+                <div className="p-4 bg-red-500 text-white rounded-2xl text-xs font-bold flex items-start gap-3 shadow-sm">
+                  <AlertTriangle className="w-5 h-5 shrink-0 stroke-[1.75]" />
+                  <div>
+                    <h4 className="font-black text-sm">Turnover Buffer Conflict</h4>
+                    <p className="text-red-100 mt-0.5">{privateModeStatus.bufferConflictMessage}</p>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-indigo-700 block">
-                    Next private session
+              )}
+
+              {/* Headcount breakdown */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Total swimmers</span>
+                  <span className="text-xl font-black text-slate-900 font-mono mt-0.5 block">
+                    {privateModeStatus.guestCount}
+                    <span className="text-xs text-slate-400 font-normal"> / 25 cap</span>
                   </span>
-                  <span className="font-bold text-slate-900 block mt-0.5">
-                    {privateModeStatus.nextBooking.customerName} ({privateModeStatus.nextBooking.guestCount} guests)
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Included guests</span>
+                  <span className="text-xl font-black text-emerald-700 font-mono mt-0.5 block">
+                    12 <span className="text-xs text-slate-400 font-normal">in base price</span>
                   </span>
-                  <span className="text-[11px] text-slate-500">
-                    Starts at {privateModeStatus.nextBooking.startTime} IST
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Extra guests</span>
+                  <span className="text-xl font-black text-amber-600 font-mono mt-0.5 block">
+                    {privateModeStatus.extraGuests}{" "}
+                    <span className="text-xs text-slate-400 font-normal">@ ₹100/hr</span>
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Extra billing</span>
+                  <span className="text-xl font-black text-slate-900 font-mono mt-0.5 block">
+                    ₹{privateModeStatus.extraBillingAmount}
                   </span>
                 </div>
               </div>
 
-              <div className="px-3 py-1 bg-white rounded-[8px] border-[0.5px] border-indigo-200 text-indigo-900 font-semibold text-xs">
-                15-minute "Filter and clean" turnover scheduled
-              </div>
+              {/* Next Booking & Turnover Task */}
+              {privateModeStatus.nextBooking && (
+                <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-5 h-5 stroke-[1.75]" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-indigo-600 block">
+                        Next private session
+                      </span>
+                      <span className="font-extrabold text-slate-900 block mt-0.5">
+                        {privateModeStatus.nextBooking.customerName} ({privateModeStatus.nextBooking.guestCount} guests)
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        Starts at {privateModeStatus.nextBooking.startTime} IST
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="px-3 py-1.5 bg-white rounded-xl border border-indigo-200 text-indigo-900 font-bold text-xs">
+                    15-min "Filter and clean" turnover scheduled
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="p-8 text-center text-slate-400 bg-slate-50 rounded-2xl">
+              <p className="text-xs font-semibold">The pool is currently in private evening hours.</p>
             </div>
           )}
         </div>
       )}
 
-      {/* 7. URGENT LISTS: ACTIVE SESSIONS (Reference Pattern 4: Toast & Resy host stand pattern: sorted by urgency, overdue state clear) */}
+      {/* 7. ACTIVE SESSIONS LIST (Sorted by Urgency: OVERDUE, EXPIRING_SOON, ACTIVE) */}
       <div id="active-sessions" className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Active sessions</h3>
-            <p className="text-xs text-slate-500">Host-stand view sorted by urgency: overdue first</p>
+            <h3 className="text-base font-extrabold text-slate-900">Active Sessions</h3>
+            <p className="text-xs text-slate-500">Swimmers currently in pool, sorted by urgency</p>
           </div>
-          <span className="px-2.5 py-0.5 rounded-[12px] bg-slate-100 text-slate-700 text-xs font-bold font-mono">
+          <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold font-mono">
             {activeSessions.length} active
           </span>
         </div>
 
         {activeSessions.length === 0 ? (
-          <div className="p-8 text-center bg-white rounded-[12px] border-[0.5px] border-slate-200 text-slate-400 space-y-1.5">
-            <Users className="w-7 h-7 mx-auto text-slate-300" strokeWidth={1.75} />
-            <p className="text-xs font-semibold text-slate-600">No swimmers currently checked in.</p>
-            <p className="text-[11px] text-slate-400">Admit arrivals via Scan QR or record a Walk in above.</p>
+          <div className="p-10 text-center bg-white rounded-3xl border border-slate-100 text-slate-400 space-y-2">
+            <Users className="w-8 h-8 mx-auto text-slate-300 stroke-[1.75]" />
+            <p className="text-xs font-bold text-slate-600">No swimmers currently checked into pool.</p>
+            <p className="text-[11px] text-slate-400">Admit arrivals via Scan QR or record a Walk-in above.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
             {activeSessions.map((session: any) => {
               const isOverdue = session.urgency === "OVERDUE";
               const isExpiring = session.urgency === "EXPIRING_SOON";
@@ -854,110 +727,110 @@ export default function AdminCounterDashboard() {
               return (
                 <div
                   key={session.sessionId}
-                  className={`rounded-[12px] p-4 border-[0.5px] transition flex flex-col justify-between gap-3 ${
+                  className={`rounded-3xl p-5 border transition-all shadow-xs flex flex-col justify-between gap-4 ${
                     isOverdue
-                      ? "bg-rose-50/70 border-rose-300"
+                      ? "bg-rose-50/70 border-rose-300 shadow-rose-200/50"
                       : isExpiring
-                      ? "bg-amber-50/70 border-amber-300"
-                      : "bg-white border-slate-200"
+                      ? "bg-amber-50/70 border-amber-300 shadow-amber-200/50"
+                      : "bg-white border-slate-200/90 hover:border-slate-300"
                   }`}
                 >
-                  {/* Top Card Info */}
+                  {/* Card Header */}
                   <div>
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <div className="flex items-center gap-1.5">
                           <span
-                            className={`px-2 py-0.5 rounded-[6px] text-[10px] font-bold uppercase tracking-wider ${
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
                               session.sessionType === "FAMILY"
                                 ? "bg-purple-100 text-purple-800"
-                                : "bg-sky-100 text-[#0284C7]"
+                                : "bg-sky-100 text-sky-800"
                             }`}
                           >
                             {session.sessionType === "FAMILY" ? "Private" : "Public"}
                           </span>
-                          <span className="px-2 py-0.5 rounded-[6px] text-[10px] font-semibold bg-slate-100 text-slate-600 uppercase">
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 uppercase">
                             {session.source}
                           </span>
                         </div>
-                        <h4 className="font-bold text-sm text-slate-900 mt-1 truncate">
+                        <h4 className="font-extrabold text-sm text-slate-900 mt-1 truncate">
                           {session.customerName}
                         </h4>
                         <p className="text-[11px] text-slate-500 font-mono">{session.id}</p>
                       </div>
 
-                      {/* Urgency Badge with required text label */}
+                      {/* Urgency Badge */}
                       <span
-                        className={`px-2.5 py-1 rounded-[12px] text-[10px] font-bold uppercase shrink-0 border-[0.5px] ${
+                        className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase shrink-0 ${
                           isOverdue
-                            ? "bg-rose-600 text-white border-rose-600"
+                            ? "bg-rose-600 text-white animate-pulse"
                             : isExpiring
-                            ? "bg-amber-500 text-white border-amber-500"
-                            : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                            ? "bg-amber-500 text-white"
+                            : "bg-emerald-100 text-emerald-800"
                         }`}
                       >
                         {isOverdue ? "Overdue" : isExpiring ? "Ending soon" : "Active"}
                       </span>
                     </div>
 
-                    {/* Guest Count & Slot */}
-                    <div className="mt-3 pt-2.5 border-t border-slate-200/60 grid grid-cols-2 gap-2 text-xs">
+                    {/* Guest Count & Timing */}
+                    <div className="mt-3.5 pt-3 border-t border-slate-200/70 grid grid-cols-2 gap-2 text-xs">
                       <div>
                         <span className="text-[10px] uppercase font-bold text-slate-400 block">Swimmers</span>
-                        <span className="font-bold text-slate-900 block mt-0.5">{session.guests} guests</span>
+                        <span className="font-black text-slate-900 mt-0.5 block">{session.guests} guests</span>
                       </div>
                       <div className="text-right">
                         <span className="text-[10px] uppercase font-bold text-slate-400 block">Slot</span>
-                        <span className="font-semibold text-slate-700 font-mono block mt-0.5">
+                        <span className="font-bold text-slate-700 font-mono mt-0.5 block">
                           {session.startTime} – {session.plannedEndTime}
                         </span>
                       </div>
                     </div>
 
-                    {/* Overdue / Countdown Box */}
+                    {/* Overtime & Countdown banner */}
                     {isOverdue ? (
-                      <div className="mt-2.5 p-2 rounded-[8px] bg-rose-100 text-rose-950 text-[11px] font-semibold space-y-1">
+                      <div className="mt-3 p-2.5 rounded-xl bg-rose-100/90 text-rose-900 text-[11px] font-bold space-y-1">
                         <div className="flex justify-between items-center">
-                          <span>Elapsed overtime:</span>
-                          <span className="font-mono font-bold">{session.overdueMinutes} mins</span>
+                          <span>Overtime:</span>
+                          <span className="font-mono text-rose-950 font-black">{session.overdueMinutes} mins</span>
                         </div>
                         {session.projectedOverstayCharge > 0 && (
-                          <div className="flex justify-between items-center text-rose-800 border-t border-rose-200/80 pt-1">
+                          <div className="flex justify-between items-center text-rose-700 border-t border-rose-200/80 pt-1">
                             <span>Projected extra charge:</span>
-                            <span className="font-mono font-bold">₹{session.projectedOverstayCharge}</span>
+                            <span className="font-black font-mono">₹{session.projectedOverstayCharge}</span>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="mt-2.5 flex items-center justify-between text-xs text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-[8px] border-[0.5px] border-slate-200/60">
+                      <div className="mt-3 flex items-center justify-between text-xs font-semibold text-slate-500 bg-slate-50 px-3 py-2 rounded-xl">
                         <span>Time remaining:</span>
-                        <span className={`font-mono font-bold ${isExpiring ? "text-amber-700" : "text-slate-900"}`}>
+                        <span className={`font-mono font-black ${isExpiring ? "text-amber-700" : "text-slate-900"}`}>
                           {session.remainingMinutes} mins
                         </span>
                       </div>
                     )}
 
-                    {/* Balance due */}
+                    {/* Balance due indicator if applicable */}
                     {session.balanceAmount > 0 && (
-                      <div className="mt-1.5 text-[11px] font-bold text-rose-600 flex items-center justify-between">
+                      <div className="mt-2 text-[11px] font-bold text-rose-600 flex items-center justify-between">
                         <span>Balance due on arrival:</span>
-                        <span className="font-mono">₹{session.balanceAmount}</span>
+                        <span className="font-mono font-black">₹{session.balanceAmount}</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Card Action Buttons (>= 44px Touch Targets, Sentence case, 1-2 words) */}
+                  {/* Card Actions (>= 44px Touch Targets) */}
                   <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => handleCheckoutSession(session)}
                       disabled={actionLoadingId === session.sessionId}
-                      className="min-h-[44px] py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-[12px] text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs"
+                      className="min-h-[44px] py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
                     >
                       {actionLoadingId === session.sessionId ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" strokeWidth={1.75} />
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={1.75} />
+                        <CheckCircle2 className="w-3.5 h-3.5 stroke-[1.75]" />
                       )}
                       <span>Check out</span>
                     </button>
@@ -966,9 +839,9 @@ export default function AdminCounterDashboard() {
                       type="button"
                       onClick={() => handleExtendSession(session)}
                       disabled={actionLoadingId === session.sessionId}
-                      className="min-h-[44px] py-2 px-3 bg-white hover:bg-slate-50 border-[0.5px] border-slate-200 text-slate-800 rounded-[12px] text-xs font-bold transition flex items-center justify-center gap-1.5"
+                      className="min-h-[44px] py-2 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
                     >
-                      <Plus className="w-3.5 h-3.5 text-[#0284C7]" strokeWidth={1.75} />
+                      <Plus className="w-3.5 h-3.5 text-[#0284C7] stroke-[1.75]" />
                       <span>Extend</span>
                     </button>
                   </div>
@@ -979,11 +852,11 @@ export default function AdminCounterDashboard() {
         )}
       </div>
 
-      {/* 8. DAY TIMELINE (Reference Pattern 2: Figma / Court Reserve horizontal lanes with hatched buffers & "now" line) */}
-      <div className="bg-white rounded-[12px] p-4 sm:p-5 border-[0.5px] border-slate-200 shadow-xs space-y-3">
+      {/* 8. DUAL-LANE HORIZONTAL TIMELINE (9:00 AM to 11:00 PM) */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.04)] space-y-4">
         <div>
-          <h3 className="text-sm font-bold text-slate-900">Today schedule and lanes</h3>
-          <p className="text-xs text-slate-500">Public lane heat strip, private booking blocks, and 15-minute cleaning buffers</p>
+          <h3 className="text-base font-extrabold text-slate-900">Today's Schedule &amp; Lanes</h3>
+          <p className="text-xs text-slate-500">Public lane heat strip, private lane blocks, and 15-minute cleaning buffers</p>
         </div>
 
         <CounterTimeline
@@ -993,22 +866,22 @@ export default function AdminCounterDashboard() {
         />
       </div>
 
-      {/* 9. PENDING BALANCES LIST (Private bookings requiring counter settlement) */}
+      {/* 9. PENDING BALANCES LIST (Checked-in private bookings with unpaid balance) */}
       {pendingBalancesList.length > 0 && (
-        <div className="bg-white rounded-[12px] p-4 sm:p-5 border-[0.5px] border-slate-200 shadow-xs space-y-3">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.04)] space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Pending balances</h3>
+              <h3 className="text-base font-extrabold text-slate-900">Pending Balances</h3>
               <p className="text-xs text-slate-500">Private bookings requiring counter settlement</p>
             </div>
-            <span className="px-2.5 py-1 bg-rose-50 text-rose-700 text-xs font-bold rounded-[8px] border-[0.5px] border-rose-200">
+            <span className="px-3 py-1 bg-rose-50 text-rose-700 text-xs font-bold rounded-xl border border-rose-200">
               ₹{pendingBalancesList.reduce((sum: number, b: any) => sum + b.balanceDue, 0)} total
             </span>
           </div>
 
           <div className="divide-y divide-slate-100 text-xs">
             {pendingBalancesList.map((item: any) => (
-              <div key={item.id} className="py-2.5 flex items-center justify-between gap-3">
+              <div key={item.id} className="py-3 flex items-center justify-between gap-3">
                 <div>
                   <span className="font-bold text-slate-900 block">{item.customerName}</span>
                   <span className="text-slate-500 text-[11px]">
@@ -1016,7 +889,7 @@ export default function AdminCounterDashboard() {
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="font-mono font-bold text-rose-600 text-sm block">₹{item.balanceDue}</span>
+                  <span className="font-mono font-black text-rose-600 text-sm block">₹{item.balanceDue}</span>
                   <span className="text-[10px] text-slate-400">Advance ₹{item.advancePaid} paid</span>
                 </div>
               </div>
@@ -1026,13 +899,12 @@ export default function AdminCounterDashboard() {
       )}
 
       {/* MODALS */}
-      {/* SCREEN 3: WALK-IN SHEET (Tablet checkout: Behance & Square POS pattern) */}
       <WalkInSheetModal
         isOpen={isWalkInOpen}
         onClose={() => setIsWalkInOpen(false)}
         currentOccupancy={publicGauge.currentSwimmers}
         maxCapacity={25}
-        isPrivateSessionActive={activeMode === "PRIVATE"}
+        isPrivateSessionActive={currentMode === "PRIVATE"}
         nextPublicSessionText="Tomorrow at 9:00 AM"
         onSuccess={() => {
           setIsWalkInOpen(false);
@@ -1061,7 +933,6 @@ export default function AdminCounterDashboard() {
         }}
       />
 
-      {/* SCREEN 5: END-OF-DAY REGISTER (Expected vs collected, blind cash entry, variance, pending balances) */}
       <EndOfDayModal
         isOpen={isClosingOpen}
         onClose={() => setIsClosingOpen(false)}
