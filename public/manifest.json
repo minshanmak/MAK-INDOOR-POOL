@@ -1,0 +1,22 @@
+{
+  "name": "M.A.K Indoor Pool - Front Desk",
+  "short_name": "M.A.K Ops",
+  "description": "Counter operations, live occupancy, QR pass scanning, and daily closing for M.A.K Indoor Pool.",
+  "start_url": "/admin",
+  "display": "standalone",
+  "background_color": "#061426",
+  "theme_color": "#0284C7",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

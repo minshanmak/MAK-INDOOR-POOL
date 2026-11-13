@@ -16,6 +16,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { formatSlotTime } from "@/lib/timezone";
+import { offlineStore } from "@/lib/offline-store";
 
 // ==========================================
 // 1. Error Boundary Component
@@ -190,6 +191,43 @@ function AdminScanContent() {
       playBeep(true);
       setScanResult(data);
     } catch (err: any) {
+      // Offline fallback: Check offline cached bookings & local signature verification
+      const offlineCheck = offlineStore.verifyOfflinePass(cleanCode);
+      if (offlineCheck.valid && offlineCheck.bookingId) {
+        const cachedBookings = offlineStore.getCachedTodayBookings();
+        const matchedBooking = cachedBookings.find(
+          (b) => b.id.toLowerCase() === (offlineCheck.bookingId || "").toLowerCase()
+        );
+
+        if (matchedBooking) {
+          playBeep(true);
+          setScanResult({
+            valid: true,
+            alreadyAdmitted: matchedBooking.checkInStatus === "CHECKED_IN",
+            timingStatus: "ON_TIME",
+            timingMessage: "Verified Offline (Local Cache)",
+            isOffline: true,
+            booking: {
+              id: matchedBooking.id,
+              customerName: matchedBooking.customerName,
+              customerPhone: matchedBooking.customerPhone,
+              customerPlace: (matchedBooking as any).customerPlace || "Counter Swimmer",
+              guestCount: matchedBooking.guestCount,
+              type: matchedBooking.type,
+              bookingDate: matchedBooking.bookingDate || "Today",
+              startTime: matchedBooking.startTime,
+              endTime: matchedBooking.endTime,
+              durationHours: matchedBooking.durationHours,
+              totalAmount: matchedBooking.totalAmount,
+              totalPaid: matchedBooking.advancePaid,
+              balanceAmount: matchedBooking.balanceAmount,
+            },
+          });
+          return;
+        }
+      }
+
+      playBeep(false);
       setErrorMsg(err.message || "Could not verify QR code.");
     } finally {
       setLoading(false);
@@ -219,7 +257,24 @@ function AdminScanContent() {
     async function initScanner() {
       try {
         setCameraError(null);
-        const { Html5Qrcode } = await import("html5-qrcode");
+        if (typeof window === "undefined") return;
+
+        // Verify camera APIs exist on current device/protocol
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          setCameraError(
+            "Camera hardware or secure HTTPS context unavailable. Use Manual Lookup below."
+          );
+          return;
+        }
+
+        const html5Module: any = await import("html5-qrcode");
+        const Html5QrcodeClass =
+          html5Module.Html5Qrcode || html5Module.default?.Html5Qrcode || html5Module.default;
+
+        if (!Html5QrcodeClass) {
+          throw new Error("Scanner engine could not be initialized.");
+        }
+
         if (!isMounted) return;
 
         const scannerId = "qr-reader-viewport";
@@ -230,7 +285,7 @@ function AdminScanContent() {
         await stopScannerSafely();
         if (!isMounted) return;
 
-        const html5QrCode = new Html5Qrcode(scannerId);
+        const html5QrCode = new Html5QrcodeClass(scannerId);
         scannerRef.current = html5QrCode;
 
         await html5QrCode.start(
@@ -240,8 +295,8 @@ function AdminScanContent() {
             qrbox: { width: 250, height: 250 },
             aspectRatio: 1.0,
           },
-          (decodedText) => {
-            // QR code detected: safely pause/freeze camera before processing
+          (decodedText: string) => {
+            // QR code detected: safely pause camera before processing
             if (!isProcessingRef.current && isMounted) {
               try {
                 if (html5QrCode.isScanning) {
@@ -286,6 +341,34 @@ function AdminScanContent() {
 
     try {
       const balanceAmount = scanResult.booking.balanceAmount || 0;
+
+      // Check if offline
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        offlineStore.enqueueAction("CHECK_IN", {
+          bookingId: scanResult.booking.id,
+          paymentMethod: collectPaymentMethod,
+          collectedAmount: balanceAmount > 0 ? balanceAmount : 0,
+        });
+
+        playBeep(true);
+        setSuccessMsg(
+          `${scanResult.booking.customerName} (${scanResult.booking.guestCount} Guests) admitted offline. Saved on this device and queued for server sync.`
+        );
+
+        setScanResult((prev: any) => ({
+          ...prev,
+          alreadyAdmitted: true,
+          booking: {
+            ...prev.booking,
+            checkInStatus: "CHECKED_IN",
+            balanceAmount: 0,
+            totalPaid: (prev.booking.totalPaid || 0) + balanceAmount,
+            paymentStatus: "PAID",
+          },
+        }));
+        return;
+      }
+
       const res = await fetch("/api/admin/bookings/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

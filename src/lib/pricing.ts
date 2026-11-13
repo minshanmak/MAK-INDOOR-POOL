@@ -97,3 +97,84 @@ export function calculateRemainingBalance(totalPrice: number, payments: { amount
   return Math.max(0, balance);
 }
 
+/**
+ * Public Swimming Capacity Guard.
+ * Strict hard cap of 25 swimmers concurrent.
+ */
+export function checkPublicCapacity(
+  currentSwimmers: number,
+  requestedGuests: number,
+  maxCapacity: number = 25
+): { allowed: boolean; remainingCapacity: number; wouldExceedBy: number } {
+  const remaining = Math.max(0, maxCapacity - currentSwimmers);
+  const allowed = requestedGuests > 0 && currentSwimmers + requestedGuests <= maxCapacity;
+  const wouldExceedBy = Math.max(0, (currentSwimmers + requestedGuests) - maxCapacity);
+
+  return {
+    allowed,
+    remainingCapacity: remaining,
+    wouldExceedBy,
+  };
+}
+
+/**
+ * Public Overstay Calculation:
+ * - 5-minute grace period.
+ * - After 5 minutes, overdue elapsed time is flagged. Staff can extend (₹150/guest/hr).
+ */
+export function calculatePublicOverstay(
+  overdueMinutes: number,
+  guestCount: number,
+  ratePerHour: number = 150
+): { isGracePeriod: boolean; billableMinutes: number; projectedCharge: number } {
+  if (overdueMinutes <= 5) {
+    return {
+      isGracePeriod: true,
+      billableMinutes: 0,
+      projectedCharge: 0,
+    };
+  }
+
+  // Billed in 30 or 60 minute extension blocks or exact hourly rate
+  const hours = Math.ceil(overdueMinutes / 60);
+  const projectedCharge = hours * guestCount * ratePerHour;
+
+  return {
+    isGracePeriod: false,
+    billableMinutes: overdueMinutes,
+    projectedCharge,
+  };
+}
+
+/**
+ * Private Overstay Calculation:
+ * - Overstay bills in 15-minute increments.
+ * - Base rate is ₹1,500/hr + ₹100/hr per extra swimmer (>12), divided into 4 quarters.
+ */
+export function calculatePrivateOverstay(
+  overdueMinutes: number,
+  guestCount: number,
+  config: PricingConfig = DEFAULT_PRICING
+): { billedIncrements: number; incrementMinutes: number; projectedCharge: number } {
+  if (overdueMinutes <= 0) {
+    return {
+      billedIncrements: 0,
+      incrementMinutes: 0,
+      projectedCharge: 0,
+    };
+  }
+
+  // 15-minute increments (1 to 15 min = 1 increment, 16 to 30 = 2 increments)
+  const billedIncrements = Math.ceil(overdueMinutes / 15);
+  const extraGuests = Math.max(0, guestCount - config.familyBaseGuests);
+  const hourlyRate = config.defaultFamilyBaseRate + extraGuests * config.familyExtraRate;
+  const quarterRate = hourlyRate / 4;
+  const projectedCharge = Math.round(billedIncrements * quarterRate);
+
+  return {
+    billedIncrements,
+    incrementMinutes: billedIncrements * 15,
+    projectedCharge,
+  };
+}
+
