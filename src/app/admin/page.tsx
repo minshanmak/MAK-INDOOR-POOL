@@ -462,110 +462,23 @@ export default function AdminOverviewPage() {
         </div>
       </div>
 
-      {/* 4. BOTTOM ROW: REVENUE CHART, BOOKINGS DONUT, RECENT ACTIVITY (Exact match to Mockup Image 1) */}
+      {/* 4. BOTTOM ROW: BOOKINGS BREAKDOWN & RECENT ACTIVITY */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Card 1: Revenue Overview Bar Chart (lg:col-span-5) */}
-        <div className="lg:col-span-5 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-3">
-          <div className="flex justify-between items-center">
+        {/* Card 1: Today's Bookings by Type (Concentric Donut Chart - Dynamic Logic) */}
+        <div className="lg:col-span-5 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-              <BarChart3 className="w-4 h-4 text-[#1D68BD]" />
-              <span>Revenue Overview</span>
+              <Calendar className="w-4 h-4 text-[#1D68BD]" />
+              <span>Today's Bookings by Type</span>
             </div>
-            <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-xl">
-              This Month ▾
+            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+              Live Breakdown
             </span>
           </div>
 
-          {/* Clean Visual Bar Chart with Exact Y-Axis Ticks */}
-          <div className="pt-1">
-            <div className="flex items-stretch gap-2 h-40">
-              {/* Y-axis labels */}
-              <div className="flex flex-col justify-between text-[10px] text-slate-400 font-mono text-right pr-1 select-none">
-                <span>₹1,00,000</span>
-                <span>₹80,000</span>
-                <span>₹60,000</span>
-                <span>₹40,000</span>
-                <span>₹20,000</span>
-                <span>₹0</span>
-              </div>
-
-              {/* Bars container with grid lines */}
-              <div className="flex-1 relative flex items-end justify-between gap-1 pb-1 border-b border-slate-200">
-                {/* Background horizontal guidelines */}
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-40">
-                  <div className="border-b border-dashed border-slate-200 w-full" />
-                  <div className="border-b border-dashed border-slate-200 w-full" />
-                  <div className="border-b border-dashed border-slate-200 w-full" />
-                  <div className="border-b border-dashed border-slate-200 w-full" />
-                  <div className="border-b border-dashed border-slate-200 w-full" />
-                </div>
-
-                {[
-                  { hPub: 40, hFam: 20 },
-                  { hPub: 35, hFam: 25 },
-                  { hPub: 50, hFam: 30 },
-                  { hPub: 45, hFam: 35 },
-                  { hPub: 60, hFam: 40 },
-                  { hPub: 55, hFam: 30 },
-                  { hPub: 70, hFam: 45 },
-                  { hPub: 65, hFam: 35 },
-                  { hPub: 80, hFam: 50 },
-                  { hPub: 75, hFam: 45 },
-                  { hPub: 90, hFam: 60 },
-                  { hPub: 85, hFam: 50 },
-                  { hPub: 95, hFam: 65 },
-                  { hPub: 70, hFam: 40 },
-                ].map((bar, i) => (
-                  <div key={i} className="flex-1 z-10 flex flex-col justify-end gap-0.5 h-full items-center">
-                    <div
-                      className="w-full bg-[#C084FC] rounded-t-xs"
-                      style={{ height: `${bar.hFam * 0.45}%` }}
-                      title="Family Booking"
-                    />
-                    <div
-                      className="w-full bg-[#38BDF8]"
-                      style={{ height: `${bar.hPub * 0.45}%` }}
-                      title="Public Swimming"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* X-axis labels */}
-            <div className="flex justify-between pl-14 pr-1 text-[10px] text-slate-400 font-semibold pt-1.5">
-              <span>1 Jan</span>
-              <span>5 Jan</span>
-              <span>10 Jan</span>
-              <span>15 Jan</span>
-              <span>20 Jan</span>
-              <span>23 Jan</span>
-            </div>
-
-            {/* Legend */}
-            <div className="flex justify-center items-center gap-6 pt-3 text-[11px] font-bold text-slate-600">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-[#38BDF8]" />
-                <span>Public Swimming</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-[#C084FC]" />
-                <span>Family Booking</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Today's Bookings by Type (Concentric Donut Chart - Dynamic Logic) */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
-          <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-            <Calendar className="w-4 h-4 text-[#1D68BD]" />
-            <span>Today's Bookings by Type</span>
-          </div>
-
-          <div className="flex items-center justify-around gap-4 py-3">
+          <div className="flex items-center justify-around gap-4 py-4">
             {/* Concentric Donut graphic */}
-            <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
+            <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 {/* Background circle */}
                 <path
@@ -600,7 +513,7 @@ export default function AdminOverviewPage() {
 
               {/* Center text */}
               <div className="absolute text-center">
-                <div className="text-xl font-black text-slate-900 tabular-nums">
+                <div className="text-2xl font-black text-slate-900 tabular-nums">
                   {donutTotalCount}
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
@@ -609,14 +522,14 @@ export default function AdminOverviewPage() {
               </div>
             </div>
 
-            {/* Legend with exact count and percentages (Right aligned as in Mockup Image 1) */}
-            <div className="space-y-3 text-xs">
+            {/* Legend with exact count and percentages */}
+            <div className="space-y-3.5 text-xs">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5 font-bold text-slate-700">
                   <span className="w-2.5 h-2.5 rounded-xs bg-[#38BDF8] shrink-0" />
                   <span>Public Swimming</span>
                 </div>
-                <div className="text-sm font-black text-slate-900 pl-4 tabular-nums">
+                <div className="text-base font-black text-slate-900 pl-4 tabular-nums">
                   {donutPublicCount} <span className="text-xs font-semibold text-slate-500">({Math.round(donutPublicPct)}%)</span>
                 </div>
               </div>
@@ -626,7 +539,7 @@ export default function AdminOverviewPage() {
                   <span className="w-2.5 h-2.5 rounded-xs bg-[#C084FC] shrink-0" />
                   <span>Family Booking</span>
                 </div>
-                <div className="text-sm font-black text-slate-900 pl-4 tabular-nums">
+                <div className="text-base font-black text-slate-900 pl-4 tabular-nums">
                   {donutFamilyCount} <span className="text-xs font-semibold text-slate-500">({Math.round(donutFamilyPct)}%)</span>
                 </div>
               </div>
@@ -634,15 +547,24 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 3: Recent Activity Feed (Dynamic events + fallback) */}
-        <div className="lg:col-span-3 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-4">
+        {/* Card 2: Recent Activity Feed (lg:col-span-7) */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center gap-2 font-bold text-slate-900 text-sm mb-3">
-              <Activity className="w-4 h-4 text-[#1D68BD]" />
-              <span>Recent Activity</span>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+                <Activity className="w-4 h-4 text-[#1D68BD]" />
+                <span>Recent Activity</span>
+              </div>
+              <Link
+                href="/admin/bookings"
+                className="text-xs font-bold text-[#1D68BD] hover:underline inline-flex items-center gap-1"
+              >
+                <span>View all activity</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-2.5 text-xs">
               {recentActivities.length > 0 ? (
                 recentActivities.map((act: any, idx: number) => (
                   <div key={act.id || idx} className="flex items-start justify-between gap-2">
@@ -725,16 +647,6 @@ export default function AdminOverviewPage() {
                 </>
               )}
             </div>
-          </div>
-
-          <div className="pt-2 border-t border-slate-100 text-right">
-            <Link
-              href="/admin/bookings"
-              className="text-xs font-bold text-[#1D68BD] hover:underline inline-flex items-center gap-1"
-            >
-              <span>View All Activity</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
           </div>
         </div>
       </div>
