@@ -70,6 +70,7 @@ model PoolSetting {
   maintenanceMessage     String?
   cancellationCutoffHours Int     @default(12)
   rescheduleCutoffHours   Int     @default(6)
+  galleryData            String?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 }

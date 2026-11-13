@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
     maintenanceMessage,
     cancellationCutoffHours,
     rescheduleCutoffHours,
+    galleryData,
   } = body;
 
   const updated = await prisma.poolSetting.upsert({
@@ -70,6 +71,7 @@ export async function POST(req: NextRequest) {
       maintenanceMessage: maintenanceMessage || null,
       cancellationCutoffHours: Number(cancellationCutoffHours),
       rescheduleCutoffHours: Number(rescheduleCutoffHours),
+      galleryData: galleryData !== undefined ? (typeof galleryData === "string" ? galleryData : JSON.stringify(galleryData)) : undefined,
     },
     update: {
       poolName,
@@ -90,6 +92,7 @@ export async function POST(req: NextRequest) {
       maintenanceMessage: maintenanceMessage || null,
       cancellationCutoffHours: Number(cancellationCutoffHours),
       rescheduleCutoffHours: Number(rescheduleCutoffHours),
+      galleryData: galleryData !== undefined ? (typeof galleryData === "string" ? galleryData : JSON.stringify(galleryData)) : undefined,
     },
   });
 
