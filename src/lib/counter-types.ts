@@ -144,3 +144,4 @@ export interface OfflineSyncQueueItem {
   status: "PENDING" | "SYNCED" | "CONFLICT";
   error?: string;
 }
+

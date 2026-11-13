@@ -50,21 +50,20 @@ export default function WaterLogModal({
           time: timeStr,
           chlorinePpm: numChlorine,
           phLevel: numPh,
+          filterStatus,
           waterClarity,
-          status: isOutOfRange ? "WARNING" : "OPTIMAL",
           remarks: remarks.trim() || undefined,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to log water reading.");
+        throw new Error(data.error || "Failed to record water test.");
       }
 
       onSuccess(data);
-      onClose();
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to record reading.");
+      setErrorMsg(err.message || "Failed to submit water reading.");
     } finally {
       setLoading(false);
     }
@@ -72,151 +71,142 @@ export default function WaterLogModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-white overflow-hidden">
+      <div className="w-full max-w-md bg-white rounded-[12px] shadow-xl border-[0.5px] border-slate-300 overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-sky-50/50">
+        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-sky-50/60">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0">
-              <Droplets className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-[8px] bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0">
+              <Droplets className="w-4 h-4" strokeWidth={1.75} />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
-                Log Water Safety
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                Water safety log
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Mandatory twice-daily chemical &amp; filtration check
+              <p className="text-xs text-slate-500 font-normal">
+                Twice-daily chlorine and pH verification
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition active:scale-95"
+            className="w-9 h-9 rounded-[8px] bg-white border-[0.5px] border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition active:scale-95"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" strokeWidth={1.75} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 text-xs">
           {errorMsg && (
-            <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-2 text-xs font-medium">
-              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            <div className="p-3 rounded-[12px] bg-rose-50 border-[0.5px] border-rose-200 text-rose-800 flex items-center gap-2 font-medium">
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" strokeWidth={1.75} />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          {/* Out of Range Warning Banner */}
+          {/* Out of Range Alert Preview */}
           {isOutOfRange && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2.5 text-xs">
-              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <div className="p-3 bg-red-50 border-[0.5px] border-red-300 rounded-[12px] text-red-900 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" strokeWidth={1.75} />
               <div>
-                <strong className="block font-bold">Out of Range Reading Detected</strong>
+                <strong className="block font-bold">Out-of-range reading detected</strong>
                 <span>
-                  {!isChlorineOptimal && "Chlorine must be 1.5–3.0 ppm. "}
-                  {!isPhOptimal && "pH must be 7.2–7.6. "}
-                  This will stay pinned to the dashboard alert strip until resolved.
+                  Safe ranges: Chlorine 1.5–3.0 ppm, pH 7.2–7.6. This reading will be pinned to the dashboard alert strip.
                 </span>
               </div>
             </div>
           )}
 
-          {/* Chlorine & pH Inputs */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                Chlorine (ppm)
-                <span className="text-slate-400 font-normal ml-1">(1.5–3.0)</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
-                required
-                value={chlorinePpm}
-                onChange={(e) => setChlorinePpm(e.target.value)}
-                className={`w-full min-h-[44px] px-3.5 border rounded-2xl text-sm font-mono font-bold focus:outline-none transition ${
-                  isChlorineOptimal
-                    ? "bg-slate-50 border-slate-200 text-slate-900 focus:ring-2 focus:ring-sky-500"
-                    : "bg-rose-50 border-rose-300 text-rose-900 focus:ring-2 focus:ring-rose-500"
-                }`}
-              />
+          {/* Chlorine Input */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="font-bold text-slate-800">Free chlorine (ppm)</label>
+              <span className="text-[11px] text-slate-500">Target: 1.5 – 3.0 ppm</span>
             </div>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="10"
+              required
+              value={chlorinePpm}
+              onChange={(e) => setChlorinePpm(e.target.value)}
+              className={`w-full min-h-[44px] px-3.5 bg-slate-50 border-[0.5px] rounded-[12px] font-mono font-bold text-slate-900 focus:outline-none focus:ring-1 ${
+                isChlorineOptimal ? "border-slate-200 focus:ring-[#0284C7]" : "border-red-400 bg-red-50/40 text-red-900"
+              }`}
+            />
+          </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                pH Level
-                <span className="text-slate-400 font-normal ml-1">(7.2–7.6)</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="6.0"
-                max="9.0"
-                required
-                value={phLevel}
-                onChange={(e) => setPhLevel(e.target.value)}
-                className={`w-full min-h-[44px] px-3.5 border rounded-2xl text-sm font-mono font-bold focus:outline-none transition ${
-                  isPhOptimal
-                    ? "bg-slate-50 border-slate-200 text-slate-900 focus:ring-2 focus:ring-sky-500"
-                    : "bg-rose-50 border-rose-300 text-rose-900 focus:ring-2 focus:ring-rose-500"
-                }`}
-              />
+          {/* pH Input */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="font-bold text-slate-800">pH level</label>
+              <span className="text-[11px] text-slate-500">Target: 7.2 – 7.6</span>
             </div>
+            <input
+              type="number"
+              step="0.1"
+              min="5"
+              max="9"
+              required
+              value={phLevel}
+              onChange={(e) => setPhLevel(e.target.value)}
+              className={`w-full min-h-[44px] px-3.5 bg-slate-50 border-[0.5px] rounded-[12px] font-mono font-bold text-slate-900 focus:outline-none focus:ring-1 ${
+                isPhOptimal ? "border-slate-200 focus:ring-[#0284C7]" : "border-red-400 bg-red-50/40 text-red-900"
+              }`}
+            />
           </div>
 
           {/* Filter Status Selector */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-1">
-              Dual Sand Filtration Status
-            </label>
+            <label className="block font-bold text-slate-800 mb-1.5">Filter pump status</label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setFilterStatus("OPTIMAL")}
-                className={`min-h-[44px] rounded-2xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                className={`min-h-[44px] rounded-[12px] border-[0.5px] font-bold text-xs transition ${
                   filterStatus === "OPTIMAL"
-                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                    ? "bg-[#0284C7] text-white border-[#0284C7] shadow-xs"
                     : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Running Optimal</span>
+                Optimal
               </button>
               <button
                 type="button"
-                onClick={() => setFilterStatus("BACKWASH_NEEDED")}
-                className={`min-h-[44px] rounded-2xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                  filterStatus === "BACKWASH_NEEDED"
-                    ? "bg-amber-600 text-white border-amber-600 shadow-xs"
+                onClick={() => setFilterStatus("RUNNING")}
+                className={`min-h-[44px] rounded-[12px] border-[0.5px] font-bold text-xs transition ${
+                  filterStatus === "RUNNING"
+                    ? "bg-slate-900 text-white border-slate-900 shadow-xs"
                     : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                 }`}
               >
-                <span>Backwash Needed</span>
+                Running
               </button>
             </div>
           </div>
 
+          {/* Water Clarity */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-1">
-              Remarks / Chemical Dosing (Optional)
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Added 200ml sodium hypochlorite"
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              className="w-full min-h-[44px] px-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
-            />
+            <label className="block font-bold text-slate-800 mb-1">Water clarity</label>
+            <select
+              value={waterClarity}
+              onChange={(e) => setWaterClarity(e.target.value)}
+              className="w-full min-h-[44px] px-3 bg-slate-50 border-[0.5px] border-slate-200 rounded-[12px] font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#0284C7]"
+            >
+              <option value="CLEAR">Crystal clear (normal)</option>
+              <option value="SLIGHTLY_CLOUDY">Slightly cloudy</option>
+              <option value="TURBID">Turbid (requires treatment)</option>
+            </select>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full min-h-[44px] bg-[#0284C7] hover:bg-[#0369a1] text-white text-xs font-bold rounded-2xl transition shadow-xs flex items-center justify-center gap-2"
+            className="w-full min-h-[44px] bg-[#0284C7] hover:bg-[#0369a1] text-white font-bold text-xs rounded-[12px] transition shadow-xs flex items-center justify-center gap-2"
           >
-            {loading ? "Submitting Log..." : "Save Water Log"}
+            {loading ? "Recording..." : "Save water safety reading"}
           </button>
         </form>
       </div>

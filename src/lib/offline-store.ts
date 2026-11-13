@@ -162,3 +162,4 @@ export class BrowserOfflineStore implements IOfflineStorage {
 }
 
 export const offlineStore = new BrowserOfflineStore();
+
