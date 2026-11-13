@@ -110,7 +110,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Bookings", href: "/admin/bookings", icon: CalendarDays, hasSubmenu: true },
+    { name: "Bookings", href: "/admin/bookings", icon: CalendarDays },
     { name: "Customers", href: "/admin/customers", icon: User },
     { name: "Walk-ins", href: "/admin/walkins", icon: UserCheck },
     { name: "QR Scanner", href: "/admin/scan", icon: QrCode },
@@ -295,9 +295,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-500"}`} />
                     <span className="truncate">{item.name}</span>
                   </div>
-                  {item.hasSubmenu && (
-                    <ChevronDown className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-slate-400"}`} />
-                  )}
+
                   {item.badge && (
                     <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none">
                       {item.badge}
