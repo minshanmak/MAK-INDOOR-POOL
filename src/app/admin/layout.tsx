@@ -138,7 +138,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Bookings", href: "/admin/bookings", icon: CalendarDays },
     { name: "Customers", href: "/admin/customers", icon: User },
-    { name: "Walk-ins", href: "/admin/walkins", icon: UserCheck },
+    { name: "Walk-ins & Occupancy", href: "/admin/walkins", icon: UserCheck },
     { name: "QR Scanner", href: "/admin/scan", icon: QrCode },
     { name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Cancellations & Refunds", href: "/admin/cancellations", icon: XCircle },
@@ -182,8 +182,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
     if (pathname.startsWith("/admin/walkins")) {
       return {
-        title: "Walk-ins",
-        subtitle: "Record and manage walk-in visitors",
+        title: "Walk-ins & Occupancy",
+        subtitle: "Live pool capacity, instant counter entries, and active swimmers",
       };
     }
     if (pathname.startsWith("/admin/scan")) {
