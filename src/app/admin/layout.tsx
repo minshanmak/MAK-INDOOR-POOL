@@ -44,6 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     notifications: [],
   });
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const updateClock = () => {
@@ -345,56 +346,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
         </div>
 
-        {/* User Card & Developed by MishGa Footer */}
-        <div className="pt-3 border-t border-slate-100 space-y-2 shrink-0">
-          {user && (
-            <div className="bg-slate-50/90 rounded-2xl p-2.5 border border-slate-200/60 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-slate-800 text-white font-bold text-xs flex items-center justify-center shrink-0">
-                  {user.name ? user.name.charAt(0).toUpperCase() : "O"}
-                </div>
-                <div className="text-left overflow-hidden">
-                  <span className="font-bold text-xs text-slate-900 block truncate leading-tight">
-                    {user.name || "Pool Owner"}
-                  </span>
-                  <span className="text-[10px] text-slate-400 block leading-tight capitalize">
-                    {user.role === "POOL_OWNER" ? "Owner" : user.role || "Staff"}
-                  </span>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-            </div>
-          )}
-
-          <div className="flex justify-between items-center text-[11px] px-1 pt-1 text-slate-500">
-            <Link
-              href="/"
-              target="_blank"
-              className="hover:text-slate-900 flex items-center gap-1 transition font-medium"
-            >
-              <ExternalLink className="w-3 h-3" />
-              Website
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="text-rose-500 hover:text-rose-600 font-semibold flex items-center gap-1 transition active:scale-95"
-            >
-              <LogOut className="w-3 h-3" />
-              Logout
-            </button>
-          </div>
-
-          <div className="pt-2 border-t border-slate-100 text-center text-[10px] text-slate-400">
-            Developed by{" "}
-            <a
-              href="https://mishga.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#1D68BD] hover:underline font-bold transition-colors"
-            >
-              MishGa
-            </a>
-          </div>
+        {/* Minimal Footer */}
+        <div className="pt-3 border-t border-slate-100 text-center text-[10px] text-slate-400 shrink-0">
+          Developed by{" "}
+          <a
+            href="https://mishga.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#1D68BD] hover:underline font-bold transition-colors"
+          >
+            MishGa
+          </a>
         </div>
       </aside>
 
@@ -512,15 +474,94 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
 
 
-            {/* Owner Profile Pill in Top Bar (Shown on Subpages as in Mockup Image 2) */}
-            {pathname !== "/admin" && (
-              <div className="bg-white rounded-2xl pl-1 pr-3 py-1 border border-white shadow-xs flex items-center gap-2 text-xs font-bold text-slate-800">
-                <div className="w-6 h-6 rounded-xl bg-slate-800 text-white font-bold text-[10px] flex items-center justify-center">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : "O"}
+            {/* User Profile Menu Dropdown (Top Right - Inside Application Style) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="h-8 pl-1 pr-2.5 rounded-2xl bg-white border border-white shadow-xs flex items-center gap-2 hover:bg-slate-50 transition active:scale-95 cursor-pointer"
+                title="Account & Sign Out"
+              >
+                <div className="w-6 h-6 rounded-xl bg-slate-800 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : "P"}
                 </div>
-                <span>{user?.role === "POOL_OWNER" ? "Owner" : user?.name || "Owner"}</span>
-              </div>
-            )}
+                <span className="text-xs font-bold text-slate-700 max-w-[120px] truncate hidden sm:inline-block">
+                  {user?.name || "Pool Owner"}
+                </span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {/* Floating Profile Dropdown Popover */}
+              {profileOpen && (
+                <>
+                  <div
+                    onClick={() => setProfileOpen(false)}
+                    className="fixed inset-0 z-40 bg-transparent"
+                  />
+                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-3xl p-3.5 shadow-xl border border-slate-100 z-50 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-1 py-1 border-b border-slate-100 pb-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-2xl bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                          {user?.name ? user.name.charAt(0).toUpperCase() : "P"}
+                        </div>
+                        <div className="overflow-hidden">
+                          <span className="font-extrabold text-xs text-slate-900 block truncate leading-tight">
+                            {user?.name || "Pool Owner"}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-semibold block leading-tight capitalize mt-0.5">
+                            {user?.role === "POOL_OWNER" ? "Owner (Full Access)" : user?.role || "Staff"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-0.5 text-xs font-semibold text-slate-700">
+                      <Link
+                        href="/"
+                        target="_blank"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-slate-50 transition text-slate-700"
+                      >
+                        <ExternalLink className="w-4 h-4 text-slate-400 stroke-[1.75]" />
+                        <span>Public Website</span>
+                      </Link>
+
+                      {isOwnerOrAdmin && (
+                        <>
+                          <Link
+                            href="/admin/staff"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-slate-50 transition text-slate-700"
+                          >
+                            <Users2 className="w-4 h-4 text-slate-400 stroke-[1.75]" />
+                            <span>Staff &amp; Permissions</span>
+                          </Link>
+                          <Link
+                            href="/admin/settings"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-slate-50 transition text-slate-700"
+                          >
+                            <Settings className="w-4 h-4 text-slate-400 stroke-[1.75]" />
+                            <span>System Settings</span>
+                          </Link>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition text-left cursor-pointer active:scale-98"
+                      >
+                        <LogOut className="w-4 h-4 stroke-[1.75]" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
 
