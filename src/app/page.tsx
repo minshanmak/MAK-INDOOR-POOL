@@ -198,12 +198,12 @@ export default function HomePage() {
           </div>
 
           {/* Main Headline with Custom Fluid/Liquid Font (ALL-CAPS) */}
-          <h1 className="w-full max-w-3xl px-2 mx-auto flex flex-col items-center justify-center">
-            <span className="sr-only">SWIM IN PEACE.</span>
+          <h1 className="w-full max-w-4xl px-2 mx-auto flex flex-col items-center justify-center">
+            <span className="sr-only">M.A.K INDOOR POOL</span>
             <img
-              src="/images/hero-swim-in-peace-caps.png"
-              alt="SWIM IN PEACE."
-              className="h-8 xs:h-9 sm:h-14 lg:h-18 w-auto max-w-[92vw] object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)] select-none pointer-events-none"
+              src="/images/hero-mak-indoor-pool.png"
+              alt="M.A.K INDOOR POOL"
+              className="h-8 xs:h-9 sm:h-12 md:h-14 lg:h-16 w-auto max-w-[92vw] object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)] select-none pointer-events-none"
             />
           </h1>
 
