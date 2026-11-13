@@ -30,7 +30,6 @@ import {
   Mail,
   Smartphone,
   Waves,
-  Heart,
   Timer,
   CheckCircle,
   Sun,
@@ -578,15 +577,15 @@ function BookingContent() {
                   {/* Feature Highlights */}
                   <div className="pt-3.5 space-y-2 text-xs text-slate-600 border-t border-slate-100/90 mt-2">
                     <div className="flex items-center gap-2 font-medium">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <ShieldCheck className="w-4 h-4 text-[#0284C7] shrink-0" />
                       <span>Full private access — entire facility reserved</span>
                     </div>
                     <div className="flex items-center gap-2 font-medium">
-                      <Users className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <Users className="w-4 h-4 text-[#0284C7] shrink-0" />
                       <span>Up to 12 guests included (₹100/extra)</span>
                     </div>
                     <div className="flex items-center gap-2 font-medium">
-                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <Clock className="w-4 h-4 text-[#0284C7] shrink-0" />
                       <span>Morning to night slots (9:00 AM – 11:00 PM)</span>
                     </div>
                   </div>
@@ -644,15 +643,15 @@ function BookingContent() {
                   {/* Feature Highlights */}
                   <div className="pt-3.5 space-y-2 text-xs text-slate-600 border-t border-slate-100/90 mt-2">
                     <div className="flex items-center gap-2 font-medium">
-                      <Waves className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <Waves className="w-4 h-4 text-[#0284C7] shrink-0" />
                       <span>Shared pool access during daytime hours</span>
                     </div>
                     <div className="flex items-center gap-2 font-medium">
-                      <Users className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <Users className="w-4 h-4 text-[#0284C7] shrink-0" />
                       <span>Priced per swimmer per hour</span>
                     </div>
                     <div className="flex items-center gap-2 font-medium">
-                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <Clock className="w-4 h-4 text-[#0284C7] shrink-0" />
                       <span>Showers &amp; private lockers included</span>
                     </div>
                   </div>

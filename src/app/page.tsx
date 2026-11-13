@@ -15,7 +15,7 @@ import {
   Image as ImageIcon,
   Play,
   CheckCircle2,
-  Heart,
+  Lock,
   Sparkles,
   Calculator,
   MapPin,
@@ -298,11 +298,11 @@ export default function HomePage() {
             href="#pricing"
             className="bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.06)] hover:shadow-lg hover:-translate-y-0.5 transition-all group flex items-center gap-4"
           >
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#0284C7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <Layers className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-slate-900 group-hover:text-purple-600 transition-colors flex items-center gap-1">
+              <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#0284C7] transition-colors flex items-center gap-1">
                 <span>Our Pricing</span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
@@ -317,11 +317,11 @@ export default function HomePage() {
             href="#gallery"
             className="bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.06)] hover:shadow-lg hover:-translate-y-0.5 transition-all group flex items-center gap-4"
           >
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#0284C7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <ImageIcon className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-slate-900 group-hover:text-teal-600 transition-colors flex items-center gap-1">
+              <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#0284C7] transition-colors flex items-center gap-1">
                 <span>View Gallery</span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
@@ -336,11 +336,11 @@ export default function HomePage() {
             href="#policies"
             className="bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.06)] hover:shadow-lg hover:-translate-y-0.5 transition-all group flex items-center gap-4"
           >
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#0284C7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-1">
+              <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#0284C7] transition-colors flex items-center gap-1">
                 <span>Safety &amp; Policies</span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
@@ -427,7 +427,7 @@ export default function HomePage() {
         {/* 4 Core Principles Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 pt-4">
           <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-xs space-y-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100/60 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-xs sm:text-sm text-slate-900">Hospital-Grade Hygiene</h3>
@@ -437,8 +437,8 @@ export default function HomePage() {
           </div>
 
           <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-xs space-y-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center shrink-0">
-              <Heart className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100/60 flex items-center justify-center shrink-0">
+              <Lock className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-xs sm:text-sm text-slate-900">100% Family Privacy</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
@@ -447,7 +447,7 @@ export default function HomePage() {
           </div>
 
           <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-xs space-y-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-[#ECFDF5] text-[#059669] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100/60 flex items-center justify-center shrink-0">
               <Users className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-xs sm:text-sm text-slate-900">Strict Capacity Limits</h3>
@@ -457,7 +457,7 @@ export default function HomePage() {
           </div>
 
           <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-xs space-y-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100/60 flex items-center justify-center shrink-0">
               <Droplets className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-xs sm:text-sm text-slate-900">All-Weather Comfort</h3>
@@ -833,8 +833,8 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Policy 1: Rescheduling */}
-          <div className="bg-[#F0F8FF] border border-sky-100 rounded-3xl p-6 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center shrink-0">
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100/60 flex items-center justify-center shrink-0">
               <RefreshCw className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-sm text-slate-900">Rescheduling Policy</h3>
@@ -844,8 +844,8 @@ export default function HomePage() {
           </div>
 
           {/* Policy 2: Cancellations */}
-          <div className="bg-[#FEF2F2] border border-rose-100 rounded-3xl p-6 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#FEE2E2] text-[#DC2626] flex items-center justify-center shrink-0">
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100/60 flex items-center justify-center shrink-0">
               <XCircle className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-sm text-slate-900">Cancellation &amp; Refund</h3>
@@ -855,9 +855,9 @@ export default function HomePage() {
           </div>
 
           {/* Policy 3: Hygiene & Attire */}
-          <div className="bg-[#F0FDF4] border border-emerald-100 rounded-3xl p-6 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5" />
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100/60 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-sm text-slate-900">Hygiene &amp; Attire</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
@@ -866,8 +866,8 @@ export default function HomePage() {
           </div>
 
           {/* Policy 4: Child Safety */}
-          <div className="bg-[#FAF5FF] border border-purple-100 rounded-3xl p-6 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#F3E8FF] text-[#9333EA] flex items-center justify-center shrink-0">
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100/60 flex items-center justify-center shrink-0">
               <LifeBuoy className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-sm text-slate-900">Child Safety</h3>

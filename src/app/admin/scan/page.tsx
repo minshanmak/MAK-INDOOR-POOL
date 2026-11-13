@@ -303,7 +303,7 @@ function AdminScanContent() {
 
       playBeep(true);
       setSuccessMsg(
-        `✅ ${data.booking.customerName} (${data.booking.guestCount} Guests) admitted successfully!${
+        `${data.booking.customerName} (${data.booking.guestCount} Guests) admitted successfully!${
           balanceAmount > 0 ? ` Collected balance ₹${balanceAmount} via ${collectPaymentMethod}.` : ""
         }`
       );

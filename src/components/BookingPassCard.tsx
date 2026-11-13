@@ -15,6 +15,8 @@ import {
   Copy,
   Check,
   ShieldCheck,
+  Lock,
+  Waves,
 } from "lucide-react";
 import { formatSlotTime } from "@/lib/timezone";
 
@@ -74,7 +76,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
     const passUrl = `${origin}/booking-status?ref=${booking.id}&phone=${booking.customerPhone}`;
 
     const text =
-      `🏊 *M.A.K INDOOR POOL - DIGITAL ENTRY PASS* 🏊\n\n` +
+      `*M.A.K INDOOR POOL - DIGITAL ENTRY PASS*\n\n` +
       `*Pass ID:* ${booking.id}\n` +
       `*Session Type:* ${booking.type === "FAMILY" ? "Exclusive Family & Group" : "Public Swimming"}\n` +
       `*Date:* ${booking.bookingDate}\n` +
@@ -84,9 +86,9 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
       `*Paid Online:* ₹${booking.totalPaid}\n` +
       (booking.balanceAmount > 0
         ? `*Balance Due at Counter:* ₹${booking.balanceAmount}\n`
-        : `*Status:* Paid in Full ✅\n`) +
-      `\n📲 *View & Show Digital QR Pass:* \n${passUrl}\n\n` +
-      `📍 *Location:* Moonniyur, Malappuram, Kerala\n` +
+        : `*Status:* Paid in Full [Verified]\n`) +
+      `\n*View & Show Digital QR Pass:* \n${passUrl}\n\n` +
+      `*Location:* Moonniyur, Malappuram, Kerala\n` +
       `Show this pass at the pool counter for instant admission!`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
@@ -148,7 +150,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
       ctx.fillStyle = isFamily ? "#7E22CE" : "#1D4ED8";
       ctx.font = "bold 13px system-ui, sans-serif";
       ctx.fillText(
-        isFamily ? "🔒 EXCLUSIVE FAMILY SESSION" : "🏊 PUBLIC SWIMMING SESSION",
+        isFamily ? "EXCLUSIVE FAMILY SESSION" : "PUBLIC SWIMMING SESSION",
         70,
         185
       );
@@ -288,13 +290,14 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
 
           <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
             <span
-              className={`px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wide uppercase ${
+              className={`px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wide uppercase inline-flex items-center gap-1.5 ${
                 isFamily
                   ? "bg-purple-900/60 text-purple-200 border border-purple-700/50"
                   : "bg-blue-900/60 text-blue-200 border border-blue-700/50"
               }`}
             >
-              {isFamily ? "Private Family Session" : "Public Swimming"}
+              {isFamily ? <Lock className="w-3 h-3 text-purple-300" /> : <Waves className="w-3 h-3 text-blue-300" />}
+              <span>{isFamily ? "Private Family Session" : "Public Swimming"}</span>
             </span>
             <span className="font-mono font-bold text-slate-300 text-[11px]">{booking.bookingDate}</span>
           </div>
