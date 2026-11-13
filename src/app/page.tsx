@@ -70,6 +70,20 @@ export default function HomePage() {
       src: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1200&q=85",
     },
     {
+      title: "Dedicated Shallow Kids Pool",
+      category: "KIDS",
+      categoryLabel: "Kids Pool",
+      desc: "Safe and shallow indoor splash pool built within the facility for toddlers and young children, included with all bookings.",
+      src: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1200&q=85",
+    },
+    {
+      title: "Supervised Kids Splash & Play Area",
+      category: "KIDS",
+      categoryLabel: "Kids Splash",
+      desc: "Gentle water depth with complimentary flotation gear provided for a fun and secure family swim experience.",
+      src: "https://images.unsplash.com/photo-1560090995-01632a28895b?auto=format&fit=crop&w=1200&q=85",
+    },
+    {
       title: "Reception & Family Waiting Lounge",
       category: "LOUNGE",
       categoryLabel: "Lounge Area",
@@ -125,6 +139,11 @@ export default function HomePage() {
       category: "SESSIONS",
       q: "What is the difference between Public Swimming and Exclusive Family Booking?",
       a: "Public Swimming (9:00 AM – 4:00 PM) is open to individual visitors and charges ₹150/person/hour with shared pool access (max 25 swimmers). Exclusive Family Booking (4:00 PM – 11:00 PM) reserves the entire pool 100% exclusively for your group (₹1,500/hr up to 12 persons, +₹100/hr for extra guests). No strangers or outside swimmers are admitted during family slots.",
+    },
+    {
+      category: "SESSIONS",
+      q: "Is access to the Kids Pool included in my booking?",
+      a: "Yes, access to both the Main Pool and the shallow Kids Pool is completely included with every booking at no extra cost. Whether you book a Public Swimming pass or an Exclusive Family session, your family has full access to the Kids Pool (adult supervision is required for children under 12).",
     },
     {
       category: "PRICING",
@@ -394,13 +413,19 @@ export default function HomePage() {
             </h2>
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-              M.A.K Indoor Pool offers a clean, safe and comfortable swimming environment for individuals, friends and families. Enjoy public swimming during the day or book exclusive time for your family in the evening.
+              M.A.K Indoor Pool offers a clean, safe and comfortable swimming environment for individuals, friends and families. Every session includes full access to both our full-length Main Pool and our dedicated shallow Kids Pool.
             </p>
 
             <div className="space-y-2.5 pt-1 text-xs font-semibold text-slate-800">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-full bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0 shadow-2xs">
                   <Waves className="w-3.5 h-3.5" />
+                </div>
+                <span>Main Pool &amp; Shallow Kids Pool (Both Included)</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0 shadow-2xs">
+                  <Clock className="w-3.5 h-3.5" />
                 </div>
                 <span>Public Swimming (9:00 AM – 4:00 PM)</span>
               </div>
@@ -522,6 +547,125 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================================
+          OUR POOLS SECTION - Main Pool & Dedicated Kids Pool (Included Facility)
+         ========================================================================= */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0284C7] block">
+              Facility Highlights
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              Our Pools
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
+              Access to both our Main Pool and shallow Kids Pool is included with every session.
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200/80">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Both Pools Included</span>
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          {/* Pool Card 1: Main Pool */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4 flex flex-col justify-between">
+            <div className="space-y-3.5">
+              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-2xs">
+                <img
+                  src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1200&q=80"
+                  alt="M.A.K Main Indoor Pool"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-bold">
+                  Main Pool
+                </div>
+                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-slate-900 text-[11px] font-extrabold shadow-xs">
+                  Depth: 2.5 ft – 5 ft
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                  Full-Length Main Pool
+                </h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Spacious indoor pool with a gradual slope depth designed for lap swimming, casual recreational dips, and exclusive family sessions.
+                </p>
+              </div>
+
+              <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-700">
+                <div className="flex items-center gap-2">
+                  <Waves className="w-4 h-4 text-[#0284C7] shrink-0" />
+                  <span>Gradual 2.5 ft to 5 ft depth</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#0284C7] shrink-0" />
+                  <span>Continuous 24/7 sand filtration</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#0284C7] shrink-0" />
+                  <span>Open for public &amp; family sessions</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#0284C7] shrink-0" />
+                  <span>Strict 25 swimmer capacity cap</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pool Card 2: Kids Pool */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4 flex flex-col justify-between">
+            <div className="space-y-3.5">
+              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-2xs">
+                <img
+                  src="https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1200&q=80"
+                  alt="M.A.K Dedicated Kids Pool"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-sky-600 text-white text-[11px] font-bold">
+                  Kids Pool
+                </div>
+                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-emerald-700 text-[11px] font-extrabold shadow-xs">
+                  Included with Entry
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                  Dedicated Shallow Kids Pool
+                </h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  A safe, shallow wading and splash pool built within the facility for toddlers and young children to enjoy water in complete safety under adult supervision.
+                </p>
+              </div>
+
+              <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-700">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#0284C7] shrink-0" />
+                  <span>Safe shallow depth for young kids</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <LifeBuoy className="w-4 h-4 text-[#0284C7] shrink-0" />
+                  <span>Complimentary flotation gear</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>100% Included at no extra fee</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#0284C7] shrink-0" />
+                  <span>Adult supervision required</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
           5. "OUR PRICING" SECTION (#pricing) - Exact Match to Mockup + Interactive Estimator
          ========================================================================= */}
       <section id="pricing" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -560,6 +704,10 @@ export default function HomePage() {
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>Pool access (9:00 AM – 4:00 PM)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Kids Pool access included</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -611,6 +759,10 @@ export default function HomePage() {
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>Private pool access (4:00 PM – 11:00 PM)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Kids Pool access included</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -768,6 +920,7 @@ export default function HomePage() {
             {[
               { id: "ALL", label: "All Facilities" },
               { id: "POOL", label: "Main Pool" },
+              { id: "KIDS", label: "Kids Pool" },
               { id: "LOUNGE", label: "Lounge" },
               { id: "FACILITIES", label: "Amenities" },
             ].map((tab) => (

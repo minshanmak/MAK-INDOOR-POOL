@@ -30,6 +30,7 @@ import {
   Mail,
   Smartphone,
   Waves,
+  LifeBuoy,
   Timer,
   CheckCircle,
   Sun,
@@ -581,6 +582,10 @@ function BookingContent() {
                       <span>Full private access — entire facility reserved</span>
                     </div>
                     <div className="flex items-center gap-2 font-medium">
+                      <LifeBuoy className="w-4 h-4 text-[#0284C7] shrink-0" />
+                      <span>Main Pool &amp; shallow Kids Pool access included</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-medium">
                       <Users className="w-4 h-4 text-[#0284C7] shrink-0" />
                       <span>Up to 12 guests included (₹100/extra)</span>
                     </div>
@@ -645,6 +650,10 @@ function BookingContent() {
                     <div className="flex items-center gap-2 font-medium">
                       <Waves className="w-4 h-4 text-[#0284C7] shrink-0" />
                       <span>Shared pool access during daytime hours</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-medium">
+                      <LifeBuoy className="w-4 h-4 text-[#0284C7] shrink-0" />
+                      <span>Kids Pool access included at no extra charge</span>
                     </div>
                     <div className="flex items-center gap-2 font-medium">
                       <Users className="w-4 h-4 text-[#0284C7] shrink-0" />
@@ -992,6 +1001,11 @@ function BookingContent() {
                   ? "Base rate covers up to 12 guests. ₹100/hr for each additional guest."
                   : "₹150 per swimmer per hour."}
               </p>
+
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-600 pt-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Full access to both Main Pool and shallow Kids Pool is included.</span>
+              </div>
             </div>
 
             {/* Duration Selector Card (1-Tap Pills) */}
@@ -1101,6 +1115,13 @@ function BookingContent() {
                   <span>Guests &amp; Duration</span>
                   <span className="font-bold text-slate-900">
                     {guestCount} Guests ({durationHours} Hour{durationHours > 1 ? "s" : ""})
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-slate-600">
+                  <span>Included Facilities</span>
+                  <span className="font-semibold text-emerald-700">
+                    Main Pool + Kids Pool Included
                   </span>
                 </div>
 
