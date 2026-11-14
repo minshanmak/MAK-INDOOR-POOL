@@ -18,3 +18,4 @@ export async function GET() {
     return NextResponse.json({ photos: DEFAULT_GALLERY_PHOTOS });
   }
 }
+

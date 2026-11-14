@@ -99,3 +99,4 @@ export function parseGalleryPhotos(rawJson: string | null | undefined): GalleryP
   }
   return DEFAULT_GALLERY_PHOTOS;
 }
+

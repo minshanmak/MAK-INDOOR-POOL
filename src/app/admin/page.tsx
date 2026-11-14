@@ -62,27 +62,13 @@ export default function AdminOverviewPage() {
       ? familyBookings
       : todayBookings;
 
-  // Donut chart logic
-  const donutPublicPct =
-    metrics?.bookingsByType?.totalCount > 0
-      ? metrics.bookingsByType.publicPercentage
-      : 66.7;
-  const donutFamilyPct =
-    metrics?.bookingsByType?.totalCount > 0
-      ? metrics.bookingsByType.familyPercentage
-      : 33.3;
-  const donutTotalCount =
-    metrics?.bookingsByType?.totalCount > 0
-      ? metrics.bookingsByType.totalCount
-      : 12;
-  const donutPublicCount =
-    metrics?.bookingsByType?.totalCount > 0
-      ? metrics.bookingsByType.publicCount
-      : 8;
-  const donutFamilyCount =
-    metrics?.bookingsByType?.totalCount > 0
-      ? metrics.bookingsByType.familyCount
-      : 4;
+  // Donut chart logic (Pure dynamic, no fake demo data)
+  const hasBookings = (metrics?.bookingsByType?.totalCount ?? 0) > 0;
+  const donutPublicPct = hasBookings ? metrics.bookingsByType.publicPercentage : 0;
+  const donutFamilyPct = hasBookings ? metrics.bookingsByType.familyPercentage : 0;
+  const donutTotalCount = metrics?.bookingsByType?.totalCount ?? 0;
+  const donutPublicCount = metrics?.bookingsByType?.publicCount ?? 0;
+  const donutFamilyCount = metrics?.bookingsByType?.familyCount ?? 0;
 
   // Family Slots logic from backend or fallback
   const familySlots = metrics?.familySlotStatuses || [
@@ -111,11 +97,22 @@ export default function AdminOverviewPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C3B68]/95 via-[#135992]/90 to-[#1A6BA8]/80" />
 
         <div className="relative z-10 p-4 sm:p-5 text-white space-y-3">
-          <div className="flex items-center gap-2 px-1">
-            <Zap className="w-4 h-4 text-cyan-200 stroke-[2]" />
-            <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
-              Quick Actions
-            </span>
+          <div className="flex items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-cyan-200 stroke-[2]" />
+              <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                Quick Actions
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-semibold text-cyan-100">
+                <Clock className="w-3.5 h-3.5 text-cyan-200" />
+                <span>9:00 AM – 11:00 PM • Public until 4:00 PM</span>
+              </div>
+              <span className="text-[11px] text-cyan-200 font-bold px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20">
+                Front Desk
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
@@ -208,7 +205,7 @@ export default function AdminOverviewPage() {
             {metrics?.todayBookingsCount ?? 0}
           </div>
           <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-            <span>{metrics?.bookingsTrendText || "↑ +3 vs yesterday"}</span>
+            <span>{metrics?.bookingsTrendText || "0 bookings today"}</span>
           </div>
         </div>
 
@@ -224,7 +221,7 @@ export default function AdminOverviewPage() {
             ₹{((metrics?.todayCollections?.total ?? 0)).toLocaleString("en-IN")}
           </div>
           <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-            <span>{metrics?.collectionsTrendText || "↑ +18% vs yesterday"}</span>
+            <span>{metrics?.collectionsTrendText || "0 collections today"}</span>
           </div>
         </div>
 
@@ -240,7 +237,7 @@ export default function AdminOverviewPage() {
             ₹{((metrics?.monthlyRevenue ?? 0)).toLocaleString("en-IN")}
           </div>
           <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
-            <span>{metrics?.monthlyTrendText || "↑ +12% vs last month"}</span>
+            <span>{metrics?.monthlyTrendText || "Current month revenue"}</span>
           </div>
         </div>
 
@@ -308,7 +305,7 @@ export default function AdminOverviewPage() {
                 scheduleFilter === "ALL" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              All ({todayBookings.length > 0 ? todayBookings.length : 12})
+              All ({todayBookings.length})
             </button>
             <button
               type="button"
@@ -317,7 +314,7 @@ export default function AdminOverviewPage() {
                 scheduleFilter === "PUBLIC" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Public ({publicBookings.length > 0 ? publicBookings.length : 8})
+              Public ({publicBookings.length})
             </button>
             <button
               type="button"
@@ -326,11 +323,11 @@ export default function AdminOverviewPage() {
                 scheduleFilter === "FAMILY" ? "bg-[#1D68BD] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Family ({familyBookings.length > 0 ? familyBookings.length : 4})
+              Family ({familyBookings.length})
             </button>
           </div>
 
-          {/* Schedule Timeline Rows (Dynamic + Mockup Fallback) */}
+          {/* Schedule Timeline Rows (Dynamic) */}
           <div className="space-y-2 text-xs">
             {filteredSchedule.length > 0 ? (
               filteredSchedule.slice(0, 5).map((b: any, i: number) => {
@@ -371,39 +368,13 @@ export default function AdminOverviewPage() {
                 );
               })
             ) : (
-              // Mockup Fallback Display when database has 0 items
-              <>
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
-                  <span className="font-semibold text-slate-900 tabular-nums">09:00 AM – 10:00 AM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 5</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#E0F2FE] text-[#0369A1]">Public</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#DCFCE7] text-[#15803D]">Ongoing</span>
-                </div>
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
-                  <span className="font-semibold text-slate-900 tabular-nums">10:00 AM – 11:00 AM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 8</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#E0F2FE] text-[#0369A1]">Public</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#DCFCE7] text-[#15803D]">Ongoing</span>
-                </div>
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
-                  <span className="font-semibold text-slate-900 tabular-nums">11:00 AM – 12:00 PM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 6</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#E0F2FE] text-[#0369A1]">Public</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF3C7] text-[#B45309]">Upcoming</span>
-                </div>
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
-                  <span className="font-semibold text-slate-900 tabular-nums">04:00 PM – 06:00 PM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 12</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#F3E8FF] text-[#7E22CE]">Family (Exclusive)</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF3C7] text-[#B45309]">Upcoming</span>
-                </div>
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80">
-                  <span className="font-semibold text-slate-900 tabular-nums">07:00 PM – 09:00 PM</span>
-                  <span className="text-slate-500 flex items-center gap-1"><Users className="w-3.5 h-3.5 text-slate-400" /> 15</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#F3E8FF] text-[#7E22CE]">Family (Exclusive)</span>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF3C7] text-[#B45309]">Upcoming</span>
-                </div>
-              </>
+              <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                <Clock className="w-6 h-6 text-slate-300 mx-auto mb-1" />
+                <p className="text-xs font-bold text-slate-600">No scheduled bookings for today</p>
+                <p className="text-[11px] text-slate-400">
+                  New reservations will appear here automatically.
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -639,60 +610,13 @@ export default function AdminOverviewPage() {
                   </div>
                 ))
               ) : (
-                // Sample fallbacks matching Mockup Image 1
-                <>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-semibold text-slate-800 block">Payment received – BK-1029</span>
-                        <span className="text-[10px] text-slate-400">2 min ago</span>
-                      </div>
-                    </div>
-                    <span className="font-bold text-slate-900 tabular-nums text-xs">₹1,500</span>
-                  </div>
-
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
-                      <Calendar className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-semibold text-slate-800 block">New booking – BK-1030 (Public)</span>
-                        <span className="text-[10px] text-slate-400">6 min ago</span>
-                      </div>
-                    </div>
-                    <span className="text-[11px] text-slate-500 font-semibold">5 guests</span>
-                  </div>
-
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
-                      <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-semibold text-slate-800 block">Booking rescheduled – BK-1026</span>
-                        <span className="text-[10px] text-slate-400">7 min ago</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
-                      <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-semibold text-slate-800 block">Cancellation request – BK-1024</span>
-                        <span className="text-[10px] text-slate-400">14 min ago</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
-                      <Users className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-semibold text-slate-800 block">Walk-in check-in – 4 guests</span>
-                        <span className="text-[10px] text-slate-400">18 min ago</span>
-                      </div>
-                    </div>
-                  </div>
-                </>
+                <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                  <Activity className="w-6 h-6 text-slate-300 mx-auto mb-1" />
+                  <p className="text-xs font-bold text-slate-600">No recent activity</p>
+                  <p className="text-[11px] text-slate-400">
+                    Live bookings and counter entries will appear here in real time.
+                  </p>
+                </div>
               )}
             </div>
           </div>
