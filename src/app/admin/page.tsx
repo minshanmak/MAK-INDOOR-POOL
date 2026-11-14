@@ -111,22 +111,11 @@ export default function AdminOverviewPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0C3B68]/95 via-[#135992]/90 to-[#1A6BA8]/80" />
 
         <div className="relative z-10 p-4 sm:p-5 text-white space-y-3">
-          <div className="flex items-center justify-between gap-2 px-1">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-cyan-200 stroke-[2]" />
-              <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
-                Quick Actions
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-semibold text-cyan-100">
-                <Clock className="w-3.5 h-3.5 text-cyan-200" />
-                <span>9:00 AM – 11:00 PM • Public until 4:00 PM</span>
-              </div>
-              <span className="text-[11px] text-cyan-200 font-bold px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20">
-                Front Desk
-              </span>
-            </div>
+          <div className="flex items-center gap-2 px-1">
+            <Zap className="w-4 h-4 text-cyan-200 stroke-[2]" />
+            <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+              Quick Actions
+            </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
