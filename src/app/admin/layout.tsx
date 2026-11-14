@@ -376,23 +376,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Right Header Status Bar (Exact Mockup Match) */}
           <div className="flex items-center gap-2 flex-wrap">
             {/* Date Pill */}
-            <div className="bg-white rounded-2xl px-3.5 py-1.5 border border-white shadow-xs flex items-center gap-2 text-xs font-semibold text-slate-700">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              <span>{livePoolClock.date || "Today"}</span>
+            <div className="h-9 px-3.5 rounded-full bg-white border border-slate-200/80 shadow-[0_2px_6px_rgba(15,23,42,0.04)] flex items-center gap-2 text-xs font-semibold text-slate-700 select-none">
+              <Calendar className="w-3.5 h-3.5 text-[#1D68BD] stroke-[2]" />
+              <span className="font-bold text-slate-800 tracking-tight">{livePoolClock.date || "Today"}</span>
             </div>
-
 
             {/* Notifications Bell & Dropdown */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="w-8 h-8 rounded-2xl bg-white border border-white shadow-xs flex items-center justify-center relative text-slate-600 hover:text-slate-900 cursor-pointer transition active:scale-95"
+                className={`h-9 w-9 rounded-full bg-white border shadow-[0_2px_6px_rgba(15,23,42,0.04)] flex items-center justify-center relative cursor-pointer transition-all active:scale-95 ${
+                  notificationsOpen
+                    ? "border-[#1D68BD] ring-2 ring-blue-500/15 bg-blue-50/40 text-[#1D68BD]"
+                    : "border-slate-200/80 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                }`}
                 title="Operational Notifications"
               >
-                <Bell className="w-4 h-4 stroke-[1.75]" />
+                <Bell className="w-4 h-4 stroke-[1.8]" />
                 {notificationData.unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 px-1 min-w-[16px] h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+                  <span className="absolute -top-1 -right-1 px-1.5 min-w-[18px] h-4.5 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white leading-none shadow-xs">
                     {notificationData.unreadCount > 9 ? "9+" : notificationData.unreadCount}
                   </span>
                 )}
@@ -405,7 +408,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     onClick={() => setNotificationsOpen(false)}
                     className="fixed inset-0 z-40 bg-transparent"
                   />
-                  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl p-4 shadow-xl border border-slate-100 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200/80 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                       <div className="flex items-center gap-2">
                         <Bell className="w-4 h-4 text-[#1D68BD] stroke-[1.75]" />
@@ -471,23 +474,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               )}
             </div>
 
-
-
             {/* User Profile Menu Dropdown (Top Right - Inside Application Style) */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="h-8 pl-1 pr-2.5 rounded-2xl bg-white border border-white shadow-xs flex items-center gap-2 hover:bg-slate-50 transition active:scale-95 cursor-pointer"
+                className={`h-9 pl-1.5 pr-3 rounded-full bg-white border shadow-[0_2px_6px_rgba(15,23,42,0.04)] flex items-center gap-2.5 cursor-pointer transition-all active:scale-95 ${
+                  profileOpen
+                    ? "border-[#1D68BD] ring-2 ring-blue-500/15 bg-blue-50/40"
+                    : "border-slate-200/80 hover:bg-slate-50/80 hover:border-slate-300"
+                }`}
                 title="Account & Sign Out"
               >
-                <div className="w-6 h-6 rounded-xl bg-slate-800 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-tr from-[#1D68BD] to-sky-500 text-white font-black text-[11px] flex items-center justify-center shrink-0 shadow-xs ring-1 ring-white">
                   {user?.name ? user.name.charAt(0).toUpperCase() : "P"}
                 </div>
-                <span className="text-xs font-bold text-slate-700 max-w-[120px] truncate hidden sm:inline-block">
+                <span className="text-xs font-bold text-slate-800 max-w-[130px] truncate hidden sm:inline-block tracking-tight">
                   {user?.name || "Pool Owner"}
                 </span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                    profileOpen ? "rotate-180 text-[#1D68BD]" : "text-slate-400"
+                  }`}
+                />
               </button>
 
               {/* Floating Profile Dropdown Popover */}
@@ -497,10 +506,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     onClick={() => setProfileOpen(false)}
                     className="fixed inset-0 z-40 bg-transparent"
                   />
-                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-3xl p-3.5 shadow-xl border border-slate-100 z-50 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-3xl p-3.5 shadow-2xl border border-slate-200/80 z-50 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
                     <div className="px-1 py-1 border-b border-slate-100 pb-2.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-2xl bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                        <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#1D68BD] to-sky-500 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
                           {user?.name ? user.name.charAt(0).toUpperCase() : "P"}
                         </div>
                         <div className="overflow-hidden">
