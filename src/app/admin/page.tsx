@@ -98,8 +98,8 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="space-y-4 text-slate-800">
-      {/* 1. HERO WELCOME BANNER (Exact match to Mockup Image 1) */}
-      <div className="relative rounded-3xl overflow-hidden min-h-[175px] shadow-[0_4px_25px_rgba(20,60,110,0.08)] border border-white/60">
+      {/* 1. QUICK ACTIONS CARD (Replaces Welcome Card) */}
+      <div className="relative rounded-3xl overflow-hidden shadow-[0_4px_25px_rgba(20,60,110,0.08)] border border-white/60">
         {/* Background Pool Photograph */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -107,94 +107,100 @@ export default function AdminOverviewPage() {
             backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=85')`,
           }}
         />
-        {/* Subtle Aquatic Gradient Overlay: Navy fading to reveal crystal water & ladder on the right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C3B68]/95 via-[#135992]/80 to-[#1A6BA8]/35" />
+        {/* Aquatic Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C3B68]/95 via-[#135992]/90 to-[#1A6BA8]/80" />
 
-        <div className="relative z-10 p-6 lg:p-7 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 h-full">
-          <div className="max-w-xl text-white">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-[11px] font-semibold text-cyan-100 mb-2.5 shadow-xs">
-              <Clock className="w-3.5 h-3.5 text-cyan-200" />
-              <span>9:00 AM – 11:00 PM • Public until 4:00 PM</span>
+        <div className="relative z-10 p-4 sm:p-5 text-white space-y-3">
+          <div className="flex items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-cyan-200 stroke-[2]" />
+              <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                Quick Actions
+              </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-              Welcome to M.A.K Indoor Pool
-            </h2>
-            <p className="text-cyan-100 text-xs sm:text-sm mt-1 font-normal leading-relaxed">
-              Bookings, operations, maintenance and reports — all in one place.
-            </p>
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-semibold text-cyan-100">
+                <Clock className="w-3.5 h-3.5 text-cyan-200" />
+                <span>9:00 AM – 11:00 PM • Public until 4:00 PM</span>
+              </div>
+              <span className="text-[11px] text-cyan-200 font-bold px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20">
+                Front Desk
+              </span>
+            </div>
           </div>
 
-          {/* Frosted Glass Quick Actions Hub */}
-          <div className="bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-3 sm:p-3.5 text-white shadow-lg w-full lg:w-auto shrink-0 space-y-2">
-            <div className="flex items-center justify-between gap-2 px-1">
-              <div className="flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-cyan-200 stroke-[1.75]" />
-                <span className="text-[11px] text-cyan-100 font-bold uppercase tracking-wider">
-                  Quick Actions
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+            {/* 1. Walk-in */}
+            <Link
+              href="/admin/walkins"
+              className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md transition active:scale-[0.98] text-left group shadow-sm"
+            >
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-400/25 text-emerald-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <UserPlus className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.75]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-bold text-white block leading-tight truncate">
+                  Walk-in
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-cyan-200 block leading-tight truncate mt-0.5">
+                  New entry
                 </span>
               </div>
-              <span className="text-[10px] text-white/60 font-medium">Front Desk</span>
-            </div>
+            </Link>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {/* 1. Walk-in */}
-              <Link
-                href="/admin/walkins"
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 transition active:scale-95 text-left"
-              >
-                <div className="w-7 h-7 rounded-lg bg-emerald-400/25 text-emerald-300 flex items-center justify-center shrink-0">
-                  <UserPlus className="w-3.5 h-3.5 stroke-[1.75]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white block leading-tight">Walk-in</span>
-                  <span className="text-[10px] text-cyan-200 block leading-tight">New entry</span>
-                </div>
-              </Link>
+            {/* 2. Scan Pass */}
+            <Link
+              href="/admin/scan"
+              className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md transition active:scale-[0.98] text-left group shadow-sm"
+            >
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-400/25 text-sky-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <QrCode className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.75]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-bold text-white block leading-tight truncate">
+                  Scan Pass
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-cyan-200 block leading-tight truncate mt-0.5">
+                  QR scanner
+                </span>
+              </div>
+            </Link>
 
-              {/* 2. Scan Pass */}
-              <Link
-                href="/admin/scan"
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 transition active:scale-95 text-left"
-              >
-                <div className="w-7 h-7 rounded-lg bg-sky-400/25 text-sky-200 flex items-center justify-center shrink-0">
-                  <QrCode className="w-3.5 h-3.5 stroke-[1.75]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white block leading-tight">Scan Pass</span>
-                  <span className="text-[10px] text-cyan-200 block leading-tight">QR scanner</span>
-                </div>
-              </Link>
+            {/* 3. Water Test */}
+            <Link
+              href="/admin/maintenance"
+              className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md transition active:scale-[0.98] text-left group shadow-sm"
+            >
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-teal-400/25 text-teal-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <Droplets className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.75]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-bold text-white block leading-tight truncate">
+                  Water Test
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-cyan-200 block leading-tight truncate mt-0.5">
+                  pH &amp; chlorine
+                </span>
+              </div>
+            </Link>
 
-              {/* 3. Water Test */}
-              <Link
-                href="/admin/maintenance"
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 transition active:scale-95 text-left"
-              >
-                <div className="w-7 h-7 rounded-lg bg-teal-400/25 text-teal-200 flex items-center justify-center shrink-0">
-                  <Droplets className="w-3.5 h-3.5 stroke-[1.75]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white block leading-tight">Water Test</span>
-                  <span className="text-[10px] text-cyan-200 block leading-tight">pH &amp; chlorine</span>
-                </div>
-              </Link>
-
-              {/* 4. Settle Balances */}
-              <Link
-                href="/admin/payments"
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 transition active:scale-95 text-left"
-              >
-                <div className="w-7 h-7 rounded-lg bg-rose-400/25 text-rose-200 flex items-center justify-center shrink-0">
-                  <Wallet className="w-3.5 h-3.5 stroke-[1.75]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white block leading-tight">Collect Due</span>
-                  <span className="text-[10px] text-cyan-200 block leading-tight">
-                    {metrics?.totalOutstanding > 0 ? `₹${metrics.totalOutstanding.toLocaleString("en-IN")}` : "0 due"}
-                  </span>
-                </div>
-              </Link>
-            </div>
+            {/* 4. Settle Balances */}
+            <Link
+              href="/admin/payments"
+              className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md transition active:scale-[0.98] text-left group shadow-sm"
+            >
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-400/25 text-rose-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <Wallet className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.75]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-bold text-white block leading-tight truncate">
+                  Collect Due
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-cyan-200 block leading-tight truncate mt-0.5">
+                  {metrics?.totalOutstanding > 0 ? `₹${metrics.totalOutstanding.toLocaleString("en-IN")}` : "0 due"}
+                </span>
+              </div>
+            </Link>
           </div>
         </div>
       </div>
