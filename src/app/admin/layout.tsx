@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { formatPoolDate, formatPoolTime } from "@/lib/timezone";
+import { formatPoolDate, formatPoolTime, POOL_TIMEZONE } from "@/lib/timezone";
 import MakLogo from "@/components/MakLogo";
 import {
   Waves,
@@ -38,6 +38,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [livePoolClock, setLivePoolClock] = useState({ date: "", time: "" });
+  const [liveClockState, setLiveClockState] = useState<{
+    time: string;
+    period: string;
+    date: string;
+  }>({
+    time: "",
+    period: "",
+    date: "",
+  });
   const [notificationData, setNotificationData] = useState<{ unreadCount: number; notifications: any[] }>({
     unreadCount: 0,
     notifications: [],
@@ -48,9 +57,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
+      const timeParts = new Intl.DateTimeFormat("en-US", {
+        timeZone: POOL_TIMEZONE,
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }).formatToParts(now);
+
+      const hours = timeParts.find((p) => p.type === "hour")?.value || "";
+      const minutes = timeParts.find((p) => p.type === "minute")?.value || "";
+      const period = timeParts.find((p) => p.type === "dayPeriod")?.value?.toUpperCase() || "";
+
+      const dateStr = new Intl.DateTimeFormat("en-GB", {
+        timeZone: POOL_TIMEZONE,
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(now);
+
+      setLiveClockState({
+        time: `${hours}:${minutes}`,
+        period,
+        date: dateStr,
+      });
+
       setLivePoolClock({
-        date: formatPoolDate(now),
-        time: formatPoolTime(now, true),
+        date: dateStr,
+        time: `${hours}:${minutes} ${period} IST`,
       });
     };
     updateClock();
@@ -302,9 +336,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }`}
       >
         <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1">
-          {/* Brand Header */}
-          <div className="flex items-center justify-center px-2 py-2 mb-3 border-b border-slate-100/90 pb-3">
-            <MakLogo variant="full" size="lg" />
+          {/* Live IST Pool Clock Header (Replaces Sidebar Logo) */}
+          <div className="px-2 py-2.5 mb-3 border-b border-slate-100/90 flex flex-col items-center justify-center text-center">
+            {/* Digital Time: e.g. 10:24 AM */}
+            <div className="flex items-baseline justify-center gap-1.5 tabular-nums">
+              <span className="text-3xl sm:text-4xl font-black text-[#0B2545] tracking-tight">
+                {liveClockState.time || "10:24"}
+              </span>
+              <span className="text-base font-extrabold text-slate-500 tracking-wide">
+                {liveClockState.period || "AM"}
+              </span>
+            </div>
+
+            {/* Light blue line divider with calendar icon */}
+            <div className="flex items-center justify-center gap-2.5 w-full my-2 px-1">
+              <div className="h-[1.5px] flex-1 bg-sky-300 rounded-full" />
+              <div className="text-[#0B2545] shrink-0">
+                <CalendarDays className="w-4 h-4 text-[#0B2545] stroke-[2]" />
+              </div>
+              <div className="h-[1.5px] flex-1 bg-sky-300 rounded-full" />
+            </div>
+
+            {/* Date display: e.g. Thu, 20 Nov 2026 / Sat, 14 Nov 2026 */}
+            <div className="text-xs sm:text-sm font-bold text-[#0B2545] tracking-tight">
+              {liveClockState.date || "Today"}
+            </div>
           </div>
 
           {/* Navigation Links */}
