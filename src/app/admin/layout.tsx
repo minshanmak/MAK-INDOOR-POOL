@@ -379,7 +379,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="bg-white rounded-2xl px-3.5 py-1.5 border border-white shadow-xs flex items-center gap-2 text-xs font-semibold text-slate-700">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
               <span>{livePoolClock.date || "Today"}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
             </div>
 
 
