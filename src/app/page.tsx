@@ -61,8 +61,9 @@ export default function HomePage() {
   });
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  // Dynamic Gallery Photos State from Server
+  // Dynamic Gallery Photos & Pool Settings State from Server
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhotoItem[]>(DEFAULT_GALLERY_PHOTOS);
+  const [poolCapacity, setPoolCapacity] = useState<number>(25);
 
   useEffect(() => {
     fetch("/api/gallery")
@@ -71,14 +72,32 @@ export default function HomePage() {
         if (data?.photos && Array.isArray(data.photos) && data.photos.length > 0) {
           setGalleryPhotos(data.photos);
         }
+        if (data?.maxCapacity) {
+          setPoolCapacity(data.maxCapacity);
+        }
       })
       .catch((err) => console.error("Gallery fetch error:", err));
+
+    fetch("/api/pool-config")
+      .then((res) => res.json())
+      .then((cfg) => {
+        if (cfg?.maxCapacity) {
+          setPoolCapacity(cfg.maxCapacity);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const filteredGallery =
     activeGalleryTab === "ALL"
       ? galleryPhotos
       : galleryPhotos.filter((p) => p.category === activeGalleryTab);
+
+  useEffect(() => {
+    if (calcGuests > poolCapacity) {
+      setCalcGuests(poolCapacity);
+    }
+  }, [poolCapacity, calcGuests]);
 
   // Pricing Calculations
   const basePrice = calcHours * 1500;
@@ -93,7 +112,7 @@ export default function HomePage() {
     {
       category: "SESSIONS",
       q: "What is the difference between Public Swimming and Exclusive Family Booking?",
-      a: "Public Swimming (9:00 AM – 4:00 PM) is open to individual visitors and charges ₹150/person/hour with shared pool access (max 25 swimmers). Exclusive Family Booking (4:00 PM – 11:00 PM) reserves the entire pool 100% exclusively for your group (₹1,500/hr up to 12 persons, +₹100/hr for extra guests). No strangers or outside swimmers are admitted during family slots.",
+      a: `Public Swimming (9:00 AM – 4:00 PM) is open to individual visitors and charges ₹150/person/hour with shared pool access (max ${poolCapacity} swimmers). Exclusive Family Booking (4:00 PM – 11:00 PM) reserves the entire pool 100% exclusively for your group (₹1,500/hr up to 12 persons, +₹100/hr for extra guests). No strangers or outside swimmers are admitted during family slots.`,
     },
     {
       category: "SESSIONS",
@@ -432,7 +451,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-bold text-xs sm:text-sm text-slate-900">Strict Capacity Limits</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              We cap public slots strictly to 25 swimmers to avoid overcrowding and ensure a calm experience.
+              We cap public slots strictly to {poolCapacity} swimmers to avoid overcrowding and ensure a calm experience.
             </p>
           </div>
 
@@ -565,7 +584,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#0284C7] shrink-0" />
-                  <span>Strict 25 swimmer capacity cap</span>
+                  <span>Strict {poolCapacity} swimmer capacity cap</span>
                 </div>
               </div>
             </div>
@@ -780,7 +799,7 @@ export default function HomePage() {
                 <input
                   type="range"
                   min="1"
-                  max="25"
+                  max={poolCapacity}
                   value={calcGuests}
                   onChange={(e) => setCalcGuests(parseInt(e.target.value))}
                   className="w-full accent-[#0284C7] cursor-pointer"
@@ -788,7 +807,7 @@ export default function HomePage() {
                 <div className="flex justify-between text-[10px] text-slate-400 font-medium mt-1">
                   <span>1 guest</span>
                   <span>12 (Standard limit)</span>
-                  <span>25 (Max capacity)</span>
+                  <span>{poolCapacity} (Max capacity)</span>
                 </div>
               </div>
 

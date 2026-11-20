@@ -9,6 +9,7 @@ interface SlotHoldModalProps {
   onClose: () => void;
   onSuccess: (hold: any) => void;
   holdTtlMinutes?: number;
+  maxCapacity?: number;
 }
 
 export default function SlotHoldModal({
@@ -16,6 +17,7 @@ export default function SlotHoldModal({
   onClose,
   onSuccess,
   holdTtlMinutes = 15,
+  maxCapacity = 25,
 }: SlotHoldModalProps) {
   const [bookingType, setBookingType] = useState<"PUBLIC" | "FAMILY">("FAMILY");
   const [date, setDate] = useState<string>(getPoolDate());
@@ -192,7 +194,7 @@ export default function SlotHoldModal({
                 <input
                   type="number"
                   min={1}
-                  max={25}
+                  max={bookingType === "PUBLIC" ? maxCapacity : Math.max(30, maxCapacity)}
                   value={guestCount}
                   onChange={(e) => setGuestCount(Number(e.target.value))}
                   className="w-full min-h-[44px] px-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-900"

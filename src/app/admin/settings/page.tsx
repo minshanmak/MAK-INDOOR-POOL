@@ -707,7 +707,7 @@ export default function AdminSettingsPage() {
                     <input
                       type="number"
                       min={5}
-                      max={50}
+                      max={100}
                       required
                       value={settings.maxCapacity}
                       onChange={(e) => setSettings({ ...settings, maxCapacity: Number(e.target.value) })}

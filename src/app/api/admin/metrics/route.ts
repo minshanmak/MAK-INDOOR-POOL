@@ -183,15 +183,19 @@ export async function GET() {
   const currentTotalSwimmers = activeWalkInGuests + ongoingBookingGuests;
   const occupancyPercentage = Math.min(100, Math.round((currentTotalSwimmers / maxCapacity) * 100));
 
-  // 25-cell Segmented Gauge Representation
+  // Dynamic Segmented Gauge Representation relative to maxCapacity
+  const normalEnd = Math.max(1, Math.floor(maxCapacity * 0.76));
+  const hardCapStart = Math.max(normalEnd + 1, Math.floor(maxCapacity * 0.92) + 1);
+
   const segmentedGaugeCells = Array.from({ length: maxCapacity }, (_, i) => {
     const isOccupied = i < currentPublicSwimmers;
+    const spotNum = i + 1;
     let colorTier: "sky" | "amber" | "red" = "sky";
-    if (i >= 23) colorTier = "red";
-    else if (i >= 19) colorTier = "amber";
+    if (spotNum >= hardCapStart) colorTier = "red";
+    else if (spotNum > normalEnd) colorTier = "amber";
 
     return {
-      index: i + 1,
+      index: spotNum,
       isOccupied,
       colorTier,
     };

@@ -505,13 +505,13 @@ export default function AdminCounterDashboard() {
                   Public Occupancy Meter
                 </span>
                 <span className="text-[10px] bg-sky-50 text-[#0284C7] font-bold px-2 py-0.5 rounded-full">
-                  Cap: 25 Max
+                  Cap: {publicGauge.maxCapacity} Max
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mt-1">
                 <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tight">
                   {publicGauge.currentSwimmers}
-                  <span className="text-lg font-bold text-slate-400"> / 25</span>
+                  <span className="text-lg font-bold text-slate-400"> / {publicGauge.maxCapacity}</span>
                 </h3>
                 <span className="text-xs font-bold text-slate-500">
                   ({publicGauge.spotsRemaining} spot{publicGauge.spotsRemaining === 1 ? "" : "s"} remaining)
@@ -532,9 +532,12 @@ export default function AdminCounterDashboard() {
             </div>
           </div>
 
-          {/* 25-CELL SEGMENTED BAR: 0-19 sky, 20-23 amber, 24-25 red */}
+          {/* Segmented Bar */}
           <div className="space-y-2">
-            <div className="grid grid-cols-25 gap-1 sm:gap-1.5 h-10 w-full rounded-2xl p-1.5 bg-slate-100 border border-slate-200/60">
+            <div
+              className="grid gap-1 sm:gap-1.5 h-10 w-full rounded-2xl p-1.5 bg-slate-100 border border-slate-200/60 overflow-hidden"
+              style={{ gridTemplateColumns: `repeat(${publicGauge.maxCapacity}, minmax(0, 1fr))` }}
+            >
               {publicGauge.cells.map((cell: any) => {
                 let cellClass = "bg-slate-200/80"; // Empty cell default
                 if (cell.isOccupied) {
@@ -547,7 +550,7 @@ export default function AdminCounterDashboard() {
                   <div
                     key={cell.index}
                     className={`h-full rounded-md transition-all duration-300 relative group ${cellClass}`}
-                    title={`Spot ${cell.index} of 25: ${cell.isOccupied ? "Occupied" : "Available"}`}
+                    title={`Spot ${cell.index} of ${publicGauge.maxCapacity}: ${cell.isOccupied ? "Occupied" : "Available"}`}
                   >
                     <span className="sr-only">Spot {cell.index}</span>
                   </div>
@@ -556,20 +559,28 @@ export default function AdminCounterDashboard() {
             </div>
 
             {/* Color Legend */}
-            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 px-1 pt-1">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-[#0284C7]" />
-                <span>Normal (1–19)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
-                <span>Busy (20–23)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-red-500" />
-                <span>Hard Cap (24–25)</span>
-              </div>
-            </div>
+            {(() => {
+              const normalEnd = Math.max(1, Math.floor(publicGauge.maxCapacity * 0.76));
+              const busyStart = normalEnd + 1;
+              const hardCapStart = Math.max(busyStart, Math.floor(publicGauge.maxCapacity * 0.92) + 1);
+              const busyEnd = Math.max(busyStart, hardCapStart - 1);
+              return (
+                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 px-1 pt-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-[#0284C7]" />
+                    <span>Normal (1–{normalEnd})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
+                    <span>Busy ({busyStart}–{busyEnd})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-red-500" />
+                    <span>Hard Cap ({hardCapStart}–{publicGauge.maxCapacity})</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Today's Collections Preview */}
@@ -641,7 +652,7 @@ export default function AdminCounterDashboard() {
                   <span className="text-[10px] text-slate-400 font-bold uppercase block">Total swimmers</span>
                   <span className="text-xl font-black text-slate-900 font-mono mt-0.5 block">
                     {privateModeStatus.guestCount}
-                    <span className="text-xs text-slate-400 font-normal"> / 25 cap</span>
+                    <span className="text-xs text-slate-400 font-normal"> / {publicGauge.maxCapacity} cap</span>
                   </span>
                 </div>
 
@@ -905,7 +916,7 @@ export default function AdminCounterDashboard() {
         isOpen={isWalkInOpen}
         onClose={() => setIsWalkInOpen(false)}
         currentOccupancy={publicGauge.currentSwimmers}
-        maxCapacity={25}
+        maxCapacity={publicGauge.maxCapacity}
         isPrivateSessionActive={currentMode === "PRIVATE"}
         nextPublicSessionText="Tomorrow at 9:00 AM"
         onSuccess={() => {
@@ -919,6 +930,7 @@ export default function AdminCounterDashboard() {
         isOpen={isHoldOpen}
         onClose={() => setIsHoldOpen(false)}
         holdTtlMinutes={holdTtlMinutes}
+        maxCapacity={publicGauge.maxCapacity}
         onSuccess={(holdData: any) => {
           setIsHoldOpen(false);
           const duration = holdData?.holdTtlMinutes || holdTtlMinutes;

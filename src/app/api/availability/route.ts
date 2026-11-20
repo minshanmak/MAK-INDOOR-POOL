@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
       where: { id: "singleton_settings" },
     });
     const holdTtlMinutes = settings?.holdTtlMinutes || 15;
+    const maxCapacity = settings?.maxCapacity ?? 25;
 
     // If caller only requested day-level slot status
     if (!startTime || !endTime) {
@@ -35,6 +36,7 @@ export async function GET(req: NextRequest) {
         available: true,
         slots: daySlots,
         holdTtlMinutes,
+        maxCapacity,
       });
     }
 
@@ -66,6 +68,7 @@ export async function GET(req: NextRequest) {
       pricing,
       slots: daySlots,
       holdTtlMinutes,
+      maxCapacity,
     });
   } catch (err: any) {
     console.error("Availability error:", err);

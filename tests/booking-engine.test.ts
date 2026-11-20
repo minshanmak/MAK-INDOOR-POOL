@@ -229,6 +229,49 @@ describe("Booking Engine & Concurrency Safety", () => {
       expect(availGroupC.isCapacityWarning).toBe(true);
       expect(availGroupC.reason).toContain("Only 5 spots left");
     });
+
+    it("dynamically adapts public capacity check when maxCapacity is changed in PoolSetting", async () => {
+      const testDate = "2026-11-19";
+
+      // 1. Change maxCapacity to 35
+      await prisma.poolSetting.upsert({
+        where: { id: "singleton_settings" },
+        update: { maxCapacity: 35 },
+        create: { id: "singleton_settings", maxCapacity: 35 },
+      });
+
+      // 2. Book 20 guests
+      await confirmBooking({
+        bookingType: "PUBLIC",
+        date: testDate,
+        startTime: "11:00",
+        endTime: "13:00",
+        guestCount: 20,
+        customerName: "Large Group",
+        customerPhone: "+919800044444",
+        initialPayment: {
+          amount: 6000,
+          method: "GATEWAY",
+        },
+      });
+
+      // 3. Query 15 guests -> 20 + 15 = 35 <= 35 -> available!
+      const avail = await checkAvailability({
+        bookingType: "PUBLIC",
+        date: testDate,
+        startTime: "11:00",
+        endTime: "13:00",
+        guestCount: 15,
+      });
+      expect(avail.available).toBe(true);
+      expect(avail.maxCapacity).toBe(35);
+
+      // Revert maxCapacity to 25
+      await prisma.poolSetting.update({
+        where: { id: "singleton_settings" },
+        data: { maxCapacity: 25 },
+      });
+    });
   });
     it("prevents public swimming booking when a family booking is confirmed for that slot", async () => {
       const testDate = "2026-11-18";

@@ -80,6 +80,7 @@ function BookingContent() {
   const [holdToken, setHoldToken] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
   const [holdTtlMinutes, setHoldTtlMinutes] = useState<number>(15);
+  const [maxCapacity, setMaxCapacity] = useState<number>(25);
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -124,6 +125,9 @@ function BookingContent() {
           setDaySlots(json.slots);
           if (json.holdTtlMinutes) {
             setHoldTtlMinutes(json.holdTtlMinutes);
+          }
+          if (json.maxCapacity) {
+            setMaxCapacity(json.maxCapacity);
           }
         }
       } catch (e) {
@@ -249,6 +253,9 @@ function BookingContent() {
             }
             if (data.holdTtlMinutes) {
               setHoldTtlMinutes(data.holdTtlMinutes);
+            }
+            if (data.maxCapacity) {
+              setMaxCapacity(data.maxCapacity);
             }
           }
         }
@@ -944,7 +951,7 @@ function BookingContent() {
                   <span>Number of Swimmers</span>
                 </label>
                 <span className="text-[11px] text-slate-500 font-semibold">
-                  {isFamily ? "Max 30 Guests" : "Max 25 Swimmers"}
+                  {isFamily ? "Max 30 Guests" : `Max ${maxCapacity} Swimmers`}
                 </span>
               </div>
 
@@ -967,7 +974,7 @@ function BookingContent() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setGuestCount(Math.min(isFamily ? 30 : 25, guestCount + 1))}
+                  onClick={() => setGuestCount(Math.min(isFamily ? 30 : maxCapacity, guestCount + 1))}
                   className="w-12 h-12 rounded-xl bg-white text-slate-800 font-black hover:bg-slate-50 active:scale-95 shadow-xs flex items-center justify-center text-xl select-none"
                 >
                   +
@@ -991,7 +998,7 @@ function BookingContent() {
                     </button>
                   ))
                 ) : (
-                  [1, 2, 4, 6, 10].map((num) => (
+                  [1, 2, 4, 6, 10].filter((n) => n <= maxCapacity).map((num) => (
                     <button
                       key={num}
                       type="button"
