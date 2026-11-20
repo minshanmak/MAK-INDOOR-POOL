@@ -143,6 +143,33 @@ describe("Booking Engine & Concurrency Safety", () => {
       });
       expect(availAfterExpiry.available).toBe(true);
     });
+
+    it("respects dynamic holdTtlMinutes configured in PoolSetting", async () => {
+      const testDate = "2026-11-18";
+      await prisma.poolSetting.upsert({
+        where: { id: "singleton_settings" },
+        update: { holdTtlMinutes: 25 },
+        create: { id: "singleton_settings", holdTtlMinutes: 25 },
+      });
+
+      const before = Date.now();
+      const hold = await createTemporaryHold({
+        bookingType: "FAMILY",
+        date: testDate,
+        startTime: "17:00",
+        endTime: "18:00",
+        guestCount: 6,
+      });
+
+      expect(hold.holdTtlMinutes).toBe(25);
+      const diffMinutes = Math.round((new Date(hold.expiresAt).getTime() - before) / (60 * 1000));
+      expect(diffMinutes).toBe(25);
+
+      await prisma.poolSetting.update({
+        where: { id: "singleton_settings" },
+        data: { holdTtlMinutes: 15 },
+      });
+    });
   });
 
   describe("Public Swimming Capacity", () => {

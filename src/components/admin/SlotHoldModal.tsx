@@ -8,12 +8,14 @@ interface SlotHoldModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (hold: any) => void;
+  holdTtlMinutes?: number;
 }
 
 export default function SlotHoldModal({
   isOpen,
   onClose,
   onSuccess,
+  holdTtlMinutes = 15,
 }: SlotHoldModalProps) {
   const [bookingType, setBookingType] = useState<"PUBLIC" | "FAMILY">("FAMILY");
   const [date, setDate] = useState<string>(getPoolDate());
@@ -48,7 +50,7 @@ export default function SlotHoldModal({
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to place 15-minute hold.");
+        throw new Error(data.error || "Failed to place slot hold.");
       }
 
       setHoldSuccess(data);
@@ -60,6 +62,8 @@ export default function SlotHoldModal({
     }
   };
 
+  const effectiveTtl = holdSuccess?.holdTtlMinutes || holdTtlMinutes;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-white overflow-hidden">
@@ -67,7 +71,7 @@ export default function SlotHoldModal({
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-sky-50/50">
           <div>
             <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
-              15-Minute Soft Hold
+              {holdTtlMinutes}-Minute Soft Hold
             </h3>
             <p className="text-xs text-slate-500 font-medium">
               Reserve slot for phone enquiries (No payment required)
@@ -90,7 +94,7 @@ export default function SlotHoldModal({
             </div>
             <div>
               <h4 className="text-base font-extrabold text-slate-900">
-                Slot Held for 15 Minutes
+                Slot Held for {effectiveTtl} Minutes
               </h4>
               <p className="text-xs text-slate-500 mt-1">
                 The slot has been blocked across the system until{" "}
@@ -169,6 +173,33 @@ export default function SlotHoldModal({
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full min-h-[44px] px-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-900"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Swimmers
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={25}
+                  value={guestCount}
+                  onChange={(e) => setGuestCount(Number(e.target.value))}
+                  className="w-full min-h-[44px] px-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-900"
+                />
+              </div>
+            </div>
+
             <div>
               <label className="block text-[11px] font-bold text-slate-700 mb-1">
                 Caller / Customer Name (Optional)
@@ -187,7 +218,7 @@ export default function SlotHoldModal({
               disabled={loading}
               className="w-full min-h-[44px] bg-[#0284C7] hover:bg-[#0369a1] text-white text-xs font-bold rounded-2xl transition shadow-xs flex items-center justify-center gap-2"
             >
-              {loading ? "Holding Slot..." : "Start 15-Minute Soft Hold"}
+              {loading ? "Holding Slot..." : `Start ${holdTtlMinutes}-Minute Soft Hold`}
             </button>
           </form>
         )}

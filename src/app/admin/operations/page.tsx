@@ -238,6 +238,8 @@ export default function AdminCounterDashboard() {
     todayTotal: 0,
   };
 
+  const holdTtlMinutes = data?.holdTtlMinutes ?? metrics?.holdTtlMinutes ?? 15;
+
   const privateModeStatus = metrics.privateModeStatus;
   const overdueSessions = activeSessions.filter((s: any) => s.urgency === "OVERDUE");
 
@@ -916,9 +918,11 @@ export default function AdminCounterDashboard() {
       <SlotHoldModal
         isOpen={isHoldOpen}
         onClose={() => setIsHoldOpen(false)}
-        onSuccess={() => {
+        holdTtlMinutes={holdTtlMinutes}
+        onSuccess={(holdData: any) => {
           setIsHoldOpen(false);
-          setNotification({ type: "success", message: "Slot soft hold reserved for 15 minutes." });
+          const duration = holdData?.holdTtlMinutes || holdTtlMinutes;
+          setNotification({ type: "success", message: `Slot soft hold reserved for ${duration} minutes.` });
           fetchDashboardMetrics(true);
         }}
       />

@@ -27,6 +27,7 @@ export async function GET() {
   const closeHour = settings?.closeHour ?? 23;
   const publicEndHour = settings?.publicEndHour ?? 16;
   const maxCapacity = settings?.maxCapacity ?? 25;
+  const holdTtlMinutes = settings?.holdTtlMinutes ?? 15;
   const bufferMinutes = 15; // 15-minute standard turnover buffer
 
   const formatHour12 = (h: number) => {
@@ -660,7 +661,9 @@ export async function GET() {
         isLogDue: waterLogDue,
         outOfRangeAlert,
       },
+      holdTtlMinutes,
     },
+    holdTtlMinutes,
     activeSessions,
     pendingBalancesList,
     timelineData: {

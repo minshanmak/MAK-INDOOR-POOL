@@ -79,6 +79,7 @@ function BookingContent() {
   const [daySlots, setDaySlots] = useState<Record<string, { status: string; reason?: string; remainingCapacity?: number }>>({});
   const [holdToken, setHoldToken] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
+  const [holdTtlMinutes, setHoldTtlMinutes] = useState<number>(15);
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -121,6 +122,9 @@ function BookingContent() {
         const json = await res.json();
         if (!isCancelled && json.slots) {
           setDaySlots(json.slots);
+          if (json.holdTtlMinutes) {
+            setHoldTtlMinutes(json.holdTtlMinutes);
+          }
         }
       } catch (e) {
         console.error("Failed to load day slots", e);
@@ -242,6 +246,9 @@ function BookingContent() {
             setAvailResult(data);
             if (data.slots) {
               setDaySlots(data.slots);
+            }
+            if (data.holdTtlMinutes) {
+              setHoldTtlMinutes(data.holdTtlMinutes);
             }
           }
         }
@@ -377,6 +384,9 @@ function BookingContent() {
 
       setHoldToken(data.holdToken);
       setHoldExpiresAt(new Date(data.expiresAt));
+      if (data.holdTtlMinutes) {
+        setHoldTtlMinutes(data.holdTtlMinutes);
+      }
       goToStep(5);
     } catch (err: any) {
       setError(err.message || "Could not reserve slot.");
@@ -451,7 +461,7 @@ function BookingContent() {
   };
 
   const formatTimer = (totalSeconds: number | null) => {
-    if (totalSeconds === null) return "15:00";
+    if (totalSeconds === null) return `${String(holdTtlMinutes).padStart(2, "0")}:00`;
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
@@ -1272,7 +1282,7 @@ function BookingContent() {
                 className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
               >
                 {loading ? (
-                  <span>Holding slot for 15 minutes...</span>
+                  <span>Holding slot for {holdTtlMinutes} minutes...</span>
                 ) : (
                   <>
                     <span>Proceed to Payment (₹{requiredPaymentAmount})</span>
@@ -1282,22 +1292,22 @@ function BookingContent() {
               </button>
               <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 mt-2.5">
                 <Lock className="w-3.5 h-3.5 text-slate-400" />
-                <span>Your slot is held for 15 minutes during checkout</span>
+                <span>Your slot is held for {holdTtlMinutes} minutes during checkout</span>
               </div>
             </div>
           </div>
         )}
 
         {/* =========================================================================
-            STEP 5: 15-MINUTE SLOT HOLD & SECURE CHECKOUT
+            STEP 5: SLOT HOLD & SECURE CHECKOUT
            ========================================================================= */}
         {wizardStep === 5 && (
           <div className="max-w-xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            {/* Live 15-Minute Hold Timer Banner */}
+            {/* Live Hold Timer Banner */}
             <div className="bg-slate-950 text-white rounded-3xl p-5 sm:p-6 text-center space-y-2 shadow-xl border border-slate-800">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-xs font-semibold">
                 <Timer className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Slot held for 15 minutes</span>
+                <span>Slot held for {holdTtlMinutes} minutes</span>
               </div>
 
               <div className="text-4xl font-black font-mono tracking-widest text-cyan-400 pt-1">

@@ -544,7 +544,7 @@ export async function getDaySlotsAvailability(
 
 export async function createTemporaryHold(
   query: SlotAvailabilityQuery
-): Promise<{ holdToken: string; expiresAt: Date }> {
+): Promise<{ holdToken: string; expiresAt: Date; holdTtlMinutes: number }> {
   const availability = await checkAvailability(query);
   if (!availability.available) {
     throw new Error(availability.reason || "Slot is not available.");
@@ -571,7 +571,7 @@ export async function createTemporaryHold(
     },
   });
 
-  return { holdToken, expiresAt };
+  return { holdToken, expiresAt, holdTtlMinutes: ttlMinutes };
 }
 
 /**

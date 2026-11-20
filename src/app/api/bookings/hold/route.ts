@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       success: true,
       holdToken: hold.holdToken,
       expiresAt: hold.expiresAt,
+      holdTtlMinutes: hold.holdTtlMinutes,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "Could not reserve temporary slot hold." }, { status: 400 });

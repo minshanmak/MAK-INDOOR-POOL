@@ -24,11 +24,17 @@ export async function GET(req: NextRequest) {
     // Always fetch authoritative day-level slot statuses
     const daySlots = await getDaySlotsAvailability(date, bookingType);
 
+    const settings = await prisma.poolSetting.findUnique({
+      where: { id: "singleton_settings" },
+    });
+    const holdTtlMinutes = settings?.holdTtlMinutes || 15;
+
     // If caller only requested day-level slot status
     if (!startTime || !endTime) {
       return NextResponse.json({
         available: true,
         slots: daySlots,
+        holdTtlMinutes,
       });
     }
 
@@ -38,10 +44,6 @@ export async function GET(req: NextRequest) {
       startTime,
       endTime,
       guestCount,
-    });
-
-    const settings = await prisma.poolSetting.findUnique({
-      where: { id: "singleton_settings" },
     });
 
     const [sh, sm] = startTime.split(":").map(Number);
@@ -63,6 +65,7 @@ export async function GET(req: NextRequest) {
       ...avail,
       pricing,
       slots: daySlots,
+      holdTtlMinutes,
     });
   } catch (err: any) {
     console.error("Availability error:", err);
