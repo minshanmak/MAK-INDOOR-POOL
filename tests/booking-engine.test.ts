@@ -13,21 +13,23 @@ import {
 
 describe("Booking Engine & Concurrency Safety", () => {
   beforeEach(async () => {
-    // Clean up test bookings and holds (respecting relational foreign keys)
-    await prisma.receipt.deleteMany();
-    await prisma.payment.deleteMany();
-    await prisma.refund.deleteMany();
-    await prisma.scheduledReminder.deleteMany();
-    await prisma.customerFeedback.deleteMany();
-    await prisma.auditLog.deleteMany();
-    await prisma.booking.deleteMany();
-    await prisma.slotHold.deleteMany();
-    await prisma.walkIn.deleteMany();
-    await prisma.poolSetting.upsert({
-      where: { id: "singleton_settings" },
-      update: { maxCapacity: 25 },
-      create: { id: "singleton_settings", maxCapacity: 25 },
+    // Clean up ONLY test-specific dates to never touch real customer bookings
+    const testDates = ["2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19"];
+    const testBookings = await prisma.booking.findMany({
+      where: { bookingDate: { in: testDates } },
+      select: { id: true },
     });
+    const testIds = testBookings.map((b) => b.id);
+    if (testIds.length > 0) {
+      await prisma.receipt.deleteMany({ where: { bookingId: { in: testIds } } });
+      await prisma.payment.deleteMany({ where: { bookingId: { in: testIds } } });
+      await prisma.refund.deleteMany({ where: { bookingId: { in: testIds } } });
+      await prisma.scheduledReminder.deleteMany({ where: { bookingId: { in: testIds } } });
+      await prisma.customerFeedback.deleteMany({ where: { bookingId: { in: testIds } } });
+      await prisma.booking.deleteMany({ where: { id: { in: testIds } } });
+    }
+    await prisma.slotHold.deleteMany({ where: { date: { in: testDates } } });
+    await prisma.walkIn.deleteMany({ where: { date: { in: testDates } } });
   });
 
   describe("Time Range & Operating Hours", () => {
