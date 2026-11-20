@@ -29,7 +29,7 @@ describe("Booking Engine & Concurrency Safety", () => {
       await prisma.booking.deleteMany({ where: { id: { in: testIds } } });
     }
     await prisma.slotHold.deleteMany({ where: { date: { in: testDates } } });
-    await prisma.walkIn.deleteMany({ where: { date: { in: testDates } } });
+    await prisma.walkIn.deleteMany({ where: { customerName: { in: ["Expired Swimmer", "Active Swimmer", "Morning Swimmer"] } } });
   });
 
   describe("Time Range & Operating Hours", () => {

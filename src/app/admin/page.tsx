@@ -25,6 +25,7 @@ export default function AdminOverviewPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [scheduleFilter, setScheduleFilter] = useState<"ALL" | "PUBLIC" | "FAMILY">("ALL");
+  const [availableSlotFilter, setAvailableSlotFilter] = useState<"ALL" | "PUBLIC" | "FAMILY">("ALL");
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -70,14 +71,43 @@ export default function AdminOverviewPage() {
   const donutPublicCount = metrics?.bookingsByType?.publicCount ?? 0;
   const donutFamilyCount = metrics?.bookingsByType?.familyCount ?? 0;
 
-  // Family Slots logic from backend or fallback
-  const familySlots = metrics?.familySlotStatuses || [
-    { start: "16:00", end: "17:00", label: "04:00 PM – 05:00 PM", status: "Available" },
-    { start: "17:00", end: "18:00", label: "05:00 PM – 06:00 PM", status: "Available" },
-    { start: "18:00", end: "19:00", label: "06:00 PM – 07:00 PM", status: "Available" },
-    { start: "21:00", end: "22:00", label: "09:00 PM – 10:00 PM", status: "Available" },
-    { start: "22:00", end: "23:00", label: "10:00 PM – 11:00 PM", status: "Available" },
-  ];
+  // Available Slots logic (Full day: Public & Family)
+  const allSlotStatuses: any[] =
+    data?.slotStatuses ||
+    metrics?.slotStatuses ||
+    (metrics?.familySlotStatuses
+      ? [
+          { start: "09:00", end: "10:00", label: "09:00 AM – 10:00 AM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "10:00", end: "11:00", label: "10:00 AM – 11:00 AM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "11:00", end: "12:00", label: "11:00 AM – 12:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "12:00", end: "13:00", label: "12:00 PM – 01:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "13:00", end: "14:00", label: "01:00 PM – 02:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "14:00", end: "15:00", label: "02:00 PM – 03:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "15:00", end: "16:00", label: "03:00 PM – 04:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          ...metrics.familySlotStatuses.map((s: any) => ({ ...s, type: "FAMILY" })),
+        ]
+      : [
+          { start: "09:00", end: "10:00", label: "09:00 AM – 10:00 AM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "10:00", end: "11:00", label: "10:00 AM – 11:00 AM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "11:00", end: "12:00", label: "11:00 AM – 12:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "12:00", end: "13:00", label: "12:00 PM – 01:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "13:00", end: "14:00", label: "01:00 PM – 02:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "14:00", end: "15:00", label: "02:00 PM – 03:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "15:00", end: "16:00", label: "03:00 PM – 04:00 PM", type: "PUBLIC", status: "Available", remainingSpots: 25 },
+          { start: "16:00", end: "17:00", label: "04:00 PM – 05:00 PM", type: "FAMILY", status: "Available" },
+          { start: "17:00", end: "18:00", label: "05:00 PM – 06:00 PM", type: "FAMILY", status: "Available" },
+          { start: "18:00", end: "19:00", label: "06:00 PM – 07:00 PM", type: "FAMILY", status: "Available" },
+          { start: "19:00", end: "20:00", label: "07:00 PM – 08:00 PM", type: "FAMILY", status: "Available" },
+          { start: "20:00", end: "21:00", label: "08:00 PM – 09:00 PM", type: "FAMILY", status: "Available" },
+          { start: "21:00", end: "22:00", label: "09:00 PM – 10:00 PM", type: "FAMILY", status: "Available" },
+          { start: "22:00", end: "23:00", label: "10:00 PM – 11:00 PM", type: "FAMILY", status: "Available" },
+        ]);
+
+  const filteredAvailableSlots = allSlotStatuses.filter((s: any) => {
+    if (availableSlotFilter === "FAMILY") return s.type === "FAMILY";
+    if (availableSlotFilter === "PUBLIC") return s.type === "PUBLIC";
+    return true;
+  });
 
   // Activities logic
   const recentActivities = metrics?.recentActivities || [];
@@ -379,32 +409,111 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 2: Available Family Booking Periods (Real Overlap Logic - lg:col-span-4) */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
-          <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-            <Calendar className="w-4 h-4 text-[#1D68BD]" />
-            <span>Available Family Booking Periods</span>
+        {/* Card 2: Available Booking Periods (Full Day: Family & Public - lg:col-span-4) */}
+        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-3.5 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+                <Calendar className="w-4 h-4 text-[#1D68BD]" />
+                <span>Available Booking Periods</span>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                {filteredAvailableSlots.filter((s: any) => s.status === "Available").length} Open
+              </span>
+            </div>
+
+            {/* Filter Pills: All | Family | Public */}
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl text-[11px] font-semibold">
+              <button
+                type="button"
+                onClick={() => setAvailableSlotFilter("ALL")}
+                className={`flex-1 py-1 px-2 rounded-xl text-center transition-all ${
+                  availableSlotFilter === "ALL"
+                    ? "bg-[#1D68BD] text-white shadow-xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                All ({allSlotStatuses.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setAvailableSlotFilter("FAMILY")}
+                className={`flex-1 py-1 px-2 rounded-xl text-center transition-all ${
+                  availableSlotFilter === "FAMILY"
+                    ? "bg-[#1D68BD] text-white shadow-xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Family ({allSlotStatuses.filter((s: any) => s.type === "FAMILY").length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setAvailableSlotFilter("PUBLIC")}
+                className={`flex-1 py-1 px-2 rounded-xl text-center transition-all ${
+                  availableSlotFilter === "PUBLIC"
+                    ? "bg-[#1D68BD] text-white shadow-xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Public ({allSlotStatuses.filter((s: any) => s.type === "PUBLIC").length})
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-2 text-xs pt-1">
-            {familySlots.map((slot: any, i: number) => {
-              const isBooked = slot.status === "Booked";
-              const isPast = slot.status === "Past";
-              return (
-                <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition font-semibold text-slate-800">
-                  <span className="tabular-nums">{slot.label}</span>
-                  <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
-                    isBooked
-                      ? "bg-[#F3E8FF] text-[#7E22CE]"
-                      : isPast
-                      ? "bg-slate-100 text-slate-400"
-                      : "bg-[#DCFCE7] text-[#15803D]"
-                  }`}>
-                    {slot.status}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="space-y-2 text-xs pt-0.5 max-h-[340px] overflow-y-auto pr-1">
+            {filteredAvailableSlots.length > 0 ? (
+              filteredAvailableSlots.map((slot: any, i: number) => {
+                const isAvailable = slot.status === "Available";
+                const isBooked = slot.status === "Booked" || slot.status === "Full";
+                const isPast = slot.status === "Past";
+                const isFamily = slot.type === "FAMILY";
+
+                return (
+                  <div
+                    key={`${slot.type}-${slot.start}-${i}`}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition font-semibold text-slate-800"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="tabular-nums truncate">{slot.label}</span>
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide shrink-0 ${
+                          isFamily
+                            ? "bg-[#F3E8FF] text-[#7E22CE]"
+                            : "bg-[#E0F2FE] text-[#0369A1]"
+                        }`}
+                      >
+                        {isFamily ? "Family" : "Public"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {slot.type === "PUBLIC" && isAvailable && slot.remainingSpots !== undefined && (
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          {slot.remainingSpots} free
+                        </span>
+                      )}
+                      <span
+                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
+                          isBooked
+                            ? isFamily
+                              ? "bg-[#F3E8FF] text-[#7E22CE]"
+                              : "bg-rose-100 text-rose-700"
+                            : isPast
+                            ? "bg-slate-100 text-slate-400 font-medium"
+                            : "bg-[#DCFCE7] text-[#15803D]"
+                        }`}
+                      >
+                        {isBooked ? (isFamily ? "Booked" : "Full") : slot.status}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-6 text-center text-slate-400 text-xs">
+                No slots found for this session type.
+              </div>
+            )}
           </div>
         </div>
 
