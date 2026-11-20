@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatSlotTime } from "@/lib/timezone";
+import StaffBookingModal from "@/components/admin/StaffBookingModal";
 import {
   Users,
   Calendar,
@@ -26,6 +27,26 @@ export default function AdminOverviewPage() {
   const [loading, setLoading] = useState(true);
   const [scheduleFilter, setScheduleFilter] = useState<"ALL" | "PUBLIC" | "FAMILY">("ALL");
   const [availableSlotFilter, setAvailableSlotFilter] = useState<"ALL" | "PUBLIC" | "FAMILY">("ALL");
+
+  // Quick Staff Booking modal from dashboard
+  const [bookingModalState, setBookingModalState] = useState<{
+    isOpen: boolean;
+    type: "FAMILY" | "PUBLIC";
+    slot?: string;
+  }>({
+    isOpen: false,
+    type: "FAMILY",
+  });
+
+  const refreshMetrics = async () => {
+    try {
+      const res = await fetch("/api/admin/metrics");
+      const json = await res.json();
+      setData(json);
+    } catch (err) {
+      console.error("Error refreshing metrics", err);
+    }
+  };
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -471,7 +492,20 @@ export default function AdminOverviewPage() {
                 return (
                   <div
                     key={`${slot.type}-${slot.start}-${i}`}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition font-semibold text-slate-800"
+                    onClick={() => {
+                      if (isAvailable) {
+                        setBookingModalState({
+                          isOpen: true,
+                          type: slot.type,
+                          slot: slot.start,
+                        });
+                      }
+                    }}
+                    className={`flex items-center justify-between p-2.5 rounded-xl transition font-semibold ${
+                      isAvailable
+                        ? "bg-slate-50/90 hover:bg-emerald-50/80 hover:border-emerald-300 border border-transparent cursor-pointer text-slate-900 group"
+                        : "bg-slate-50/80 text-slate-800"
+                    }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="tabular-nums truncate">{slot.label}</span>
@@ -492,19 +526,25 @@ export default function AdminOverviewPage() {
                           {slot.remainingSpots} free
                         </span>
                       )}
-                      <span
-                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
-                          isBooked
-                            ? isFamily
-                              ? "bg-[#F3E8FF] text-[#7E22CE]"
-                              : "bg-rose-100 text-rose-700"
-                            : isPast
-                            ? "bg-slate-100 text-slate-400 font-medium"
-                            : "bg-[#DCFCE7] text-[#15803D]"
-                        }`}
-                      >
-                        {isBooked ? (isFamily ? "Booked" : "Full") : slot.status}
-                      </span>
+                      {isAvailable ? (
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[#DCFCE7] text-[#15803D] group-hover:bg-[#15803D] group-hover:text-white transition">
+                          + Book
+                        </span>
+                      ) : (
+                        <span
+                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
+                            isBooked
+                              ? isFamily
+                                ? "bg-[#F3E8FF] text-[#7E22CE]"
+                                : "bg-rose-100 text-rose-700"
+                              : isPast
+                              ? "bg-slate-100 text-slate-400 font-medium"
+                              : "bg-[#DCFCE7] text-[#15803D]"
+                          }`}
+                        >
+                          {isBooked ? (isFamily ? "Booked" : "Full") : slot.status}
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
@@ -731,6 +771,18 @@ export default function AdminOverviewPage() {
           </div>
         </div>
       </div>
+
+      {/* Modern Smart Staff Booking Modal */}
+      <StaffBookingModal
+        isOpen={bookingModalState.isOpen}
+        defaultBookingType={bookingModalState.type}
+        defaultSlot={bookingModalState.slot}
+        onClose={() => setBookingModalState((prev) => ({ ...prev, isOpen: false }))}
+        onSuccess={() => {
+          setBookingModalState((prev) => ({ ...prev, isOpen: false }));
+          refreshMetrics();
+        }}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getPoolDate, formatSlotTime } from "@/lib/timezone";
+import StaffBookingModal from "@/components/admin/StaffBookingModal";
 import {
   Calendar,
   Search,
@@ -30,23 +31,6 @@ export default function AdminBookingsPage() {
 
   // Create Staff Booking Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newBookingType, setNewBookingType] = useState<"PUBLIC" | "FAMILY">("FAMILY");
-  const [newDate, setNewDate] = useState("");
-
-  useEffect(() => {
-    setNewDate(getPoolDate());
-  }, []);
-
-  const [newStartTime, setNewStartTime] = useState("17:00");
-  const [newDuration, setNewDuration] = useState(2);
-  const [newGuestCount, setNewGuestCount] = useState(10);
-  const [newCustomerName, setNewCustomerName] = useState("");
-  const [newCustomerPhone, setNewCustomerPhone] = useState("");
-  const [newCustomerPlace, setNewCustomerPlace] = useState("");
-  const [newPaymentMethod, setNewPaymentMethod] = useState<"CASH" | "UPI">("CASH");
-  const [newAdvancePaid, setNewAdvancePaid] = useState(750);
-  const [modalError, setModalError] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
 
   // Collect Counter Balance Modal State
   const [collectingBooking, setCollectingBooking] = useState<any | null>(null);
@@ -78,50 +62,6 @@ export default function AdminBookingsPage() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchBookings();
-  };
-
-  const getEndTime = (start: string, duration: number) => {
-    const [h, m] = start.split(":").map(Number);
-    const totalMinutes = h * 60 + (m || 0) + duration * 60;
-    const endH = Math.floor(totalMinutes / 60);
-    const endM = totalMinutes % 60;
-    return `${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`;
-  };
-
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCreating(true);
-    setModalError(null);
-    try {
-      const endTime = getEndTime(newStartTime, newDuration);
-      const res = await fetch("/api/bookings/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookingType: newBookingType,
-          date: newDate,
-          startTime: newStartTime,
-          endTime,
-          guestCount: newGuestCount,
-          customerName: newCustomerName,
-          customerPhone: newCustomerPhone,
-          customerPlace: newCustomerPlace.trim() || undefined,
-          isStaffCreated: true,
-          paymentMethod: newPaymentMethod,
-          initialAmount: newAdvancePaid,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create staff booking.");
-      }
-      setShowCreateModal(false);
-      fetchBookings();
-    } catch (err: any) {
-      setModalError(err.message || "Failed to create booking.");
-    } finally {
-      setCreating(false);
-    }
   };
 
   const handleCollectBalance = async (e: React.FormEvent) => {
@@ -221,10 +161,7 @@ export default function AdminBookingsPage() {
           </Link>
 
           <button
-            onClick={() => {
-              setModalError(null);
-              setShowCreateModal(true);
-            }}
+            onClick={() => setShowCreateModal(true)}
             className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2 shrink-0"
           >
             <Plus className="w-4 h-4" />
@@ -520,177 +457,15 @@ export default function AdminBookingsPage() {
         </div>
       )}
 
-      {/* Create Staff Booking Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-white space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm">Create Staff Booking</h3>
-                <p className="text-[11px] text-slate-400">Direct booking with slot lock</p>
-              </div>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-slate-700 p-1"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {modalError && (
-              <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl flex items-center gap-1.5 border border-red-200">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{modalError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Booking Type</label>
-                  <select
-                    value={newBookingType}
-                    onChange={(e) => setNewBookingType(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-                  >
-                    <option value="FAMILY">Family (Exclusive)</option>
-                    <option value="PUBLIC">Public Swimming</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Start Time</label>
-                  <input
-                    type="time"
-                    required
-                    value={newStartTime}
-                    onChange={(e) => setNewStartTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Duration (Hours)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={6}
-                    required
-                    value={newDuration}
-                    onChange={(e) => setNewDuration(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Guest Count</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={30}
-                    required
-                    value={newGuestCount}
-                    onChange={(e) => setNewGuestCount(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Customer Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={newCustomerName}
-                    onChange={(e) => setNewCustomerName(e.target.value)}
-                    placeholder="Full Name"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Customer Phone</label>
-                  <input
-                    type="tel"
-                    required
-                    value={newCustomerPhone}
-                    onChange={(e) => setNewCustomerPhone(e.target.value)}
-                    placeholder="10-digit number"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Place / Town</label>
-                  <input
-                    type="text"
-                    value={newCustomerPlace}
-                    onChange={(e) => setNewCustomerPlace(e.target.value)}
-                    placeholder="e.g. Moonniyur, Chelari"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Payment Method</label>
-                  <select
-                    value={newPaymentMethod}
-                    onChange={(e) => setNewPaymentMethod(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-                  >
-                    <option value="CASH">Cash</option>
-                    <option value="UPI">UPI</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Initial Advance (₹)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={newAdvancePaid}
-                    onChange={(e) => setNewAdvancePaid(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-700 font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="px-5 py-2.5 rounded-2xl bg-[#1D68BD] hover:bg-[#155299] text-white font-bold shadow-md shadow-blue-700/20"
-                >
-                  {creating ? "Creating..." : "Confirm Booking"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Modern Smart Staff Booking Modal */}
+      <StaffBookingModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={() => {
+          setShowCreateModal(false);
+          fetchBookings();
+        }}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { formatPoolTime } from "@/lib/timezone";
+import StaffBookingModal from "@/components/admin/StaffBookingModal";
 import {
   Users,
   Clock,
@@ -16,6 +17,7 @@ import {
   Hourglass,
   Gauge,
   RefreshCw,
+  Calendar,
 } from "lucide-react";
 
 export default function AdminWalkinsPage() {
@@ -44,6 +46,7 @@ export default function AdminWalkinsPage() {
 
   // Table filter: "ALL" | "ACTIVE" | "CHECKED_OUT"
   const [tableFilter, setTableFilter] = useState<"ALL" | "ACTIVE" | "CHECKED_OUT">("ALL");
+  const [showStaffBookingModal, setShowStaffBookingModal] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -185,7 +188,7 @@ export default function AdminWalkinsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
             <div className="text-right">
               <div className="text-lg font-black text-slate-900 tabular-nums">
                 {currentOccupancy} <span className="text-xs font-semibold text-slate-400">/ {maxCapacity} Swimmers</span>
@@ -194,14 +197,26 @@ export default function AdminWalkinsPage() {
                 {remainingSpots > 0 ? `${remainingSpots} spots remaining` : "Pool at maximum capacity!"}
               </div>
             </div>
-            <button
-              onClick={() => fetchWalkIns()}
-              disabled={loading}
-              title="Refresh live occupancy"
-              className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 active:scale-95 transition"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#1D68BD]" : ""}`} />
-            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowStaffBookingModal(true)}
+                className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-extrabold px-3.5 py-2.5 rounded-2xl text-xs shadow-md shadow-purple-700/20 transition flex items-center gap-1.5 shrink-0"
+              >
+                <Calendar className="w-4 h-4 stroke-[2]" />
+                <span>Book Family / Advance Slot</span>
+              </button>
+
+              <button
+                onClick={() => fetchWalkIns()}
+                disabled={loading}
+                title="Refresh live occupancy"
+                className="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 active:scale-95 transition"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#1D68BD]" : ""}`} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -642,6 +657,16 @@ export default function AdminWalkinsPage() {
           )}
         </div>
       </div>
+
+      {/* Modern Smart Staff Booking Modal */}
+      <StaffBookingModal
+        isOpen={showStaffBookingModal}
+        onClose={() => setShowStaffBookingModal(false)}
+        onSuccess={() => {
+          setShowStaffBookingModal(false);
+          fetchWalkIns(true);
+        }}
+      />
     </div>
   );
 }
