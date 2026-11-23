@@ -21,7 +21,7 @@ export async function GET() {
       publicEndHour: settings?.publicEndHour ?? 16,
       poolName: settings?.poolName || "M.A.K Indoor Pool",
       address: settings?.address || "Kalathingalpara, Moonniyur, Malappuram, Kerala",
-      contactPhone: settings?.contactPhone || "+91 98470 12345",
+      contactPhone: settings?.contactPhone || "+91 9947714716",
     });
   } catch (err: any) {
     console.error("Error fetching pool config:", err);
