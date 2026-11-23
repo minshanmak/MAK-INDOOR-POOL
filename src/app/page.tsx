@@ -1121,10 +1121,10 @@ export default function HomePage() {
                   <div>
                     <strong className="block text-slate-900 text-xs sm:text-sm">Phone Support</strong>
                     <a
-                      href="tel:+919847123456"
+                      href="tel:+919947714716"
                       className="text-[#0284C7] hover:underline font-bold tabular-nums block mt-0.5"
                     >
-                      +91 9847 123 456
+                      +91 99477 14716
                     </a>
                     <span className="text-slate-400 text-[11px]">Direct line for questions and instant support</span>
                   </div>

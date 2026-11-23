@@ -16,8 +16,8 @@ import MakLogo from "@/components/MakLogo";
 export default function Footer() {
   const pathname = usePathname();
 
-  // Do not render public footer on admin management pages
-  if (pathname.startsWith("/admin")) {
+  // Do not render public footer on admin management pages or booking page
+  if (pathname.startsWith("/admin") || pathname === "/book") {
     return null;
   }
 
@@ -116,8 +116,8 @@ export default function Footer() {
             <ul className="space-y-2.5 text-xs text-slate-300">
               <li className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <a href="tel:+919847123456" className="hover:text-white transition-colors tabular-nums">
-                  +91 9847 123 456
+                <a href="tel:+919947714716" className="hover:text-white transition-colors tabular-nums font-mono font-bold">
+                  +91 99477 14716
                 </a>
               </li>
               <li className="flex items-center gap-2">

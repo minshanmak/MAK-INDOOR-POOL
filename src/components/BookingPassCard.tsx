@@ -247,7 +247,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
       ctx.textAlign = "center";
       ctx.fillStyle = "#94A3B8";
       ctx.font = "11px system-ui, sans-serif";
-      ctx.fillText("Helpline: +91 98470 12345 • info@makindoorpool.com", 300, 860);
+      ctx.fillText("Helpline: +91 99477 14716 • Kalathingalpara, Moonniyur", 300, 860);
 
       const downloadUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");

@@ -1235,7 +1235,7 @@ function BookingContent() {
                         required
                         inputMode="tel"
                         autoComplete="tel"
-                        placeholder="98470XXXXX"
+                        placeholder="99477XXXXX"
                         value={customerPhone}
                         onChange={(e) => {
                           setCustomerPhone(e.target.value);
@@ -1525,6 +1525,30 @@ function BookingContent() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Distraction-Free Trust & Support Note */}
+        {!confirmedBooking && (
+          <div className="pt-6 pb-2 text-center space-y-1.5 text-xs text-slate-500">
+            <div className="flex items-center justify-center gap-2 font-medium flex-wrap">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>256-Bit SSL Encrypted Slot Lock</span>
+              <span className="text-slate-300">•</span>
+              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span>Kalathingalpara, Moonniyur</span>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Need booking help or special timing? Call / WhatsApp:{" "}
+              <a
+                href="https://wa.me/919947714716"
+                target="_blank"
+                rel="noreferrer"
+                className="font-bold text-[#1D68BD] hover:underline"
+              >
+                +91 99477 14716
+              </a>
+            </p>
           </div>
         )}
 

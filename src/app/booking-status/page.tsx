@@ -203,7 +203,7 @@ function BookingStatusContent() {
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. 9847012345"
+                placeholder="e.g. 9947714716"
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition"
               />
             </div>
