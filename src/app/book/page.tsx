@@ -27,6 +27,7 @@ import {
   Sun,
   Moon,
   Sparkles,
+  X,
 } from "lucide-react";
 import { getPoolDate, getPoolHour } from "@/lib/timezone";
 
@@ -62,6 +63,11 @@ function BookingContent() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    phone?: string;
+    place?: string;
+  }>({});
 
   // Server-Authoritative State
   const [availResult, setAvailResult] = useState<any>(null);
@@ -316,16 +322,19 @@ function BookingContent() {
     setError(null);
     if (!date) {
       setError("Please select a valid date.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     const slotInfo = daySlots[startTime];
     const isPast = isSlotPastToday(startTime) || slotInfo?.status === "PAST";
     if (isPast || slotInfo?.status === "BOOKED" || slotInfo?.status === "HELD") {
       setError("The selected start time slot is unavailable. Please select an available slot.");
+      window.scrollTo({ top: 180, behavior: "smooth" });
       return;
     }
     if (isDurationColliding(startTime, durationHours)) {
       setError("Your selected duration overlaps with an already booked slot. Please select fewer hours or a different start time.");
+      window.scrollTo({ top: 250, behavior: "smooth" });
       return;
     }
     goToStep(2);
@@ -333,15 +342,38 @@ function BookingContent() {
 
   // Step 2 to Step 3: Hold slot for 15 minutes and proceed to payment
   const handleProceedToPayment = async () => {
-    if (!customerName.trim() || !customerPhone.trim() || !customerPlace.trim()) {
-      setError("Please enter your Full Name, 10-digit Mobile Number, and Place / Town.");
-      return;
+    setError(null);
+    const errors: { name?: string; phone?: string; place?: string } = {};
+
+    if (!customerName.trim()) {
+      errors.name = "Please enter your Full Name.";
     }
-    if (customerPhone.replace(/\D/g, "").length < 10) {
-      setError("Please enter a valid 10-digit Indian phone number.");
+    const cleanPhone = customerPhone.replace(/\D/g, "");
+    if (!customerPhone.trim()) {
+      errors.phone = "Please enter your 10-digit Mobile Number.";
+    } else if (cleanPhone.length < 10) {
+      errors.phone = "Please enter a valid 10-digit Indian mobile number.";
+    }
+    if (!customerPlace.trim()) {
+      errors.place = "Please enter or select your Place / Town.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      const firstError = errors.phone || errors.name || errors.place || "Please check the required fields.";
+      setError(firstError);
+
+      // Auto-scroll to the guest info card so user sees the highlighted field immediately
+      const cardEl = document.getElementById("guest-info-card");
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        window.scrollTo({ top: 120, behavior: "smooth" });
+      }
       return;
     }
 
+    setFieldErrors({});
     setLoading(true);
     setError(null);
 
@@ -481,11 +513,38 @@ function BookingContent() {
           </div>
         )}
 
-        {/* Global Error Banner */}
+        {/* Floating Mobile Toast Alert - Always visible at top of viewport on mobile and desktop */}
         {error && (
-          <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2.5 text-xs shadow-2xs animate-in fade-in">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-            <div className="leading-relaxed font-semibold">{error}</div>
+          <div className="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-50 p-3.5 rounded-2xl bg-rose-600 text-white shadow-2xl flex items-center justify-between gap-3 animate-in slide-in-from-top-3 duration-200">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <AlertCircle className="w-5 h-5 shrink-0 text-white" />
+              <span className="text-xs font-bold leading-tight line-clamp-2">{error}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center shrink-0 active:scale-90"
+              title="Dismiss alert"
+            >
+              <X className="w-3.5 h-3.5 stroke-[2.5]" />
+            </button>
+          </div>
+        )}
+
+        {/* Global In-Page Error Banner */}
+        {error && (
+          <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start justify-between gap-2.5 text-xs shadow-2xs animate-in fade-in">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+              <div className="leading-relaxed font-semibold">{error}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="text-rose-600 hover:text-rose-900 text-[10px] uppercase font-bold shrink-0"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 
@@ -879,31 +938,49 @@ function BookingContent() {
 
             {/* STICKY BOTTOM BAR (Always accessible under thumb on mobile) */}
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] py-3 px-4 pb-safe">
-              <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-                <div>
-                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-                    {isFamily ? "Advance Payable" : "Total Amount"}
-                  </span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-xl sm:text-2xl font-black text-slate-950 font-mono tracking-tight">
-                      ₹{requiredPaymentAmount}
-                    </span>
-                    {isFamily && (
-                      <span className="text-[11px] text-slate-500 font-medium">
-                        (Total: ₹{computedTotal})
-                      </span>
-                    )}
+              <div className="max-w-2xl mx-auto space-y-2">
+                {error && (
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center justify-between gap-2 animate-in fade-in">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                      <span className="truncate">{error}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setError(null)}
+                      className="text-rose-500 hover:text-rose-800 text-[10px] uppercase font-bold shrink-0"
+                    >
+                      Dismiss
+                    </button>
                   </div>
-                </div>
+                )}
 
-                <button
-                  type="button"
-                  onClick={handleValidateStep1}
-                  className="bg-slate-950 hover:bg-slate-800 active:scale-95 text-white font-bold py-3 px-5 sm:px-6 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 group shrink-0"
-                >
-                  <span>Continue</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                      {isFamily ? "Advance Payable" : "Total Amount"}
+                    </span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-xl sm:text-2xl font-black text-slate-950 font-mono tracking-tight">
+                        ₹{requiredPaymentAmount}
+                      </span>
+                      {isFamily && (
+                        <span className="text-[11px] text-slate-500 font-medium">
+                          (Total: ₹{computedTotal})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleValidateStep1}
+                    className="bg-slate-950 hover:bg-slate-800 active:scale-95 text-white font-bold py-3 px-5 sm:px-6 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 group shrink-0"
+                  >
+                    <span>Continue</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -975,13 +1052,14 @@ function BookingContent() {
             </div>
 
             {/* Contact Details Card (Mobile Safari Auto-Zoom Protected with text-base on mobile) */}
-            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-sm space-y-3">
+            <div id="guest-info-card" className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-sm space-y-3">
               <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-[#0284C7]" />
                 <span>Guest Information</span>
               </label>
 
               <div className="space-y-3">
+                {/* Customer Full Name */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
                     Full Name <span className="text-rose-500">*</span>
@@ -994,14 +1072,29 @@ function BookingContent() {
                       autoCapitalize="words"
                       placeholder="e.g. Rahul Sharma"
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-base sm:text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
+                      onChange={(e) => {
+                        setCustomerName(e.target.value);
+                        if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                        if (error) setError(null);
+                      }}
+                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-2xl text-base sm:text-xs font-semibold transition focus:outline-none focus:ring-2 ${
+                        fieldErrors.name
+                          ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
+                          : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#0284C7]"
+                      }`}
                     />
-                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 sm:top-3 pointer-events-none" />
+                    <User className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.name ? "text-rose-500" : "text-slate-400"}`} />
                   </div>
+                  {fieldErrors.name && (
+                    <p className="text-[11px] font-bold text-rose-600 mt-1 flex items-center gap-1 animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{fieldErrors.name}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Mobile Number */}
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
                       Mobile Number <span className="text-rose-500">*</span>
@@ -1014,13 +1107,28 @@ function BookingContent() {
                         autoComplete="tel"
                         placeholder="98470XXXXX"
                         value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-base sm:text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
+                        onChange={(e) => {
+                          setCustomerPhone(e.target.value);
+                          if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: undefined }));
+                          if (error) setError(null);
+                        }}
+                        className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-2xl text-base sm:text-xs font-mono font-bold transition focus:outline-none focus:ring-2 ${
+                          fieldErrors.phone
+                            ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
+                            : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#0284C7]"
+                        }`}
                       />
-                      <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 sm:top-3 pointer-events-none" />
+                      <Phone className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.phone ? "text-rose-500" : "text-slate-400"}`} />
                     </div>
+                    {fieldErrors.phone && (
+                      <p className="text-[11px] font-bold text-rose-600 mt-1 flex items-center gap-1 animate-in fade-in">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{fieldErrors.phone}</span>
+                      </p>
+                    )}
                   </div>
 
+                  {/* Email */}
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
                       Email Address <span className="text-slate-400 text-[10px] font-normal">(Optional)</span>
@@ -1054,11 +1162,25 @@ function BookingContent() {
                       required
                       placeholder="Enter your town (e.g. Moonniyur)"
                       value={customerPlace}
-                      onChange={(e) => setCustomerPlace(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-base sm:text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
+                      onChange={(e) => {
+                        setCustomerPlace(e.target.value);
+                        if (fieldErrors.place) setFieldErrors((prev) => ({ ...prev, place: undefined }));
+                        if (error) setError(null);
+                      }}
+                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-2xl text-base sm:text-xs font-semibold transition focus:outline-none focus:ring-2 ${
+                        fieldErrors.place
+                          ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
+                          : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#0284C7]"
+                      }`}
                     />
-                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 sm:top-3 pointer-events-none" />
+                    <MapPin className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.place ? "text-rose-500" : "text-slate-400"}`} />
                   </div>
+                  {fieldErrors.place && (
+                    <p className="text-[11px] font-bold text-rose-600 mt-1 flex items-center gap-1 animate-in fade-in">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{fieldErrors.place}</span>
+                    </p>
+                  )}
 
                   {/* Quick Nearby Town Swipeable Chips */}
                   <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar touch-pan-x">
@@ -1067,7 +1189,11 @@ function BookingContent() {
                       <button
                         key={town}
                         type="button"
-                        onClick={() => setCustomerPlace(town)}
+                        onClick={() => {
+                          setCustomerPlace(town);
+                          if (fieldErrors.place) setFieldErrors((prev) => ({ ...prev, place: undefined }));
+                          if (error) setError(null);
+                        }}
                         className={`px-3 py-1 rounded-full text-[11px] font-bold transition shrink-0 active:scale-95 ${
                           customerPlace.toLowerCase() === town.toLowerCase()
                             ? "bg-slate-950 text-white shadow-2xs"
@@ -1097,30 +1223,48 @@ function BookingContent() {
 
             {/* STICKY BOTTOM BAR FOR STEP 2 */}
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] py-3 px-4 pb-safe">
-              <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => goToStep(1)}
-                  className="py-3 px-3 rounded-2xl text-xs font-bold text-slate-600 hover:text-slate-900 transition"
-                >
-                  &larr; Back
-                </button>
+              <div className="max-w-2xl mx-auto space-y-2">
+                {error && (
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center justify-between gap-2 animate-in fade-in">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                      <span className="truncate">{error}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setError(null)}
+                      className="text-rose-500 hover:text-rose-800 text-[10px] uppercase font-bold shrink-0"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
 
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={handleProceedToPayment}
-                  className="bg-slate-950 hover:bg-slate-800 active:scale-95 text-white font-bold py-3 px-5 sm:px-6 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 group shrink-0"
-                >
-                  {loading ? (
-                    <span>Holding slot...</span>
-                  ) : (
-                    <>
-                      <span>Proceed to Payment (₹{requiredPaymentAmount})</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
-                </button>
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => goToStep(1)}
+                    className="py-3 px-3 rounded-2xl text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+                  >
+                    &larr; Back
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={handleProceedToPayment}
+                    className="bg-slate-950 hover:bg-slate-800 active:scale-95 text-white font-bold py-3 px-5 sm:px-6 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 group shrink-0"
+                  >
+                    {loading ? (
+                      <span>Holding slot...</span>
+                    ) : (
+                      <>
+                        <span>Proceed to Payment (₹{requiredPaymentAmount})</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
