@@ -481,11 +481,11 @@ function BookingContent() {
 
               {/* Step Badge */}
               <div className="inline-flex items-center gap-2 bg-white border border-slate-200 px-3.5 py-1.5 rounded-full shadow-2xs text-xs font-medium text-slate-600">
-                <span className="font-bold text-[#1D68BD]">
+                <span className="font-semibold text-[#1D68BD]">
                   Step {wizardStep} of 3
                 </span>
                 <span className="text-slate-300">•</span>
-                <span className="text-slate-800 font-semibold">
+                <span className="text-slate-800 font-medium">
                   {wizardStep === 1 && "Session & Timing"}
                   {wizardStep === 2 && "Guest Details"}
                   {wizardStep === 3 && "Payment"}
@@ -512,7 +512,7 @@ function BookingContent() {
           <div className="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-50 p-3.5 rounded-xl bg-rose-600 text-white shadow-lg flex items-center justify-between gap-3 animate-in slide-in-from-top-3 duration-200">
             <div className="flex items-center gap-2.5 min-w-0">
               <AlertCircle className="w-5 h-5 shrink-0 text-white" />
-              <span className="text-xs font-semibold leading-tight line-clamp-2">{error}</span>
+              <span className="text-xs font-medium leading-tight line-clamp-2">{error}</span>
             </div>
             <button
               type="button"
@@ -532,7 +532,7 @@ function BookingContent() {
           <div className="space-y-4 animate-in fade-in duration-150">
             {/* Clean Header */}
             <div className="text-center space-y-1 pt-1">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 Book Your Pool Session
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
@@ -553,7 +553,7 @@ function BookingContent() {
                 }`}
               >
                 <div className="flex items-center justify-between pb-2">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
                     bookingType === "FAMILY"
                       ? "bg-[#1D68BD] text-white"
                       : "bg-slate-100 text-slate-600"
@@ -571,7 +571,7 @@ function BookingContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className="text-base font-semibold text-slate-900">
                     Family &amp; Group Session
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
@@ -592,10 +592,10 @@ function BookingContent() {
 
                 <div className="mt-3 pt-3 border-t border-slate-200/80 flex items-baseline justify-between text-slate-900">
                   <div>
-                    <span className="text-xl font-bold font-mono">₹1,500</span>
+                    <span className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">₹1,500</span>
                     <span className="text-xs text-slate-500 ml-1">/ hour</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                     ₹750 advance lock
                   </span>
                 </div>
@@ -612,7 +612,7 @@ function BookingContent() {
                 }`}
               >
                 <div className="flex items-center justify-between pb-2">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
                     bookingType === "PUBLIC"
                       ? "bg-[#1D68BD] text-white"
                       : "bg-slate-100 text-slate-600"
@@ -630,7 +630,7 @@ function BookingContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className="text-base font-semibold text-slate-900">
                     Public Swimming
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
@@ -651,10 +651,10 @@ function BookingContent() {
 
                 <div className="mt-3 pt-3 border-t border-slate-200/80 flex items-baseline justify-between text-slate-900">
                   <div>
-                    <span className="text-xl font-bold font-mono">₹150</span>
+                    <span className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">₹150</span>
                     <span className="text-xs text-slate-500 ml-1">/ swimmer / hr</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
                     Daytime only
                   </span>
                 </div>
@@ -666,11 +666,11 @@ function BookingContent() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-[#1D68BD]" />
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  <h3 className="text-sm font-semibold text-slate-900">
                     1. Select Date
                   </h3>
                 </div>
-                <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md tabular-nums">
                   {formatDateLabel(date)}
                 </span>
               </div>
@@ -699,13 +699,13 @@ function BookingContent() {
                           : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
                       }`}
                     >
-                      <div className={`text-[10px] font-semibold uppercase tracking-wider ${isSelected ? "text-blue-100" : "text-slate-500"}`}>
+                      <div className={`text-xs font-medium ${isSelected ? "text-blue-100" : "text-slate-500"}`}>
                         {label}
                       </div>
-                      <div className="text-sm sm:text-base font-bold font-mono mt-0.5">
+                      <div className="text-base font-bold tracking-tight tabular-nums mt-0.5">
                         {d} {monthName}
                       </div>
-                      <div className={`text-[11px] font-medium ${isSelected ? "text-blue-100" : "text-slate-500"}`}>
+                      <div className={`text-xs font-normal ${isSelected ? "text-blue-100" : "text-slate-400"}`}>
                         {dayName}
                       </div>
                     </button>
@@ -715,13 +715,13 @@ function BookingContent() {
 
               {/* Custom Date Input */}
               <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
-                <span className="text-xs font-medium">Or pick another date:</span>
+                <span className="text-xs font-medium text-slate-600">Or pick another date:</span>
                 <input
                   type="date"
                   min={todayIST}
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="px-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1D68BD] cursor-pointer"
+                  className="px-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1D68BD] cursor-pointer tabular-nums"
                 />
               </div>
             </div>
@@ -731,29 +731,29 @@ function BookingContent() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[#1D68BD]" />
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  <h3 className="text-sm font-semibold text-slate-900">
                     2. Select Start Time
                   </h3>
                 </div>
-                <span className="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                <span className="text-xs font-semibold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-md tabular-nums">
                   {formatTimeSlot(startTime)}
                 </span>
               </div>
 
               {/* Day/Evening Tabs for Family */}
               {isFamily && (
-                <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+                <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-medium">
                   <button
                     type="button"
                     onClick={() => setSlotFilter("ALL")}
-                    className={`flex-1 py-1 rounded-lg transition ${slotFilter === "ALL" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600"}`}
+                    className={`flex-1 py-1 rounded-lg transition ${slotFilter === "ALL" ? "bg-white text-slate-900 shadow-2xs font-semibold" : "text-slate-600"}`}
                   >
                     All Slots
                   </button>
                   <button
                     type="button"
                     onClick={() => setSlotFilter("DAY")}
-                    className={`flex-1 py-1 rounded-lg transition flex items-center justify-center gap-1.5 ${slotFilter === "DAY" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600"}`}
+                    className={`flex-1 py-1 rounded-lg transition flex items-center justify-center gap-1.5 ${slotFilter === "DAY" ? "bg-white text-slate-900 shadow-2xs font-semibold" : "text-slate-600"}`}
                   >
                     <Sun className="w-3.5 h-3.5 text-amber-500" />
                     <span>Day (9 AM–4 PM)</span>
@@ -761,7 +761,7 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => setSlotFilter("EVENING")}
-                    className={`flex-1 py-1 rounded-lg transition flex items-center justify-center gap-1.5 ${slotFilter === "EVENING" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600"}`}
+                    className={`flex-1 py-1 rounded-lg transition flex items-center justify-center gap-1.5 ${slotFilter === "EVENING" ? "bg-white text-slate-900 shadow-2xs font-semibold" : "text-slate-600"}`}
                   >
                     <Moon className="w-3.5 h-3.5 text-indigo-500" />
                     <span>Evening (4 PM–11 PM)</span>
@@ -790,7 +790,7 @@ function BookingContent() {
                       }}
                       className={`p-2.5 rounded-xl border text-center transition-all select-none active:scale-95 ${
                         isSelected
-                          ? "bg-[#1D68BD] border-[#1D68BD] text-white shadow-xs font-bold"
+                          ? "bg-[#1D68BD] border-[#1D68BD] text-white shadow-xs font-semibold"
                           : isPast
                           ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-50"
                           : isBooked
@@ -800,10 +800,10 @@ function BookingContent() {
                           : "border-slate-200 bg-white hover:border-[#1D68BD] text-slate-800"
                       }`}
                     >
-                      <div className="text-xs sm:text-sm font-bold font-mono">
+                      <div className="text-xs sm:text-sm font-semibold tracking-tight tabular-nums">
                         {formatTimeSlot(slot)}
                       </div>
-                      <div className={`text-[10px] font-semibold mt-0.5 ${
+                      <div className={`text-[11px] font-medium mt-0.5 ${
                         isSelected
                           ? "text-blue-100"
                           : isPast
@@ -832,14 +832,14 @@ function BookingContent() {
               </div>
 
               {/* Minimal Legend */}
-              <div className="flex items-center gap-4 text-[11px] text-slate-500 pt-1.5 border-t border-slate-100">
-                <span className="flex items-center gap-1.5">
+              <div className="flex items-center gap-4 text-xs text-slate-500 pt-1.5 border-t border-slate-100">
+                <span className="flex items-center gap-1.5 font-normal">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" /> Available
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 font-normal">
                   <span className="w-2 h-2 rounded-full bg-[#1D68BD]" /> Selected
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 font-normal">
                   <span className="w-2 h-2 rounded-full bg-slate-300" /> Booked / Past
                 </span>
               </div>
@@ -852,11 +852,11 @@ function BookingContent() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Timer className="w-4 h-4 text-[#1D68BD]" />
-                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    <h3 className="text-sm font-semibold text-slate-900">
                       3. Duration
                     </h3>
                   </div>
-                  <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md font-mono">
+                  <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md tabular-nums">
                     Until {formatTimeSlot(endTime)}
                   </span>
                 </div>
@@ -876,11 +876,11 @@ function BookingContent() {
                             collides
                               ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed"
                               : durationHours === h
-                              ? "bg-[#1D68BD] text-white border-[#1D68BD] font-bold shadow-xs"
-                              : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
+                              ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
+                              : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
                           }`}
                         >
-                          <div className="text-xs sm:text-sm font-mono">{h} {h === 1 ? "Hour" : "Hours"}</div>
+                          <div className="text-xs sm:text-sm tabular-nums">{h} {h === 1 ? "Hour" : "Hours"}</div>
                         </button>
                       );
                     })}
@@ -892,11 +892,11 @@ function BookingContent() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-[#1D68BD]" />
-                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    <h3 className="text-sm font-semibold text-slate-900">
                       4. Number of Guests
                     </h3>
                   </div>
-                  <span className="text-xs text-slate-500 font-medium">
+                  <span className="text-xs text-slate-500 font-normal">
                     {isFamily ? "Up to 30 guests" : `Max ${maxCapacity} swimmers`}
                   </span>
                 </div>
@@ -911,10 +911,10 @@ function BookingContent() {
                     –
                   </button>
                   <div className="text-center">
-                    <span className="text-2xl font-bold font-mono text-slate-900 block leading-tight">
+                    <span className="text-3xl font-bold tracking-tight text-slate-900 block leading-tight tabular-nums">
                       {guestCount}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
+                    <span className="text-xs text-slate-500 font-medium">
                       {guestCount === 1 ? "Swimmer" : "Swimmers / Guests"}
                     </span>
                   </div>
@@ -929,15 +929,15 @@ function BookingContent() {
 
                 {/* Quick Selection Chips */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  <span className="text-[11px] text-slate-400 font-medium shrink-0">Quick select:</span>
+                  <span className="text-xs text-slate-400 font-medium shrink-0">Quick select:</span>
                   {isFamily ? (
                     [6, 10, 12, 15, 20].map((num) => (
                       <button
                         key={num}
                         type="button"
                         onClick={() => setGuestCount(num)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold transition shrink-0 active:scale-95 ${
-                          guestCount === num ? "bg-[#1D68BD] text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 tabular-nums ${
+                          guestCount === num ? "bg-[#1D68BD] text-white font-semibold" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
                         {num} {num === 12 ? "(Base)" : ""}
@@ -949,8 +949,8 @@ function BookingContent() {
                         key={num}
                         type="button"
                         onClick={() => setGuestCount(num)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold transition shrink-0 active:scale-95 ${
-                          guestCount === num ? "bg-[#1D68BD] text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 tabular-nums ${
+                          guestCount === num ? "bg-[#1D68BD] text-white font-semibold" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
                         {num}
@@ -965,7 +965,7 @@ function BookingContent() {
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-lg py-3 px-4 pb-safe">
               <div className="max-w-2xl mx-auto space-y-2">
                 {error && (
-                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between gap-2">
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                       <span className="truncate">{error}</span>
@@ -973,7 +973,7 @@ function BookingContent() {
                     <button
                       type="button"
                       onClick={() => setError(null)}
-                      className="text-rose-500 hover:text-rose-800 text-[10px] uppercase font-bold shrink-0"
+                      className="text-rose-500 hover:text-rose-800 text-xs font-medium shrink-0"
                     >
                       Dismiss
                     </button>
@@ -982,15 +982,15 @@ function BookingContent() {
 
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                    <span className="text-xs font-medium text-slate-500 block">
                       {isFamily ? "Advance Payable" : "Total Fee"}
                     </span>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl font-bold text-slate-900 font-mono tracking-tight">
+                      <span className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
                         ₹{requiredPaymentAmount}
                       </span>
                       {isFamily && (
-                        <span className="text-xs text-slate-500 font-medium">
+                        <span className="text-xs text-slate-500 font-normal">
                           (Total: ₹{computedTotal})
                         </span>
                       )}
@@ -1000,7 +1000,7 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={handleValidateStep1}
-                    className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-bold py-3.5 px-6 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 group shrink-0"
+                    className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-semibold py-3.5 px-6 rounded-xl text-sm shadow-md transition flex items-center gap-2 group shrink-0"
                   >
                     <span>Continue to Details</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -1017,7 +1017,7 @@ function BookingContent() {
         {wizardStep === 2 && !confirmedBooking && (
           <div className="space-y-4 animate-in fade-in duration-150">
             <div className="text-center space-y-1 pt-1">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 Guest Information &amp; Summary
               </h1>
               <p className="text-xs sm:text-sm text-slate-500">
@@ -1027,48 +1027,48 @@ function BookingContent() {
 
             {/* Order Summary Card */}
             <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs space-y-3">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-semibold text-slate-900 pb-2 border-b border-slate-100">
                 Booking Summary
               </h3>
 
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between text-slate-600">
-                  <span>Session:</span>
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-normal">Session:</span>
+                  <span className="font-medium text-slate-900">
                     {isFamily ? "Family & Group Session (Private Pool)" : "Public Swimming Session"}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-slate-600">
-                  <span>Date &amp; Time:</span>
-                  <span className="font-mono font-semibold text-slate-900">
+                  <span className="font-normal">Date &amp; Time:</span>
+                  <span className="font-medium text-slate-900 tabular-nums">
                     {date} • {formatTimeSlot(startTime)} – {formatTimeSlot(endTime)} ({durationHours} hr)
                   </span>
                 </div>
 
                 <div className="flex justify-between text-slate-600">
-                  <span>Guests:</span>
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-normal">Guests:</span>
+                  <span className="font-medium text-slate-900 tabular-nums">
                     {guestCount} Swimmers
                   </span>
                 </div>
 
                 <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-100">
-                  <span>Total Amount:</span>
-                  <span className="font-mono font-bold text-slate-900 text-sm">₹{computedTotal}</span>
+                  <span className="font-normal">Total Amount:</span>
+                  <span className="font-bold text-slate-900 text-sm tabular-nums">₹{computedTotal}</span>
                 </div>
 
                 <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-medium text-slate-800">
                     {isFamily ? "Advance Required Online:" : "Total Payable Now:"}
                   </span>
-                  <span className="font-mono font-bold text-base text-[#1D68BD]">
+                  <span className="font-bold text-base text-[#1D68BD] tabular-nums">
                     ₹{requiredPaymentAmount}
                   </span>
                 </div>
 
                 {isFamily && remainingArrivalBalance > 0 && (
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 font-normal">
                     * Remaining balance of <strong>₹{remainingArrivalBalance}</strong> is payable at the counter upon arrival (Cash or UPI).
                   </p>
                 )}
@@ -1079,7 +1079,7 @@ function BookingContent() {
             <div id="guest-info-card" className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs space-y-3.5">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                 <User className="w-4 h-4 text-[#1D68BD]" />
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-slate-900">
                   Guest Information
                 </h3>
               </div>
@@ -1087,7 +1087,7 @@ function BookingContent() {
               <div className="space-y-3.5">
                 {/* Full Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">
                     Full Name <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
@@ -1103,7 +1103,7 @@ function BookingContent() {
                         if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: undefined }));
                         if (error) setError(null);
                       }}
-                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-semibold transition focus:outline-none focus:ring-2 ${
+                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-normal transition focus:outline-none focus:ring-2 ${
                         fieldErrors.name
                           ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
                           : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#1D68BD]"
@@ -1112,7 +1112,7 @@ function BookingContent() {
                     <User className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.name ? "text-rose-500" : "text-slate-400"}`} />
                   </div>
                   {fieldErrors.name && (
-                    <p className="text-[11px] font-semibold text-rose-600 mt-1 flex items-center gap-1">
+                    <p className="text-[11px] font-medium text-rose-600 mt-1 flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{fieldErrors.name}</span>
                     </p>
@@ -1122,7 +1122,7 @@ function BookingContent() {
                 {/* Mobile & Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
                       Mobile Number <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -1138,7 +1138,7 @@ function BookingContent() {
                           if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: undefined }));
                           if (error) setError(null);
                         }}
-                        className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-mono font-bold transition focus:outline-none focus:ring-2 ${
+                        className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-medium tracking-normal tabular-nums transition focus:outline-none focus:ring-2 ${
                           fieldErrors.phone
                             ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
                             : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#1D68BD]"
@@ -1147,7 +1147,7 @@ function BookingContent() {
                       <Phone className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.phone ? "text-rose-500" : "text-slate-400"}`} />
                     </div>
                     {fieldErrors.phone && (
-                      <p className="text-[11px] font-semibold text-rose-600 mt-1 flex items-center gap-1">
+                      <p className="text-[11px] font-medium text-rose-600 mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                         <span>{fieldErrors.phone}</span>
                       </p>
@@ -1155,7 +1155,7 @@ function BookingContent() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
                       Email Address <span className="text-slate-400 text-[10px] font-normal">(Optional)</span>
                     </label>
                     <div className="relative">
@@ -1166,7 +1166,7 @@ function BookingContent() {
                         placeholder="name@example.com"
                         value={customerEmail}
                         onChange={(e) => setCustomerEmail(e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1D68BD] transition"
+                        className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-normal text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1D68BD] transition"
                       />
                       <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 sm:top-3 pointer-events-none" />
                     </div>
@@ -1176,10 +1176,10 @@ function BookingContent() {
                 {/* Place / Town */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-slate-700">
+                    <label className="block text-xs font-medium text-slate-700">
                       Place / Town / City <span className="text-rose-500">*</span>
                     </label>
-                    <span className="text-[10px] text-slate-400">e.g. Moonniyur, Chelari</span>
+                    <span className="text-[10px] text-slate-400 font-normal">e.g. Moonniyur, Chelari</span>
                   </div>
                   <div className="relative">
                     <input
@@ -1192,7 +1192,7 @@ function BookingContent() {
                         if (fieldErrors.place) setFieldErrors((prev) => ({ ...prev, place: undefined }));
                         if (error) setError(null);
                       }}
-                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-semibold transition focus:outline-none focus:ring-2 ${
+                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-normal transition focus:outline-none focus:ring-2 ${
                         fieldErrors.place
                           ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
                           : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#1D68BD]"
@@ -1201,7 +1201,7 @@ function BookingContent() {
                     <MapPin className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.place ? "text-rose-500" : "text-slate-400"}`} />
                   </div>
                   {fieldErrors.place && (
-                    <p className="text-[11px] font-semibold text-rose-600 mt-1 flex items-center gap-1">
+                    <p className="text-[11px] font-medium text-rose-600 mt-1 flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{fieldErrors.place}</span>
                     </p>
@@ -1209,7 +1209,7 @@ function BookingContent() {
 
                   {/* Nearby Town Quick Selection */}
                   <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar touch-pan-x">
-                    <span className="text-[11px] text-slate-400 font-medium shrink-0">Nearby:</span>
+                    <span className="text-xs text-slate-400 font-medium shrink-0">Nearby:</span>
                     {["Moonniyur", "Tirurangadi", "Chelari", "Calicut", "Kondotty", "Parappanangadi", "Kottakkal", "Tanur"].map((town) => (
                       <button
                         key={town}
@@ -1219,9 +1219,9 @@ function BookingContent() {
                           if (fieldErrors.place) setFieldErrors((prev) => ({ ...prev, place: undefined }));
                           if (error) setError(null);
                         }}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold transition shrink-0 active:scale-95 ${
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 ${
                           customerPlace.toLowerCase() === town.toLowerCase()
-                            ? "bg-[#1D68BD] text-white"
+                            ? "bg-[#1D68BD] text-white font-semibold"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                         }`}
                       >
@@ -1232,7 +1232,7 @@ function BookingContent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">
                     Special Requests <span className="text-slate-400 text-[10px] font-normal">(Optional)</span>
                   </label>
                   <input
@@ -1240,7 +1240,7 @@ function BookingContent() {
                     placeholder="e.g. Small children with party, require swim rings"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1D68BD] transition"
+                    className="w-full px-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-normal text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1D68BD] transition"
                   />
                 </div>
               </div>
@@ -1250,7 +1250,7 @@ function BookingContent() {
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-lg py-3 px-4 pb-safe">
               <div className="max-w-2xl mx-auto space-y-2">
                 {error && (
-                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between gap-2">
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                       <span className="truncate">{error}</span>
@@ -1258,7 +1258,7 @@ function BookingContent() {
                     <button
                       type="button"
                       onClick={() => setError(null)}
-                      className="text-rose-500 hover:text-rose-800 text-[10px] uppercase font-bold shrink-0"
+                      className="text-rose-500 hover:text-rose-800 text-xs font-medium shrink-0"
                     >
                       Dismiss
                     </button>
@@ -1269,7 +1269,7 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => goToStep(1)}
-                    className="py-3 px-3 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition active:scale-95"
+                    className="py-3 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition active:scale-95"
                   >
                     &larr; Back
                   </button>
@@ -1278,7 +1278,7 @@ function BookingContent() {
                     type="button"
                     disabled={loading}
                     onClick={handleProceedToPayment}
-                    className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-bold py-3.5 px-6 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 group shrink-0"
+                    className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-semibold py-3.5 px-6 rounded-xl text-sm shadow-md transition flex items-center gap-2 group shrink-0"
                   >
                     {loading ? (
                       <span>Reserving slot...</span>
@@ -1307,9 +1307,9 @@ function BookingContent() {
                   <Clock className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Slot Reserved</div>
+                  <div className="text-xs font-semibold text-slate-900">Slot Reserved</div>
                   <div className="text-xs text-slate-600">
-                    Held for <span className="font-mono font-bold text-[#1D68BD]">{formatTimer(secondsRemaining)}</span>. Complete payment to confirm.
+                    Held for <span className="font-semibold text-[#1D68BD] tabular-nums">{formatTimer(secondsRemaining)}</span>. Complete payment to confirm.
                   </div>
                 </div>
               </div>
@@ -1317,34 +1317,34 @@ function BookingContent() {
 
             {/* Payment Details Card */}
             <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs space-y-4">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-semibold text-slate-900 pb-2 border-b border-slate-100">
                 Payment Details
               </h3>
 
               <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-2 text-xs">
                 <div className="flex justify-between text-slate-600">
-                  <span>Primary Guest:</span>
-                  <span className="font-semibold text-slate-900">{customerName} ({customerPhone})</span>
+                  <span className="font-normal">Primary Guest:</span>
+                  <span className="font-medium text-slate-900">{customerName} ({customerPhone})</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
-                  <span>Session:</span>
-                  <span className="font-mono font-semibold text-slate-900">{date} • {formatTimeSlot(startTime)} ({durationHours}h)</span>
+                  <span className="font-normal">Session:</span>
+                  <span className="font-medium text-slate-900 tabular-nums">{date} • {formatTimeSlot(startTime)} ({durationHours}h)</span>
                 </div>
-                <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-200 font-bold">
-                  <span>Amount to Pay Now:</span>
-                  <span className="font-mono font-bold text-base text-emerald-700">₹{requiredPaymentAmount}</span>
+                <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-200">
+                  <span className="font-normal">Amount to Pay Now:</span>
+                  <span className="font-bold text-base text-emerald-700 tabular-nums">₹{requiredPaymentAmount}</span>
                 </div>
                 {isFamily && remainingArrivalBalance > 0 && (
                   <div className="flex justify-between text-[11px] text-slate-500">
-                    <span>Balance Due at Counter:</span>
-                    <span className="font-mono font-semibold text-slate-800">₹{remainingArrivalBalance}</span>
+                    <span className="font-normal">Balance Due at Counter:</span>
+                    <span className="font-medium text-slate-800 tabular-nums">₹{remainingArrivalBalance}</span>
                   </div>
                 )}
               </div>
 
               {/* Payment Method Selector */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700">
+                <label className="block text-xs font-medium text-slate-700">
                   Select Payment Method
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -1353,8 +1353,8 @@ function BookingContent() {
                     onClick={() => setSelectedPayMethod("UPI")}
                     className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${
                       selectedPayMethod === "UPI"
-                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-bold shadow-xs"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
+                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
                     }`}
                   >
                     <Smartphone className="w-4 h-4 mx-auto mb-1" />
@@ -1366,8 +1366,8 @@ function BookingContent() {
                     onClick={() => setSelectedPayMethod("CARD")}
                     className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${
                       selectedPayMethod === "CARD"
-                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-bold shadow-xs"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
+                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
                     }`}
                   >
                     <CreditCard className="w-4 h-4 mx-auto mb-1" />
@@ -1379,8 +1379,8 @@ function BookingContent() {
                     onClick={() => setSelectedPayMethod("NETBANKING")}
                     className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${
                       selectedPayMethod === "NETBANKING"
-                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-bold shadow-xs"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
+                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
                     }`}
                   >
                     <Lock className="w-4 h-4 mx-auto mb-1" />
@@ -1395,7 +1395,7 @@ function BookingContent() {
                   type="button"
                   disabled={loading}
                   onClick={handleCompletePayment}
-                  className="w-full bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-bold py-3.5 rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2 group"
+                  className="w-full bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2 group"
                 >
                   {loading ? (
                     <span>Confirming booking...</span>
@@ -1428,13 +1428,13 @@ function BookingContent() {
               <span className="text-slate-300">•</span>
               <span>Daily 9:00 AM – 11:00 PM</span>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-400 font-normal">
               Need help or custom timing? Call / WhatsApp:{" "}
               <a
                 href="https://wa.me/919947714716"
                 target="_blank"
                 rel="noreferrer"
-                className="font-bold text-[#1D68BD] hover:underline"
+                className="font-semibold text-[#1D68BD] hover:underline"
               >
                 +91 99477 14716
               </a>
@@ -1452,10 +1452,10 @@ function BookingContent() {
               <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-xs">
                 <CheckCircle2 className="w-7 h-7 stroke-[2.5]" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold tracking-tight text-slate-900">
                 Booking Confirmed
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 font-normal">
                 Your pool reservation is locked. Show this pass at the counter upon arrival.
               </p>
             </div>
@@ -1466,14 +1466,14 @@ function BookingContent() {
             <div className="pt-2 text-center space-y-2">
               <Link
                 href={`/booking-status?ref=${confirmedBooking.id}&phone=${customerPhone}`}
-                className="inline-block text-xs text-[#1D68BD] hover:underline font-bold py-1"
+                className="inline-block text-xs text-[#1D68BD] hover:underline font-semibold py-1"
               >
                 Go to Self-Service &amp; Reschedule Portal &rarr;
               </Link>
               <div>
                 <Link
                   href="/"
-                  className="inline-block text-center text-xs text-slate-500 hover:text-slate-900 font-semibold py-1 transition"
+                  className="inline-block text-center text-xs text-slate-500 hover:text-slate-900 font-medium py-1 transition"
                 >
                   &larr; Return to Home Page
                 </Link>
@@ -1489,7 +1489,7 @@ function BookingContent() {
 
 export default function BookNowPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500 font-mono text-xs">Loading booking engine...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500 text-xs font-medium">Loading booking engine...</div>}>
       <BookingContent />
     </Suspense>
   );
