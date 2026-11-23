@@ -217,59 +217,35 @@ export async function GET() {
     (b) => b.type === "FAMILY" && b.status === "CONFIRMED"
   );
 
-  // A) Public Swimming Slots: openHour to publicEndHour
-  for (let h = openHour; h < publicEndHour; h++) {
+  // Full day booking slots: openHour to closeHour (09:00 AM – 11:00 PM)
+  for (let h = openHour; h < closeHour; h++) {
     const start = `${String(h).padStart(2, "0")}:00`;
     const end = `${String(h + 1).padStart(2, "0")}:00`;
     const label = `${formatHourLabel12(h)} – ${formatHourLabel12(h + 1)}`;
 
+    const bookedFamily = confirmedFamilyBookings.find(
+      (b) => start < b.endTime && end > b.startTime
+    );
+    const bookedPublic = confirmedPublicBookings.find(
+      (b) => start < b.endTime && end > b.startTime
+    );
     const bookedGuests = confirmedPublicBookings
       .filter((b) => start < b.endTime && end > b.startTime)
       .reduce((sum, b) => sum + b.guestCount, 0);
 
     const isOngoing = currentTimeStr >= start && currentTimeStr < end;
     const walkInGuests = isOngoing ? activeWalkInGuests : 0;
-
     const totalSwimmers = bookedGuests + walkInGuests;
     const remainingSpots = Math.max(0, maxCapacity - totalSwimmers);
 
     let status = "Available";
-    if (currentTimeStr >= end) {
-      status = "Past";
-    } else if (remainingSpots <= 0) {
-      status = "Full";
-    }
+    let customerName = bookedFamily?.customerName;
+    let guestCount = bookedFamily?.guestCount || (totalSwimmers > 0 ? totalSwimmers : undefined);
 
-    allSlotStatuses.push({
-      start,
-      end,
-      label,
-      type: "PUBLIC",
-      status,
-      currentSwimmers: totalSwimmers,
-      remainingSpots,
-      maxCapacity,
-    });
-  }
-
-  // B) Family Slots: publicEndHour to closeHour
-  for (let h = publicEndHour; h < closeHour; h++) {
-    const start = `${String(h).padStart(2, "0")}:00`;
-    const end = `${String(h + 1).padStart(2, "0")}:00`;
-    const label = `${formatHourLabel12(h)} – ${formatHourLabel12(h + 1)}`;
-
-    const booked = confirmedFamilyBookings.find(
-      (b) => start < b.endTime && end > b.startTime
-    );
-
-    let status = "Available";
-    let customerName = undefined;
-    let guestCount = undefined;
-
-    if (booked) {
+    if (bookedFamily) {
       status = "Booked";
-      customerName = booked.customerName;
-      guestCount = booked.guestCount;
+    } else if (bookedPublic || remainingSpots <= 0) {
+      status = "Booked";
     } else if (currentTimeStr >= end) {
       status = "Past";
     }
@@ -278,15 +254,16 @@ export async function GET() {
       start,
       end,
       label,
-      type: "FAMILY",
       status,
       customerName,
       guestCount,
+      remainingSpots,
+      maxCapacity,
     });
   }
 
-  const familySlotStatuses = allSlotStatuses.filter((s) => s.type === "FAMILY");
-  const publicSlotStatuses = allSlotStatuses.filter((s) => s.type === "PUBLIC");
+  const familySlotStatuses = allSlotStatuses;
+  const publicSlotStatuses = allSlotStatuses;
 
   // 10. Maintenance & Water Status
   const todayWaterReadings = await prisma.waterReading.findMany({
