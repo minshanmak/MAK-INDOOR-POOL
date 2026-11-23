@@ -22,7 +22,6 @@ import {
   Mail,
   Smartphone,
   Waves,
-  LifeBuoy,
   Timer,
   Check,
   Sun,
@@ -426,36 +425,36 @@ function BookingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F0F5FA] via-[#F4F8FC] to-[#EEF4FA] text-slate-800 pb-28 lg:pb-16 pt-4 sm:pt-8 selection:bg-slate-900 selection:text-white">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-5 sm:space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-[#F0F5FA] via-[#F4F8FC] to-[#EEF4FA] text-slate-800 pb-36 sm:pb-28 pt-2 sm:pt-6 selection:bg-slate-900 selection:text-white">
+      <div className="max-w-2xl mx-auto px-3.5 sm:px-6 space-y-3.5 sm:space-y-5">
 
         {/* =========================================================================
-            TOP iOS PROGRESS BAR & NAVIGATION (Steps 1 to 3)
+            STICKY TOP APP-STYLE HEADER & PROGRESS (Steps 1 to 3)
            ========================================================================= */}
         {!confirmedBooking && (
-          <div className="space-y-3.5">
+          <div className="sticky top-0 z-30 -mx-3.5 sm:-mx-6 px-3.5 sm:px-6 pt-2 pb-2.5 bg-[#F0F5FA]/90 backdrop-blur-md border-b border-slate-200/60 shadow-2xs space-y-2">
             <div className="flex items-center justify-between">
               {wizardStep === 1 ? (
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-950 bg-white/80 hover:bg-white backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-95"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-950 bg-white border border-slate-200/90 px-3 py-1 rounded-full shadow-2xs transition active:scale-95"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-3.5 h-3.5" />
                   <span>Home</span>
                 </Link>
               ) : (
                 <button
                   type="button"
                   onClick={() => goToStep((wizardStep - 1) as any)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-950 bg-white/80 hover:bg-white backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-95"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-950 bg-white border border-slate-200/90 px-3 py-1 rounded-full shadow-2xs transition active:scale-95"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-3.5 h-3.5" />
                   <span>Back</span>
                 </button>
               )}
 
               {/* iOS Step Pill */}
-              <div className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-xl border border-white/90 px-3.5 py-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] text-[11px] font-bold text-slate-700">
+              <div className="inline-flex items-center gap-1.5 bg-white border border-slate-200/80 px-3 py-1 rounded-full shadow-2xs text-[11px] font-bold text-slate-700">
                 <span className="text-[#0284C7] font-extrabold">Step {wizardStep} of 3</span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-600">
@@ -467,14 +466,14 @@ function BookingContent() {
             </div>
 
             {/* Apple Segmented 3-Step Progress Bar */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
               {[1, 2, 3].map((s) => (
                 <div
                   key={s}
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
                     wizardStep >= s
                       ? "bg-slate-950 shadow-xs"
-                      : "bg-slate-200/80"
+                      : "bg-slate-200"
                   }`}
                 />
               ))}
@@ -484,51 +483,51 @@ function BookingContent() {
 
         {/* Global Error Banner */}
         {error && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200/90 text-rose-900 flex items-start gap-2.5 text-xs shadow-2xs animate-in fade-in">
+          <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2.5 text-xs shadow-2xs animate-in fade-in">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
             <div className="leading-relaxed font-semibold">{error}</div>
           </div>
         )}
 
         {/* =========================================================================
-            STEP 1: SELECT SESSION & SLOTS (Type, Date, Slot, Duration, Guests, Live Price)
+            STEP 1: SELECT SESSION & SLOTS (Type, Date, Slot, Duration, Guests)
            ========================================================================= */}
         {wizardStep === 1 && !confirmedBooking && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
+          <div className="space-y-3.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
             {/* Header */}
-            <div className="text-center space-y-1 pb-1">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+            <div className="text-center space-y-0.5 pt-1">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
                 Select Session &amp; Slot
               </h1>
-              <p className="text-xs text-slate-500 font-normal">
-                Choose private family session or daytime public swimming
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
+                Book exclusive family session or daytime public swimming
               </p>
             </div>
 
-            {/* Session Type Segmented Toggle */}
-            <div className="bg-white rounded-3xl p-2.5 border border-white shadow-sm">
+            {/* Session Type Segmented Cards (Touch Friendly) */}
+            <div className="bg-white rounded-3xl p-2 sm:p-2.5 border border-white shadow-sm">
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setBookingType("FAMILY")}
-                  className={`p-3.5 sm:p-4 rounded-2xl text-left transition-all border ${
+                  className={`p-3 rounded-2xl text-left transition-all border select-none active:scale-[0.98] ${
                     bookingType === "FAMILY"
                       ? "bg-slate-950 text-white border-slate-950 shadow-md ring-2 ring-cyan-400/30"
-                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/80"
+                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/70"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className={`w-4 h-4 ${bookingType === "FAMILY" ? "text-cyan-300" : "text-[#0284C7]"}`} />
-                      <span className="font-extrabold text-xs sm:text-sm">Family &amp; Group</span>
-                    </div>
-                    {bookingType === "FAMILY" && <Check className="w-4 h-4 text-cyan-300" />}
-                  </div>
-                  <div className="mt-1 flex items-baseline justify-between">
-                    <span className={`text-[11px] ${bookingType === "FAMILY" ? "text-cyan-200" : "text-slate-500"}`}>
-                      100% Private Pool
+                    <span className="font-extrabold text-xs sm:text-sm flex items-center gap-1.5">
+                      <ShieldCheck className={`w-3.5 h-3.5 ${bookingType === "FAMILY" ? "text-cyan-300" : "text-[#0284C7]"}`} />
+                      <span>Family &amp; Group</span>
                     </span>
-                    <span className={`text-xs font-black font-mono ${bookingType === "FAMILY" ? "text-white" : "text-slate-900"}`}>
+                    {bookingType === "FAMILY" && <Check className="w-3.5 h-3.5 text-cyan-300 shrink-0" />}
+                  </div>
+                  <div className="mt-1 flex items-baseline justify-between gap-1">
+                    <span className={`text-[10px] sm:text-[11px] truncate ${bookingType === "FAMILY" ? "text-cyan-200" : "text-slate-500"}`}>
+                      Private Pool
+                    </span>
+                    <span className={`text-xs font-black font-mono shrink-0 ${bookingType === "FAMILY" ? "text-white" : "text-slate-900"}`}>
                       ₹1,500/hr
                     </span>
                   </div>
@@ -537,48 +536,48 @@ function BookingContent() {
                 <button
                   type="button"
                   onClick={() => setBookingType("PUBLIC")}
-                  className={`p-3.5 sm:p-4 rounded-2xl text-left transition-all border ${
+                  className={`p-3 rounded-2xl text-left transition-all border select-none active:scale-[0.98] ${
                     bookingType === "PUBLIC"
                       ? "bg-slate-950 text-white border-slate-950 shadow-md ring-2 ring-cyan-400/30"
-                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/80"
+                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/70"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Waves className={`w-4 h-4 ${bookingType === "PUBLIC" ? "text-cyan-300" : "text-[#0284C7]"}`} />
-                      <span className="font-extrabold text-xs sm:text-sm">Public Swimming</span>
-                    </div>
-                    {bookingType === "PUBLIC" && <Check className="w-4 h-4 text-cyan-300" />}
-                  </div>
-                  <div className="mt-1 flex items-baseline justify-between">
-                    <span className={`text-[11px] ${bookingType === "PUBLIC" ? "text-cyan-200" : "text-slate-500"}`}>
-                      Daytime (9am–4pm)
+                    <span className="font-extrabold text-xs sm:text-sm flex items-center gap-1.5">
+                      <Waves className={`w-3.5 h-3.5 ${bookingType === "PUBLIC" ? "text-cyan-300" : "text-[#0284C7]"}`} />
+                      <span>Public Pool</span>
                     </span>
-                    <span className={`text-xs font-black font-mono ${bookingType === "PUBLIC" ? "text-white" : "text-slate-900"}`}>
-                      ₹150/hr/person
+                    {bookingType === "PUBLIC" && <Check className="w-3.5 h-3.5 text-cyan-300 shrink-0" />}
+                  </div>
+                  <div className="mt-1 flex items-baseline justify-between gap-1">
+                    <span className={`text-[10px] sm:text-[11px] truncate ${bookingType === "PUBLIC" ? "text-cyan-200" : "text-slate-500"}`}>
+                      Daytime (9–4)
+                    </span>
+                    <span className={`text-xs font-black font-mono shrink-0 ${bookingType === "PUBLIC" ? "text-white" : "text-slate-900"}`}>
+                      ₹150/person
                     </span>
                   </div>
                 </button>
               </div>
 
               {/* Type Detail Notice */}
-              <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-slate-50 text-[11px] text-slate-500 flex items-center justify-between">
-                <span>
+              <div className="mt-2 px-3 py-1.5 rounded-xl bg-slate-50 text-[11px] text-slate-600 flex items-center justify-between">
+                <span className="truncate pr-2">
                   {isFamily
-                    ? "Up to 12 guests included in base rate (₹100/extra guest) • 9:00 AM to 11:00 PM"
-                    : "Individual access to Main Pool & shallow Kids Pool • 9:00 AM to 4:00 PM"}
+                    ? "Up to 12 guests included in base rate • 9:00 AM to 11:00 PM"
+                    : "Individual access to Main & Kids Pool • 9:00 AM to 4:00 PM"}
                 </span>
-                <span className="font-bold text-slate-700 font-mono shrink-0 ml-2">
-                  {isFamily ? "₹750 Advance" : "Full Fee"}
+                <span className="font-bold text-slate-800 font-mono text-[11px] shrink-0">
+                  {isFamily ? "₹750 Advance" : "Full Payment"}
                 </span>
               </div>
             </div>
 
             {/* Date Selection Card */}
-            <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3">
+            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-sm space-y-2.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-[#0284C7]" />
+                  <Calendar className="w-3.5 h-3.5 text-[#0284C7]" />
                   <span>Choose Date</span>
                 </label>
                 <span className="text-[11px] font-bold text-[#0284C7] bg-sky-50 px-2.5 py-0.5 rounded-full font-mono">
@@ -586,12 +585,12 @@ function BookingContent() {
                 </span>
               </div>
 
-              {/* Quick Date Pills */}
-              <div className="grid grid-cols-3 gap-2">
+              {/* Quick Date 3-Button Row */}
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 <button
                   type="button"
                   onClick={() => setDate(todayIST)}
-                  className={`py-2.5 px-2 rounded-2xl border text-center transition active:scale-95 ${
+                  className={`py-2 px-1 rounded-2xl border text-center transition active:scale-95 ${
                     date === todayIST
                       ? "bg-slate-950 text-white border-slate-950 shadow-xs font-bold"
                       : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
@@ -604,7 +603,7 @@ function BookingContent() {
                 <button
                   type="button"
                   onClick={() => setDate(tomorrowIST)}
-                  className={`py-2.5 px-2 rounded-2xl border text-center transition active:scale-95 ${
+                  className={`py-2 px-1 rounded-2xl border text-center transition active:scale-95 ${
                     date === tomorrowIST
                       ? "bg-slate-950 text-white border-slate-950 shadow-xs font-bold"
                       : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
@@ -617,7 +616,7 @@ function BookingContent() {
                 <button
                   type="button"
                   onClick={() => setDate(dayAfterIST)}
-                  className={`py-2.5 px-2 rounded-2xl border text-center transition active:scale-95 ${
+                  className={`py-2 px-1 rounded-2xl border text-center transition active:scale-95 ${
                     date === dayAfterIST
                       ? "bg-slate-950 text-white border-slate-950 shadow-xs font-bold"
                       : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
@@ -630,7 +629,7 @@ function BookingContent() {
 
               {/* Calendar Input for other dates */}
               <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
-                <span className="text-[11px] font-medium">Pick another date:</span>
+                <span className="text-[11px] font-medium">Other date:</span>
                 <input
                   type="date"
                   min={todayIST}
@@ -641,21 +640,21 @@ function BookingContent() {
               </div>
             </div>
 
-            {/* Time Slot Selection Card */}
-            <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3.5">
+            {/* Time Slot Selection Card (3 Columns on Mobile, 4 on Desktop) */}
+            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-[#0284C7]" />
+                  <Clock className="w-3.5 h-3.5 text-[#0284C7]" />
                   <span>Start Time Slot</span>
                 </label>
                 <span className="text-[11px] font-mono font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-full">
-                  Selected: {formatTimeSlot(startTime)}
+                  {formatTimeSlot(startTime)}
                 </span>
               </div>
 
               {/* Day/Evening filter for Family */}
               {isFamily && (
-                <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl text-[11px] font-medium">
+                <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl text-[11px] font-medium">
                   <button
                     type="button"
                     onClick={() => setSlotFilter("ALL")}
@@ -666,24 +665,24 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => setSlotFilter("DAY")}
-                    className={`flex-1 py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 ${slotFilter === "DAY" ? "bg-white text-slate-950 shadow-xs font-bold" : "text-slate-600"}`}
+                    className={`flex-1 py-1.5 rounded-xl transition flex items-center justify-center gap-1 ${slotFilter === "DAY" ? "bg-white text-slate-950 shadow-xs font-bold" : "text-slate-600"}`}
                   >
-                    <Sun className="w-3.5 h-3.5 text-amber-500" />
+                    <Sun className="w-3 h-3 text-amber-500" />
                     <span>Day (9–4)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setSlotFilter("EVENING")}
-                    className={`flex-1 py-1.5 rounded-xl transition flex items-center justify-center gap-1.5 ${slotFilter === "EVENING" ? "bg-white text-slate-950 shadow-xs font-bold" : "text-slate-600"}`}
+                    className={`flex-1 py-1.5 rounded-xl transition flex items-center justify-center gap-1 ${slotFilter === "EVENING" ? "bg-white text-slate-950 shadow-xs font-bold" : "text-slate-600"}`}
                   >
-                    <Moon className="w-3.5 h-3.5 text-indigo-500" />
+                    <Moon className="w-3 h-3 text-indigo-500" />
                     <span>Evening (4–11)</span>
                   </button>
                 </div>
               )}
 
-              {/* Slot Chips Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* Slot Chips Grid: 3 cols on mobile so rows fit compactly! */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 sm:gap-2">
                 {activeSlots.map((slot) => {
                   const slotInfo = daySlots[slot];
                   const isPast = isSlotPastToday(slot) || slotInfo?.status === "PAST";
@@ -701,7 +700,7 @@ function BookingContent() {
                         if (isDisabled) return;
                         setStartTime(slot);
                       }}
-                      className={`p-3 rounded-2xl border text-center transition-all active:scale-95 select-none ${
+                      className={`py-2 px-1 rounded-2xl border text-center transition-all select-none active:scale-95 ${
                         isSelected
                           ? "bg-slate-950 border-slate-950 text-white shadow-md ring-2 ring-cyan-400/30"
                           : isPast
@@ -713,11 +712,11 @@ function BookingContent() {
                           : "border-slate-200/80 bg-white hover:border-slate-400 text-slate-800 hover:shadow-2xs"
                       }`}
                     >
-                      <div className={`text-xs font-black font-mono tracking-tight ${isSelected ? "text-white" : ""}`}>
+                      <div className={`text-[11px] sm:text-xs font-black font-mono tracking-tight ${isSelected ? "text-white" : ""}`}>
                         {formatTimeSlot(slot)}
                       </div>
                       <div
-                        className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${
+                        className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-wider mt-0.5 truncate ${
                           isSelected
                             ? "text-cyan-300 font-extrabold"
                             : isPast
@@ -736,10 +735,10 @@ function BookingContent() {
                           : isBooked
                           ? "Booked"
                           : isHeld
-                          ? "In Hold"
+                          ? "Hold"
                           : bookingType === "PUBLIC" && slotInfo?.remainingCapacity !== undefined && slotInfo.remainingCapacity < 10
                           ? `${slotInfo.remainingCapacity} Left`
-                          : "Available"}
+                          : "Open"}
                       </div>
                     </button>
                   );
@@ -747,37 +746,37 @@ function BookingContent() {
               </div>
 
               {/* Slot Legend */}
-              <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" /> Available
+              <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Open
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-slate-950" /> Selected
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-950" /> Selected
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" /> Booked
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Booked
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" /> In Hold
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Hold
                 </span>
               </div>
             </div>
 
             {/* Duration & Swimmers Combined Card */}
-            <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-4">
+            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-sm space-y-3.5">
               {/* Duration Section */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-[#0284C7]" />
-                    <span>Duration (Hours)</span>
+                    <Clock className="w-3.5 h-3.5 text-[#0284C7]" />
+                    <span>Duration</span>
                   </label>
                   <span className="text-[11px] font-medium text-slate-500">
                     Until {formatTimeSlot(endTime)}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-1.5">
                   {[1, 2, 3, 4]
                     .filter((h) => h <= maxAllowedHours)
                     .map((h) => {
@@ -788,7 +787,7 @@ function BookingContent() {
                           type="button"
                           disabled={collides}
                           onClick={() => setDurationHours(h)}
-                          className={`py-2.5 px-2 rounded-2xl border text-center transition active:scale-95 ${
+                          className={`py-2 px-1 rounded-2xl border text-center transition select-none active:scale-95 ${
                             collides
                               ? "bg-rose-50 border-rose-100 text-rose-400 opacity-60 cursor-not-allowed"
                               : durationHours === h
@@ -796,9 +795,9 @@ function BookingContent() {
                               : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
                           }`}
                         >
-                          <div className="text-xs font-mono">{h} Hour{h > 1 ? "s" : ""}</div>
-                          <div className={`text-[10px] mt-0.5 ${collides ? "text-rose-500 font-bold" : durationHours === h ? "text-cyan-300" : "text-slate-500"}`}>
-                            {collides ? "Collides" : `until ${formatTimeSlot(getEndTime(startTime, h))}`}
+                          <div className="text-xs font-mono font-bold">{h} {h === 1 ? "Hr" : "Hrs"}</div>
+                          <div className={`text-[9px] mt-0.5 truncate ${collides ? "text-rose-500 font-bold" : durationHours === h ? "text-cyan-300" : "text-slate-400"}`}>
+                            {collides ? "Collides" : `${h * 60}m`}
                           </div>
                         </button>
                       );
@@ -810,25 +809,25 @@ function BookingContent() {
               <div className="space-y-2 pt-3 border-t border-slate-100">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-[#0284C7]" />
-                    <span>Number of Guests / Swimmers</span>
+                    <Users className="w-3.5 h-3.5 text-[#0284C7]" />
+                    <span>Guests / Swimmers</span>
                   </label>
                   <span className="text-[11px] text-slate-500 font-semibold">
                     {isFamily ? "Up to 30 Guests" : `Max ${maxCapacity} Swimmers`}
                   </span>
                 </div>
 
-                {/* Swimmer Stepper */}
-                <div className="flex items-center justify-between bg-slate-100/90 rounded-2xl p-1.5 border border-slate-200/80">
+                {/* Swimmer Stepper (Finger-Friendly Touch Size) */}
+                <div className="flex items-center justify-between bg-slate-100 rounded-2xl p-1.5 border border-slate-200/80">
                   <button
                     type="button"
                     onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
-                    className="w-10 h-10 rounded-xl bg-white text-slate-800 font-black hover:bg-slate-50 active:scale-95 shadow-xs flex items-center justify-center text-lg select-none"
+                    className="w-11 h-11 rounded-xl bg-white text-slate-800 font-black hover:bg-slate-50 active:scale-95 shadow-xs flex items-center justify-center text-xl select-none"
                   >
                     –
                   </button>
                   <div className="text-center">
-                    <span className="text-xl font-black font-mono text-slate-950 block leading-tight">
+                    <span className="text-2xl font-black font-mono text-slate-950 block leading-tight">
                       {guestCount}
                     </span>
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
@@ -838,22 +837,22 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => setGuestCount(Math.min(isFamily ? 30 : maxCapacity, guestCount + 1))}
-                    className="w-10 h-10 rounded-xl bg-white text-slate-800 font-black hover:bg-slate-50 active:scale-95 shadow-xs flex items-center justify-center text-lg select-none"
+                    className="w-11 h-11 rounded-xl bg-white text-slate-800 font-black hover:bg-slate-50 active:scale-95 shadow-xs flex items-center justify-center text-xl select-none"
                   >
                     +
                   </button>
                 </div>
 
-                {/* Quick Chips */}
-                <div className="flex items-center gap-1.5 pt-1">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">Quick:</span>
+                {/* Quick Chips (Horizontal Scroll on Mobile) */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase shrink-0">Quick:</span>
                   {isFamily ? (
                     [6, 10, 12, 15, 20].map((num) => (
                       <button
                         key={num}
                         type="button"
                         onClick={() => setGuestCount(num)}
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition ${
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition shrink-0 active:scale-95 ${
                           guestCount === num ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
@@ -866,7 +865,7 @@ function BookingContent() {
                         key={num}
                         type="button"
                         onClick={() => setGuestCount(num)}
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition ${
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition shrink-0 active:scale-95 ${
                           guestCount === num ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
@@ -878,32 +877,34 @@ function BookingContent() {
               </div>
             </div>
 
-            {/* Bottom Sticky Action Bar */}
-            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-md flex items-center justify-between gap-4">
-              <div>
-                <span className="text-[10px] text-slate-400 font-semibold block uppercase">
-                  {isFamily ? "Advance Payable" : "Total Fee"}
-                </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-black text-slate-950 font-mono tracking-tight">
-                    ₹{requiredPaymentAmount}
+            {/* STICKY BOTTOM BAR (Always accessible under thumb on mobile) */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] py-3 px-4 pb-safe">
+              <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                    {isFamily ? "Advance Payable" : "Total Amount"}
                   </span>
-                  {isFamily && (
-                    <span className="text-xs text-slate-500 font-medium">
-                      (Total: ₹{computedTotal})
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-xl sm:text-2xl font-black text-slate-950 font-mono tracking-tight">
+                      ₹{requiredPaymentAmount}
                     </span>
-                  )}
+                    {isFamily && (
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        (Total: ₹{computedTotal})
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleValidateStep1}
-                className="bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 px-6 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center gap-2 group shrink-0"
-              >
-                <span>Continue to Details</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+                <button
+                  type="button"
+                  onClick={handleValidateStep1}
+                  className="bg-slate-950 hover:bg-slate-800 active:scale-95 text-white font-bold py-3 px-5 sm:px-6 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 group shrink-0"
+                >
+                  <span>Continue</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -912,18 +913,18 @@ function BookingContent() {
             STEP 2: GUEST DETAILS & FINAL REVIEW
            ========================================================================= */}
         {wizardStep === 2 && !confirmedBooking && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
-            <div className="text-center space-y-1 pb-1">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+          <div className="space-y-3.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="text-center space-y-0.5 pt-1">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
                 Review &amp; Guest Details
               </h1>
-              <p className="text-xs text-slate-500 font-normal">
-                Confirm your session and enter your contact details
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
+                Verify booking details and enter contact information
               </p>
             </div>
 
             {/* Session Summary Card */}
-            <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3">
+            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-sm space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <span className="text-xs font-bold text-slate-900">
                   Session Summary
@@ -960,7 +961,7 @@ function BookingContent() {
                   <span className="font-mono text-slate-900">₹{computedTotal}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-xs font-bold text-emerald-700 bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200/80">
+                <div className="flex justify-between items-center text-xs font-bold text-emerald-700 bg-emerald-50/70 p-2.5 rounded-2xl border border-emerald-200/80">
                   <span>{isFamily ? "Advance Payment Due Now:" : "Total Payable Now:"}</span>
                   <span className="text-base font-mono font-black">₹{requiredPaymentAmount}</span>
                 </div>
@@ -973,10 +974,10 @@ function BookingContent() {
               </div>
             </div>
 
-            {/* Contact Details Card */}
-            <div className="bg-white rounded-3xl p-5 border border-white shadow-sm space-y-3.5">
+            {/* Contact Details Card (Mobile Safari Auto-Zoom Protected with text-base on mobile) */}
+            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-sm space-y-3">
               <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                <User className="w-4 h-4 text-[#0284C7]" />
+                <User className="w-3.5 h-3.5 text-[#0284C7]" />
                 <span>Guest Information</span>
               </label>
 
@@ -990,12 +991,13 @@ function BookingContent() {
                       type="text"
                       required
                       autoComplete="name"
+                      autoCapitalize="words"
                       placeholder="e.g. Rahul Sharma"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
+                      className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-base sm:text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
                     />
-                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 sm:top-3 pointer-events-none" />
                   </div>
                 </div>
 
@@ -1013,9 +1015,9 @@ function BookingContent() {
                         placeholder="98470XXXXX"
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
+                        className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-base sm:text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
                       />
-                      <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 sm:top-3 pointer-events-none" />
                     </div>
                   </div>
 
@@ -1031,42 +1033,42 @@ function BookingContent() {
                         placeholder="name@example.com"
                         value={customerEmail}
                         onChange={(e) => setCustomerEmail(e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
+                        className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-base sm:text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
                       />
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                      <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 sm:top-3 pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
-                {/* Place / Town Field with Quick Suggestions */}
+                {/* Place / Town Field with Smooth Swipe Carousel */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-[11px] font-bold text-slate-700">
                       Place / Town / City <span className="text-rose-500">*</span>
                     </label>
-                    <span className="text-[10px] text-slate-400 font-medium">e.g. Moonniyur, Tirurangadi</span>
+                    <span className="text-[10px] text-slate-400 font-medium">e.g. Moonniyur</span>
                   </div>
                   <div className="relative">
                     <input
                       type="text"
                       required
-                      placeholder="Enter your town / locality (e.g. Moonniyur)"
+                      placeholder="Enter your town (e.g. Moonniyur)"
                       value={customerPlace}
                       onChange={(e) => setCustomerPlace(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
+                      className="w-full pl-9 pr-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-base sm:text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
                     />
-                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 sm:top-3 pointer-events-none" />
                   </div>
 
-                  {/* Quick Nearby Town Pills */}
-                  <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Nearby:</span>
+                  {/* Quick Nearby Town Swipeable Chips */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar touch-pan-x">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider shrink-0">Nearby:</span>
                     {["Moonniyur", "Tirurangadi", "Chelari", "Calicut", "Kondotty", "Parappanangadi", "Kottakkal", "Tanur"].map((town) => (
                       <button
                         key={town}
                         type="button"
                         onClick={() => setCustomerPlace(town)}
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition active:scale-95 ${
+                        className={`px-3 py-1 rounded-full text-[11px] font-bold transition shrink-0 active:scale-95 ${
                           customerPlace.toLowerCase() === town.toLowerCase()
                             ? "bg-slate-950 text-white shadow-2xs"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-700"
@@ -1087,32 +1089,38 @@ function BookingContent() {
                     placeholder="e.g. Small children with party, require swim rings"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
+                    className="w-full px-3.5 py-3 sm:py-2 bg-slate-50 border border-slate-200 rounded-2xl text-base sm:text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284C7] transition"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Bottom Proceed to Hold & Payment */}
-            <div className="pt-2">
-              <button
-                type="button"
-                disabled={loading}
-                onClick={handleProceedToPayment}
-                className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
-              >
-                {loading ? (
-                  <span>Reserving slot for {holdTtlMinutes} minutes...</span>
-                ) : (
-                  <>
-                    <span>Proceed to Payment (₹{requiredPaymentAmount})</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-              <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 mt-2.5">
-                <Lock className="w-3.5 h-3.5 text-slate-400" />
-                <span>Your slot will be locked for {holdTtlMinutes} minutes during checkout</span>
+            {/* STICKY BOTTOM BAR FOR STEP 2 */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] py-3 px-4 pb-safe">
+              <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => goToStep(1)}
+                  className="py-3 px-3 rounded-2xl text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+                >
+                  &larr; Back
+                </button>
+
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={handleProceedToPayment}
+                  className="bg-slate-950 hover:bg-slate-800 active:scale-95 text-white font-bold py-3 px-5 sm:px-6 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 group shrink-0"
+                >
+                  {loading ? (
+                    <span>Holding slot...</span>
+                  ) : (
+                    <>
+                      <span>Proceed to Payment (₹{requiredPaymentAmount})</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -1122,49 +1130,45 @@ function BookingContent() {
             STEP 3: 15-MINUTE HOLD & SECURE PAYMENT CHECKOUT
            ========================================================================= */}
         {wizardStep === 3 && !confirmedBooking && (
-          <div className="max-w-xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="space-y-3.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
             {/* Live Hold Timer Banner */}
-            <div className="bg-slate-950 text-white rounded-3xl p-5 sm:p-6 text-center space-y-2 shadow-xl border border-slate-800">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-xs font-semibold">
-                <Timer className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="bg-slate-950 text-white rounded-3xl p-4 sm:p-5 text-center space-y-1.5 shadow-xl border border-slate-800">
+              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-[11px] font-semibold">
+                <Timer className="w-3 h-3 text-cyan-400" />
                 <span>Slot held for {holdTtlMinutes} minutes</span>
               </div>
 
-              <div className="text-4xl font-black font-mono tracking-widest text-cyan-400 pt-1">
+              <div className="text-3xl sm:text-4xl font-black font-mono tracking-widest text-cyan-400 pt-0.5">
                 {formatTimer(secondsRemaining)}
               </div>
 
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                Your pool slot is held. Complete checkout before the timer expires to confirm your reservation.
+              <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
+                Complete checkout before the timer expires to confirm your reservation.
               </p>
             </div>
 
             {/* Booking Details Card */}
-            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-white shadow-sm space-y-3.5">
+            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-white shadow-sm space-y-3">
               <h3 className="text-xs font-bold text-slate-900">
                 Payment Review
               </h3>
 
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-2.5 text-xs">
+              <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 space-y-2 text-xs">
                 <div className="flex justify-between text-slate-600">
-                  <span>Customer Name</span>
-                  <span className="font-bold text-slate-900">{customerName}</span>
-                </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>Mobile</span>
-                  <span className="font-bold font-mono text-slate-900">{customerPhone}</span>
+                  <span>Guest</span>
+                  <span className="font-bold text-slate-900">{customerName} ({customerPhone})</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Session</span>
                   <span className="font-bold font-mono text-slate-900">{date} • {formatTimeSlot(startTime)} ({durationHours}h)</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
-                  <span>Session Type</span>
+                  <span>Type</span>
                   <span className="font-bold text-slate-900">{isFamily ? "Family & Group" : "Public Swimming"}</span>
                 </div>
                 <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-200">
                   <span>Amount Due Now:</span>
-                  <span className="font-mono font-black text-base text-emerald-700">₹{requiredPaymentAmount}</span>
+                  <span className="font-mono font-black text-sm sm:text-base text-emerald-700">₹{requiredPaymentAmount}</span>
                 </div>
                 {isFamily && remainingArrivalBalance > 0 && (
                   <div className="flex justify-between text-[11px] text-slate-500">
@@ -1174,49 +1178,49 @@ function BookingContent() {
                 )}
               </div>
 
-              {/* Payment Method Selector */}
-              <div className="space-y-2 pt-1">
+              {/* Payment Method Selector (Touch Friendly 3 Cards) */}
+              <div className="space-y-1.5 pt-1">
                 <label className="block text-[11px] font-bold text-slate-700">
-                  Select Payment Method
+                  Payment Method
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   <button
                     type="button"
                     onClick={() => setSelectedPayMethod("UPI")}
-                    className={`py-2.5 px-2 rounded-2xl border text-center transition ${
+                    className={`py-2.5 px-1.5 rounded-2xl border text-center transition active:scale-95 select-none ${
                       selectedPayMethod === "UPI"
-                        ? "bg-slate-950 text-white border-slate-950 font-bold shadow-xs"
+                        ? "bg-slate-950 text-white border-slate-950 font-bold shadow-xs ring-2 ring-cyan-400/30"
                         : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
                     }`}
                   >
                     <Smartphone className="w-4 h-4 mx-auto mb-1" />
-                    <span className="text-[11px]">UPI / QR</span>
+                    <span className="text-[11px] block">UPI / QR</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setSelectedPayMethod("CARD")}
-                    className={`py-2.5 px-2 rounded-2xl border text-center transition ${
+                    className={`py-2.5 px-1.5 rounded-2xl border text-center transition active:scale-95 select-none ${
                       selectedPayMethod === "CARD"
-                        ? "bg-slate-950 text-white border-slate-950 font-bold shadow-xs"
+                        ? "bg-slate-950 text-white border-slate-950 font-bold shadow-xs ring-2 ring-cyan-400/30"
                         : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
                     }`}
                   >
                     <CreditCard className="w-4 h-4 mx-auto mb-1" />
-                    <span className="text-[11px]">Card</span>
+                    <span className="text-[11px] block">Card</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setSelectedPayMethod("NETBANKING")}
-                    className={`py-2.5 px-2 rounded-2xl border text-center transition ${
+                    className={`py-2.5 px-1.5 rounded-2xl border text-center transition active:scale-95 select-none ${
                       selectedPayMethod === "NETBANKING"
-                        ? "bg-slate-950 text-white border-slate-950 font-bold shadow-xs"
+                        ? "bg-slate-950 text-white border-slate-950 font-bold shadow-xs ring-2 ring-cyan-400/30"
                         : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
                     }`}
                   >
                     <Lock className="w-4 h-4 mx-auto mb-1" />
-                    <span className="text-[11px]">Net Banking</span>
+                    <span className="text-[11px] block">Net Banking</span>
                   </button>
                 </div>
               </div>
@@ -1227,7 +1231,7 @@ function BookingContent() {
                   type="button"
                   disabled={loading}
                   onClick={handleCompletePayment}
-                  className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 group"
+                  className="w-full bg-slate-950 hover:bg-slate-800 active:scale-95 text-white font-bold py-3.5 rounded-2xl text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 group"
                 >
                   {loading ? (
                     <span>Confirming Transaction...</span>
@@ -1242,7 +1246,7 @@ function BookingContent() {
                 <button
                   type="button"
                   onClick={() => goToStep(2)}
-                  className="w-full py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+                  className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
                 >
                   &larr; Back to Details
                 </button>
@@ -1255,16 +1259,16 @@ function BookingContent() {
             DIGITAL BOOKING PASS & RECEIPT (Success State)
            ========================================================================= */}
         {confirmedBooking && (
-          <div className="max-w-lg mx-auto space-y-4 animate-in fade-in zoom-in-95 duration-400">
+          <div className="max-w-md mx-auto space-y-3.5 animate-in fade-in zoom-in-95 duration-300">
             {/* Success Header */}
-            <div className="text-center space-y-1.5 pb-2">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-md">
-                <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
+            <div className="text-center space-y-1 pb-1">
+              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-md">
+                <CheckCircle2 className="w-7 h-7 stroke-[2.5]" />
               </div>
-              <h2 className="text-2xl font-black text-slate-950">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-950">
                 Booking Confirmed!
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-[11px] sm:text-xs text-slate-500">
                 Your pool reservation is locked. Show this pass at the counter upon arrival.
               </p>
             </div>
@@ -1275,14 +1279,14 @@ function BookingContent() {
             <div className="pt-2 text-center space-y-2">
               <Link
                 href={`/booking-status?ref=${confirmedBooking.id}&phone=${customerPhone}`}
-                className="inline-block text-xs text-[#1D68BD] hover:underline font-bold"
+                className="inline-block text-xs text-[#1D68BD] hover:underline font-bold py-1"
               >
                 Go to Self-Service &amp; Reschedule Portal &rarr;
               </Link>
               <div>
                 <Link
                   href="/"
-                  className="inline-block text-center text-xs text-slate-500 hover:text-slate-900 font-semibold py-1.5 transition"
+                  className="inline-block text-center text-xs text-slate-500 hover:text-slate-900 font-semibold py-1 transition"
                 >
                   &larr; Return to Home Page
                 </Link>
