@@ -159,7 +159,7 @@ function BookingStatusContent() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold text-cyan-200">
               <span>M.A.K Indoor Pool</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
               Manage Your Booking
             </h1>
             <p className="text-xs sm:text-sm text-cyan-100 font-normal leading-relaxed max-w-lg">
@@ -192,7 +192,7 @@ function BookingStatusContent() {
                 value={bookingId}
                 onChange={(e) => setBookingId(e.target.value)}
                 placeholder="e.g. MAK-20261029-001"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 font-mono transition"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 tabular-nums font-medium transition"
               />
             </div>
 
@@ -212,7 +212,7 @@ function BookingStatusContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#1D68BD] hover:bg-[#155299] text-white font-extrabold py-3 rounded-full text-xs shadow-md transition flex items-center justify-center gap-2 active:scale-95"
+            className="w-full bg-[#1D68BD] hover:bg-[#155299] text-white font-semibold py-3 rounded-full text-xs shadow-md transition flex items-center justify-center gap-2 active:scale-95"
           >
             <Search className="w-4 h-4" />
             <span>{loading ? "Searching..." : "Find My Booking"}</span>
@@ -252,10 +252,10 @@ function BookingStatusContent() {
           <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] p-6 sm:p-8 space-y-6">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-4">
               <div>
-                <span className="text-xs uppercase font-extrabold text-[#1D68BD] tracking-wider block">
+                <span className="text-xs font-semibold text-[#1D68BD] block">
                   {bookingData.booking.type === "FAMILY" ? "Exclusive Family Booking" : "Public Swimming Session"}
                 </span>
-                <h2 className="text-2xl font-black text-slate-900 font-mono mt-0.5">{bookingData.booking.id}</h2>
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums mt-0.5">{bookingData.booking.id}</h2>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
@@ -428,7 +428,7 @@ function BookingStatusContent() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-[#0077B6] via-[#0096C7] to-[#00B4D8] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight">
               Ready to Swim?
             </h2>
             <p className="text-cyan-100 text-xs sm:text-sm mt-1 max-w-xl font-normal leading-relaxed">
@@ -438,7 +438,7 @@ function BookingStatusContent() {
 
           <Link
             href="/book"
-            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
+            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-bold px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
           >
             <span>Book Now</span>
             <ArrowRight className="w-4 h-4" />

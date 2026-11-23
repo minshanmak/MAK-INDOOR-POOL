@@ -498,9 +498,8 @@ function BookingContent() {
               {[1, 2, 3].map((s) => (
                 <div
                   key={s}
-                  className={`h-1.5 rounded-full transition-all duration-200 ${
-                    wizardStep >= s ? "bg-[#1D68BD]" : "bg-slate-200"
-                  }`}
+                  className={`h-1.5 rounded-full transition-all duration-200 ${wizardStep >= s ? "bg-[#1D68BD]" : "bg-slate-200"
+                    }`}
                 />
               ))}
             </div>
@@ -546,11 +545,10 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={() => setBookingType("FAMILY")}
-                className={`w-full text-left p-4 sm:p-5 rounded-2xl transition-all relative select-none border-2 ${
-                  bookingType === "FAMILY"
-                    ? "bg-blue-50/60 border-[#1D68BD] shadow-xs ring-1 ring-[#1D68BD]"
-                    : "bg-white hover:bg-slate-50 border-slate-200"
-                }`}
+                className={`w-full text-left p-4 sm:p-5 rounded-2xl transition-all relative select-none border-2 ${bookingType === "FAMILY"
+                  ? "bg-blue-50/60 border-[#1D68BD] shadow-xs ring-1 ring-[#1D68BD]"
+                  : "bg-white hover:bg-slate-50 border-slate-200"
+                  }`}
               >
                 <div className="flex items-center justify-between pb-2">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
@@ -561,11 +559,10 @@ function BookingContent() {
                     Private Session
                   </span>
 
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-                    bookingType === "FAMILY"
-                      ? "bg-[#1D68BD] text-white"
-                      : "border-2 border-slate-300"
-                  }`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${bookingType === "FAMILY"
+                    ? "bg-[#1D68BD] text-white"
+                    : "border-2 border-slate-300"
+                    }`}>
                     {bookingType === "FAMILY" && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                   </div>
                 </div>
@@ -605,11 +602,10 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={() => setBookingType("PUBLIC")}
-                className={`w-full text-left p-4 sm:p-5 rounded-2xl transition-all relative select-none border-2 ${
-                  bookingType === "PUBLIC"
-                    ? "bg-blue-50/60 border-[#1D68BD] shadow-xs ring-1 ring-[#1D68BD]"
-                    : "bg-white hover:bg-slate-50 border-slate-200"
-                }`}
+                className={`w-full text-left p-4 sm:p-5 rounded-2xl transition-all relative select-none border-2 ${bookingType === "PUBLIC"
+                  ? "bg-blue-50/60 border-[#1D68BD] shadow-xs ring-1 ring-[#1D68BD]"
+                  : "bg-white hover:bg-slate-50 border-slate-200"
+                  }`}
               >
                 <div className="flex items-center justify-between pb-2">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
@@ -620,11 +616,10 @@ function BookingContent() {
                     Public Entry
                   </span>
 
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-                    bookingType === "PUBLIC"
-                      ? "bg-[#1D68BD] text-white"
-                      : "border-2 border-slate-300"
-                  }`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${bookingType === "PUBLIC"
+                    ? "bg-[#1D68BD] text-white"
+                    : "border-2 border-slate-300"
+                    }`}>
                     {bookingType === "PUBLIC" && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                   </div>
                 </div>
@@ -693,11 +688,10 @@ function BookingContent() {
                       key={dateVal}
                       type="button"
                       onClick={() => setDate(dateVal)}
-                      className={`p-2.5 rounded-xl border text-center transition select-none active:scale-95 ${
-                        isSelected
-                          ? "bg-[#1D68BD] text-white border-[#1D68BD] shadow-xs"
-                          : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
-                      }`}
+                      className={`p-2.5 rounded-xl border text-center transition select-none active:scale-95 ${isSelected
+                        ? "bg-[#1D68BD] text-white border-[#1D68BD] shadow-xs"
+                        : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
+                        }`}
                     >
                       <div className={`text-xs font-medium ${isSelected ? "text-blue-100" : "text-slate-500"}`}>
                         {label}
@@ -794,11 +788,11 @@ function BookingContent() {
                           : isPast
                           ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-50"
                           : isBooked
-                          ? "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
-                          : isHeld
-                          ? "border-amber-200 bg-amber-50/70 text-amber-700 cursor-not-allowed"
-                          : "border-slate-200 bg-white hover:border-[#1D68BD] text-slate-800"
-                      }`}
+                            ? "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+                            : isHeld
+                              ? "border-amber-200 bg-amber-50/70 text-amber-700 cursor-not-allowed"
+                              : "border-slate-200 bg-white hover:border-[#1D68BD] text-slate-800"
+                        }`}
                     >
                       <div className="text-xs sm:text-sm font-semibold tracking-tight tabular-nums">
                         {formatTimeSlot(slot)}
@@ -809,22 +803,22 @@ function BookingContent() {
                           : isPast
                           ? "text-slate-400"
                           : isBooked
-                          ? "text-slate-400"
-                          : isHeld
-                          ? "text-amber-600"
-                          : "text-emerald-700"
-                      }`}>
+                            ? "text-slate-400"
+                            : isHeld
+                              ? "text-amber-600"
+                              : "text-emerald-700"
+                        }`}>
                         {isSelected
                           ? "Selected"
                           : isPast
-                          ? "Past"
-                          : isBooked
-                          ? "Booked"
-                          : isHeld
-                          ? "Held"
-                          : bookingType === "PUBLIC" && slotInfo?.remainingCapacity !== undefined && slotInfo.remainingCapacity < 10
-                          ? `${slotInfo.remainingCapacity} Left`
-                          : "Available"}
+                            ? "Past"
+                            : isBooked
+                              ? "Booked"
+                              : isHeld
+                                ? "Held"
+                                : bookingType === "PUBLIC" && slotInfo?.remainingCapacity !== undefined && slotInfo.remainingCapacity < 10
+                                  ? `${slotInfo.remainingCapacity} Left`
+                                  : "Available"}
                       </div>
                     </button>
                   );
@@ -872,10 +866,9 @@ function BookingContent() {
                           type="button"
                           disabled={collides}
                           onClick={() => setDurationHours(h)}
-                          className={`py-2 px-1 rounded-xl border text-center transition select-none active:scale-95 ${
-                            collides
-                              ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed"
-                              : durationHours === h
+                          className={`py-2 px-1 rounded-xl border text-center transition select-none active:scale-95 ${collides
+                            ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed"
+                            : durationHours === h
                               ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
                               : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
                           }`}

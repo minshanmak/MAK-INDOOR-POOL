@@ -198,7 +198,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
       ctx.fillText("GUEST NAME", 330, 550);
 
       ctx.fillStyle = "#0F172A";
-      ctx.font = "bold 16px monospace";
+      ctx.font = "bold 15px 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
       ctx.fillText(booking.id, 60, 575);
       ctx.font = "bold 15px system-ui, sans-serif";
       ctx.fillText(booking.customerName, 330, 575);
@@ -236,11 +236,11 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
       ctx.fillText("BALANCE ON ARRIVAL", 310, 770);
 
       ctx.fillStyle = "#15803D";
-      ctx.font = "bold 18px monospace";
+      ctx.font = "bold 17px 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
       ctx.fillText(`₹${booking.totalPaid}`, 70, 798);
 
       ctx.fillStyle = booking.balanceAmount > 0 ? "#DC2626" : "#15803D";
-      ctx.font = "bold 18px monospace";
+      ctx.font = "bold 17px 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
       ctx.fillText(booking.balanceAmount > 0 ? `₹${booking.balanceAmount}` : "₹0 (Fully Paid)", 310, 798);
 
       // Footer
@@ -277,7 +277,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
           <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl" />
           <div className="flex items-center justify-between relative z-10">
             <div>
-              <span className="text-[10px] uppercase tracking-wider font-extrabold text-sky-400 block mb-1">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-sky-400 block mb-1">
                 Official Entry Pass
               </span>
               <MakLogo light={true} size="md" />
@@ -290,7 +290,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
 
           <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
             <span
-              className={`px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wide uppercase inline-flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide uppercase inline-flex items-center gap-1.5 ${
                 isFamily
                   ? "bg-purple-900/60 text-purple-200 border border-purple-700/50"
                   : "bg-blue-900/60 text-blue-200 border border-blue-700/50"
@@ -299,7 +299,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
               {isFamily ? <Lock className="w-3 h-3 text-purple-300" /> : <Waves className="w-3 h-3 text-blue-300" />}
               <span>{isFamily ? "Private Family Session" : "Public Swimming"}</span>
             </span>
-            <span className="font-mono font-bold text-slate-300 text-[11px]">{booking.bookingDate}</span>
+            <span className="font-medium text-slate-300 text-xs tabular-nums">{booking.bookingDate}</span>
           </div>
         </div>
 
@@ -334,9 +334,9 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
         <div className="p-6 space-y-4 text-xs">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase block">Pass ID</span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Pass ID</span>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="font-mono font-black text-sm text-slate-900">{booking.id}</span>
+                <span className="font-bold text-sm text-slate-900 tabular-nums">{booking.id}</span>
                 <button
                   type="button"
                   onClick={handleCopyId}
@@ -348,8 +348,8 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
               </div>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 font-bold uppercase block">Swimmers</span>
-              <span className="font-extrabold text-sm text-slate-900 mt-0.5 block">
+              <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Swimmers</span>
+              <span className="font-semibold text-sm text-slate-900 mt-0.5 block tabular-nums">
                 {booking.guestCount} {booking.guestCount === 1 ? "Guest" : "Guests"}
               </span>
             </div>
@@ -357,14 +357,14 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
 
           <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-100">
             <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase block">Guest Name</span>
-              <span className="font-bold text-slate-900 block mt-0.5">
+              <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Guest Name</span>
+              <span className="font-semibold text-slate-900 block mt-0.5">
                 {booking.customerName} {booking.customerPlace ? `(${booking.customerPlace})` : ""}
               </span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase block">Session Time</span>
-              <span className="font-bold text-slate-900 font-mono block mt-0.5">
+              <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Session Time</span>
+              <span className="font-semibold text-slate-900 block mt-0.5 tabular-nums">
                 {formatSlotTime(booking.startTime)} – {formatSlotTime(booking.endTime)}
               </span>
             </div>
@@ -373,13 +373,13 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
           {/* Payment Pill Summary */}
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Paid Online</span>
-              <span className="font-black text-emerald-700 text-sm font-mono">₹{booking.totalPaid}</span>
+              <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">Paid Online</span>
+              <span className="font-bold text-emerald-700 text-sm tabular-nums">₹{booking.totalPaid}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Balance Due</span>
+              <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">Balance Due</span>
               <span
-                className={`font-black text-sm font-mono ${
+                className={`font-bold text-sm tabular-nums ${
                   booking.balanceAmount > 0 ? "text-amber-700" : "text-emerald-700"
                 }`}
               >
@@ -397,7 +397,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
           <button
             type="button"
             onClick={handleWhatsAppShare}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold py-3.5 rounded-2xl text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center gap-2"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-semibold py-3.5 rounded-2xl text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center gap-2"
           >
             <Share2 className="w-4 h-4" />
             <span>Share Pass on WhatsApp</span>
@@ -408,7 +408,7 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
             type="button"
             onClick={handleDownloadTicket}
             disabled={downloading}
-            className="w-full bg-white hover:bg-slate-50 active:scale-98 border border-slate-200 text-slate-900 font-extrabold py-3 rounded-2xl text-xs shadow-sm transition flex items-center justify-center gap-2"
+            className="w-full bg-white hover:bg-slate-50 active:scale-98 border border-slate-200 text-slate-900 font-semibold py-3 rounded-2xl text-xs shadow-sm transition flex items-center justify-center gap-2"
           >
             <Download className="w-4 h-4 text-slate-600" />
             <span>{downloading ? "Preparing Pass..." : "Download Pass (Save to Photos / Files)"}</span>

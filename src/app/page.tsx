@@ -381,7 +381,7 @@ export default function HomePage() {
               About M.A.K Indoor Pool
             </span>
 
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-tight">
               A Modern Indoor Pool <br />
               for Everyone
             </h2>
@@ -479,7 +479,7 @@ export default function HomePage() {
                 <Waves className="w-5 h-5 text-[#0284C7]" />
               </div>
               <div>
-                <span className="font-extrabold text-base text-slate-900 block leading-tight">2</span>
+                <span className="font-bold text-base text-slate-900 block leading-tight tabular-nums">2</span>
                 <span className="text-slate-600 font-medium block text-[11px] leading-tight">Swimming Modes</span>
               </div>
             </div>
@@ -490,7 +490,7 @@ export default function HomePage() {
                 <Calendar className="w-5 h-5 text-[#0284C7]" />
               </div>
               <div>
-                <span className="font-extrabold text-base text-slate-900 block leading-tight">12+</span>
+                <span className="font-bold text-base text-slate-900 block leading-tight tabular-nums">12+</span>
                 <span className="text-slate-600 font-medium block text-[11px] leading-tight">Hours Daily</span>
               </div>
             </div>
@@ -501,7 +501,7 @@ export default function HomePage() {
                 <Users2 className="w-5 h-5 text-[#0284C7]" />
               </div>
               <div>
-                <span className="font-extrabold text-sm text-slate-900 block leading-tight">Family Friendly</span>
+                <span className="font-semibold text-sm text-slate-900 block leading-tight">Family Friendly</span>
                 <span className="text-slate-600 font-medium block text-[11px] leading-tight">Exclusive Bookings</span>
               </div>
             </div>
@@ -512,7 +512,7 @@ export default function HomePage() {
                 <ShieldCheck className="w-5 h-5 text-[#0284C7]" />
               </div>
               <div>
-                <span className="font-extrabold text-sm text-slate-900 block leading-tight">Safe &amp; Hygienic</span>
+                <span className="font-semibold text-sm text-slate-900 block leading-tight">Safe &amp; Hygienic</span>
                 <span className="text-slate-600 font-medium block text-[11px] leading-tight">Clean &amp; Well Maintained</span>
               </div>
             </div>
@@ -529,7 +529,7 @@ export default function HomePage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#0284C7] block">
               Facility Highlights
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mt-1">
               Our Pools
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
@@ -555,7 +555,7 @@ export default function HomePage() {
                 <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-bold">
                   Main Pool
                 </div>
-                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-slate-900 text-[11px] font-extrabold shadow-xs">
+                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-slate-900 text-[11px] font-semibold shadow-xs">
                   Depth: 2.5 ft – 5 ft
                 </div>
               </div>
@@ -602,7 +602,7 @@ export default function HomePage() {
                 <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-sky-600 text-white text-[11px] font-bold">
                   Kids Pool
                 </div>
-                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-emerald-700 text-[11px] font-extrabold shadow-xs">
+                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-emerald-700 text-[11px] font-semibold shadow-xs">
                   Included with Entry
                 </div>
               </div>
@@ -644,7 +644,7 @@ export default function HomePage() {
          ========================================================================= */}
       <section id="pricing" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             Our Pricing
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
@@ -663,12 +663,12 @@ export default function HomePage() {
                 <div className="w-8 h-8 rounded-xl bg-white text-[#0284C7] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                   <Waves className="w-4 h-4" />
                 </div>
-                <span className="text-base font-extrabold">Public Swimming</span>
+                <span className="text-base font-semibold">Public Swimming</span>
               </div>
 
               <div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">₹150</span>
+                  <span className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight tabular-nums">₹150</span>
                   <span className="text-sm font-semibold text-slate-500">/ hour</span>
                 </div>
                 <div className="text-xs text-slate-500 font-medium mt-0.5">per person</div>
@@ -718,12 +718,12 @@ export default function HomePage() {
                 <div className="w-8 h-8 rounded-xl bg-white text-[#9333EA] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                   <Users2 className="w-4 h-4" />
                 </div>
-                <span className="text-base font-extrabold">Exclusive Family Booking</span>
+                <span className="text-base font-semibold">Exclusive Family Booking</span>
               </div>
 
               <div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">₹1,500</span>
+                  <span className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight tabular-nums">₹1,500</span>
                   <span className="text-sm font-semibold text-slate-500">/ hour</span>
                 </div>
                 <div className="text-xs text-slate-500 font-medium mt-0.5">up to 12 people</div>
@@ -772,7 +772,7 @@ export default function HomePage() {
                 <Calculator className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-extrabold text-base text-slate-900">
+                <h3 className="font-semibold text-base text-slate-900">
                   Instant Family Price Estimator
                 </h3>
                 <p className="text-xs text-slate-500 font-normal">
@@ -792,7 +792,7 @@ export default function HomePage() {
               <div>
                 <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-2">
                   <span>Number of Guests:</span>
-                  <span className="text-[#0284C7] font-extrabold text-sm">
+                  <span className="text-[#0284C7] font-bold text-sm tabular-nums">
                     {calcGuests} {calcGuests === 1 ? "Person" : "People"}
                   </span>
                 </div>
@@ -814,7 +814,7 @@ export default function HomePage() {
               <div>
                 <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-2">
                   <span>Duration of Session:</span>
-                  <span className="text-[#0284C7] font-extrabold text-sm">
+                  <span className="text-[#0284C7] font-bold text-sm tabular-nums">
                     {calcHours} {calcHours === 1 ? "Hour" : "Hours"}
                   </span>
                 </div>
@@ -824,7 +824,7 @@ export default function HomePage() {
                       key={hrs}
                       type="button"
                       onClick={() => setCalcHours(hrs)}
-                      className={`py-2 text-xs font-bold rounded-xl border transition-all ${calcHours === hrs
+                      className={`py-2 text-xs font-semibold rounded-xl border transition-all ${calcHours === hrs
                         ? "bg-[#0284C7] text-white border-[#0284C7] shadow-xs"
                         : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                         }`}
@@ -840,25 +840,25 @@ export default function HomePage() {
             <div className="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl p-5 space-y-3 text-xs">
               <div className="flex justify-between text-slate-600">
                 <span>Base Rate ({calcHours} hrs × ₹1,500):</span>
-                <span className="font-semibold text-slate-800">₹{basePrice.toLocaleString()}</span>
+                <span className="font-semibold text-slate-800 tabular-nums">₹{basePrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>
                   Extra Guests ({extraGuests} extra × ₹100/hr × {calcHours} hrs):
                 </span>
-                <span className="font-semibold text-slate-800">₹{extraPrice.toLocaleString()}</span>
+                <span className="font-semibold text-slate-800 tabular-nums">₹{extraPrice.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-slate-900 font-extrabold text-sm pt-2 border-t border-slate-200">
+              <div className="flex justify-between text-slate-900 font-bold text-sm pt-2 border-t border-slate-200">
                 <span>Estimated Total:</span>
-                <span className="text-[#0284C7] text-base">₹{totalPrice.toLocaleString()}</span>
+                <span className="text-[#0284C7] text-base font-bold tabular-nums">₹{totalPrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-emerald-700 font-medium pt-1">
                 <span>Advance Required Online:</span>
-                <span className="font-bold">₹{advanceRequired}</span>
+                <span className="font-bold tabular-nums">₹{advanceRequired}</span>
               </div>
               <div className="flex justify-between text-slate-500 font-medium">
                 <span>Balance at Check-in:</span>
-                <span className="font-bold text-slate-700">₹{balanceAtCounter.toLocaleString()}</span>
+                <span className="font-semibold text-slate-700 tabular-nums">₹{balanceAtCounter.toLocaleString()}</span>
               </div>
 
               <div className="pt-2">
@@ -881,7 +881,7 @@ export default function HomePage() {
       <section id="gallery" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               Explore Our Pool
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
@@ -950,7 +950,7 @@ export default function HomePage() {
          ========================================================================= */}
       <section id="policies" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             Safety &amp; Policies
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
@@ -1010,7 +1010,7 @@ export default function HomePage() {
          ========================================================================= */}
       <section id="faq" className="scroll-mt-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             Frequently Asked Questions
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-normal">
@@ -1077,7 +1077,7 @@ export default function HomePage() {
          ========================================================================= */}
       <section id="contact" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             Contact Us
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
@@ -1089,7 +1089,7 @@ export default function HomePage() {
           {/* Left Column: Contact Details Cards */}
           <div className="lg:col-span-5 space-y-4">
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-5">
-              <h3 className="text-base font-extrabold text-slate-900">
+              <h3 className="text-base font-semibold text-slate-900">
                 Facility &amp; Desk Information
               </h3>
 
@@ -1188,7 +1188,7 @@ export default function HomePage() {
                 </div>
               ) : (
                 <form onSubmit={handleContactSubmit} className="space-y-4">
-                  <h3 className="text-base font-extrabold text-slate-900">
+                  <h3 className="text-base font-semibold text-slate-900">
                     Send Us an Inquiry
                   </h3>
 
@@ -1279,7 +1279,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-[#0077B6] via-[#0096C7] to-[#00B4D8] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight">
               Ready to Swim?
             </h2>
             <p className="text-cyan-100 text-xs sm:text-sm mt-1 max-w-xl font-normal leading-relaxed">
@@ -1289,7 +1289,7 @@ export default function HomePage() {
 
           <Link
             href="/book"
-            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-black px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
+            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-bold px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
           >
             <span>Book Now</span>
             <ArrowRight className="w-4 h-4" />
