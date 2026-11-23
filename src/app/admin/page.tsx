@@ -70,14 +70,25 @@ export default function AdminOverviewPage() {
   const donutPublicCount = metrics?.bookingsByType?.publicCount ?? 0;
   const donutFamilyCount = metrics?.bookingsByType?.familyCount ?? 0;
 
-  // Family Slots logic from backend or fallback
-  const familySlots = metrics?.familySlotStatuses || [
-    { start: "16:00", end: "17:00", label: "04:00 PM – 05:00 PM", status: "Available" },
-    { start: "17:00", end: "18:00", label: "05:00 PM – 06:00 PM", status: "Available" },
-    { start: "18:00", end: "19:00", label: "06:00 PM – 07:00 PM", status: "Available" },
-    { start: "21:00", end: "22:00", label: "09:00 PM – 10:00 PM", status: "Available" },
-    { start: "22:00", end: "23:00", label: "10:00 PM – 11:00 PM", status: "Available" },
-  ];
+  // All Booking Periods (Full Day 09:00 AM – 11:00 PM: Public & Family)
+  const allBookingPeriods: any[] =
+    data?.slotStatuses ||
+    metrics?.slotStatuses || [
+      { start: "09:00", end: "10:00", label: "09:00 AM – 10:00 AM", type: "PUBLIC", status: "Available" },
+      { start: "10:00", end: "11:00", label: "10:00 AM – 11:00 AM", type: "PUBLIC", status: "Available" },
+      { start: "11:00", end: "12:00", label: "11:00 AM – 12:00 PM", type: "PUBLIC", status: "Available" },
+      { start: "12:00", end: "13:00", label: "12:00 PM – 01:00 PM", type: "PUBLIC", status: "Available" },
+      { start: "13:00", end: "14:00", label: "01:00 PM – 02:00 PM", type: "PUBLIC", status: "Available" },
+      { start: "14:00", end: "15:00", label: "02:00 PM – 03:00 PM", type: "PUBLIC", status: "Available" },
+      { start: "15:00", end: "16:00", label: "03:00 PM – 04:00 PM", type: "PUBLIC", status: "Available" },
+      { start: "16:00", end: "17:00", label: "04:00 PM – 05:00 PM", type: "FAMILY", status: "Available" },
+      { start: "17:00", end: "18:00", label: "05:00 PM – 06:00 PM", type: "FAMILY", status: "Available" },
+      { start: "18:00", end: "19:00", label: "06:00 PM – 07:00 PM", type: "FAMILY", status: "Available" },
+      { start: "19:00", end: "20:00", label: "07:00 PM – 08:00 PM", type: "FAMILY", status: "Available" },
+      { start: "20:00", end: "21:00", label: "08:00 PM – 09:00 PM", type: "FAMILY", status: "Available" },
+      { start: "21:00", end: "22:00", label: "09:00 PM – 10:00 PM", type: "FAMILY", status: "Available" },
+      { start: "22:00", end: "23:00", label: "10:00 PM – 11:00 PM", type: "FAMILY", status: "Available" },
+    ];
 
   // Activities logic
   const recentActivities = metrics?.recentActivities || [];
@@ -379,28 +390,55 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 2: Available Family Booking Periods (Real Overlap Logic - lg:col-span-4) */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
-          <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-            <Calendar className="w-4 h-4 text-[#1D68BD]" />
-            <span>Available Family Booking Periods</span>
+        {/* Card 2: All Available Booking Periods (Full Day 09:00 AM – 11:00 PM: Public & Family - lg:col-span-4) */}
+        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-3.5 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+              <Calendar className="w-4 h-4 text-[#1D68BD]" />
+              <span>Available Booking Periods</span>
+            </div>
+            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+              {allBookingPeriods.filter((s: any) => s.status === "Available").length} Open
+            </span>
           </div>
 
-          <div className="space-y-2 text-xs pt-1">
-            {familySlots.map((slot: any, i: number) => {
-              const isBooked = slot.status === "Booked";
+          <div className="space-y-2 text-xs pt-0.5 max-h-[350px] overflow-y-auto pr-1">
+            {allBookingPeriods.map((slot: any, i: number) => {
+              const isAvailable = slot.status === "Available";
+              const isBooked = slot.status === "Booked" || slot.status === "Full";
               const isPast = slot.status === "Past";
+              const isFamily = slot.type === "FAMILY";
+
               return (
-                <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition font-semibold text-slate-800">
-                  <span className="tabular-nums">{slot.label}</span>
-                  <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
-                    isBooked
-                      ? "bg-[#F3E8FF] text-[#7E22CE]"
-                      : isPast
-                      ? "bg-slate-100 text-slate-400"
-                      : "bg-[#DCFCE7] text-[#15803D]"
-                  }`}>
-                    {slot.status}
+                <div
+                  key={`${slot.start}-${i}`}
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/60 transition font-semibold text-slate-800"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="tabular-nums truncate">{slot.label}</span>
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide shrink-0 ${
+                        isFamily
+                          ? "bg-[#F3E8FF] text-[#7E22CE]"
+                          : "bg-[#E0F2FE] text-[#0369A1]"
+                      }`}
+                    >
+                      {isFamily ? "Family" : "Public"}
+                    </span>
+                  </div>
+
+                  <span
+                    className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${
+                      isBooked
+                        ? isFamily
+                          ? "bg-[#F3E8FF] text-[#7E22CE]"
+                          : "bg-rose-100 text-rose-700"
+                        : isPast
+                        ? "bg-slate-100 text-slate-400"
+                        : "bg-[#DCFCE7] text-[#15803D]"
+                    }`}
+                  >
+                    {isBooked ? (isFamily ? "Booked" : "Full") : slot.status}
                   </span>
                 </div>
               );
