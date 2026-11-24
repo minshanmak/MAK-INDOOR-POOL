@@ -11,6 +11,7 @@ export interface SlotAvailabilityQuery {
   startTime: string; // HH:mm
   endTime: string; // HH:mm
   guestCount: number;
+  excludeBookingId?: string;
 }
 
 export interface AvailabilityResult {
@@ -141,6 +142,7 @@ export async function checkAvailability(
         bookingDate: query.date,
         type: "FAMILY",
         status: { in: ["CONFIRMED", "HOLD"] },
+        ...(query.excludeBookingId ? { id: { not: query.excludeBookingId } } : {}),
       },
     });
 
@@ -178,6 +180,7 @@ export async function checkAvailability(
         bookingDate: query.date,
         type: "PUBLIC",
         status: { in: ["CONFIRMED", "HOLD"] },
+        ...(query.excludeBookingId ? { id: { not: query.excludeBookingId } } : {}),
       },
     });
 
@@ -238,6 +241,7 @@ export async function checkAvailability(
       bookingDate: query.date,
       type: "FAMILY",
       status: { in: ["CONFIRMED", "HOLD"] },
+      ...(query.excludeBookingId ? { id: { not: query.excludeBookingId } } : {}),
     },
   });
 
@@ -276,6 +280,7 @@ export async function checkAvailability(
       bookingDate: query.date,
       type: "PUBLIC",
       status: "CONFIRMED",
+      ...(query.excludeBookingId ? { id: { not: query.excludeBookingId } } : {}),
     },
   });
 

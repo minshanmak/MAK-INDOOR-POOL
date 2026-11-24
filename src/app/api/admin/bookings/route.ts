@@ -228,6 +228,7 @@ export async function POST(req: NextRequest) {
         startTime: targetStartTime,
         endTime: targetEndTime,
         guestCount: targetGuestCount,
+        excludeBookingId: booking.id,
       });
 
       if (!avail.available) {
