@@ -97,6 +97,8 @@ export default function StaffBookingModal({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successBooking, setSuccessBooking] = useState<any | null>(null);
   const [copiedWhatsApp, setCopiedWhatsApp] = useState(false);
+  const [smsSending, setSmsSending] = useState(false);
+  const [smsSent, setSmsSent] = useState(false);
 
   // Sync defaultBookingType if prop changes
   useEffect(() => {
@@ -351,9 +353,6 @@ export default function StaffBookingModal({
     setCopiedWhatsApp(true);
     setTimeout(() => setCopiedWhatsApp(false), 3000);
   };
-
-  const [smsSending, setSmsSending] = useState(false);
-  const [smsSent, setSmsSent] = useState(false);
 
   const handleDirectWhatsApp = () => {
     if (!customerPhone || !successBooking) return;
