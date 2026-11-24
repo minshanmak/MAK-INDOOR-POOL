@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { phone } = body;
+    const { phone, purpose = "LOOKUP", name } = body;
 
     if (!phone) {
       return NextResponse.json({ error: "Mobile number is required." }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     const last10 = cleanPhone.slice(-10);
 
-    // Check if any bookings exist for this customer phone
+    // If purpose is LOOKUP, check if any bookings exist for this customer phone
     const existingBookings = await prisma.booking.findMany({
       where: {
         customerPhone: { contains: last10 },
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       take: 5,
     });
 
-    if (existingBookings.length === 0) {
+    if (purpose === "LOOKUP" && existingBookings.length === 0) {
       return NextResponse.json(
         {
           error: "No bookings found matching this mobile number. Please check the number or book a new session.",
@@ -62,12 +62,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const customerName = existingBookings[0].customerName || "Customer";
+    const customerName = name || existingBookings[0]?.customerName || "Customer";
     const otpMsg =
-      `🔐 *M.A.K INDOOR POOL VERIFICATION CODE*\n\n` +
+      `M.A.K INDOOR POOL VERIFICATION CODE\n\n` +
       `Hello ${customerName},\n` +
-      `Your one-time pass verification code is: *${code}*\n\n` +
-      `This code is valid for 5 minutes. Show this pass at the counter to admit your guests.`;
+      `Your one-time mobile verification code is: ${code}\n\n` +
+      `This code is valid for 5 minutes. Enter this code to confirm your pool reservation.`;
 
     // Attempt dispatch via WhatsApp and SMS
     try {

@@ -25,6 +25,7 @@ import {
   Sun,
   Moon,
   X,
+  RefreshCw,
 } from "lucide-react";
 import { getPoolDate, getPoolHour } from "@/lib/timezone";
 
@@ -65,6 +66,28 @@ function BookingContent() {
     phone?: string;
     place?: string;
   }>({});
+
+  // Mobile OTP Verification State
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [verifiedPhone, setVerifiedPhone] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [debugOtp, setDebugOtp] = useState<string | null>(null);
+  const [otpError, setOtpError] = useState<string | null>(null);
+
+  // Timer countdown for resending OTP
+  useEffect(() => {
+    let interval: any = null;
+    if (otpTimer > 0) {
+      interval = setInterval(() => {
+        setOtpTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpTimer]);
 
   // Server-Authoritative State
   const [availResult, setAvailResult] = useState<any>(null);
@@ -337,7 +360,7 @@ function BookingContent() {
     goToStep(2);
   };
 
-  // Step 2 to Step 3: Hold slot for 15 minutes and proceed to payment
+  // Step 2 to Step 3: Verify OTP on mobile and hold slot for 15 minutes
   const handleProceedToPayment = async () => {
     setError(null);
     const errors: { name?: string; phone?: string; place?: string } = {};
@@ -370,6 +393,99 @@ function BookingContent() {
     }
 
     setFieldErrors({});
+
+    // Check if phone number is verified with OTP
+    if (!isPhoneVerified || verifiedPhone !== customerPhone) {
+      await sendBookingOtp();
+      return;
+    }
+
+    // Already verified, proceed to slot hold
+    await executeSlotHold();
+  };
+
+  const sendBookingOtp = async () => {
+    const cleanPhone = customerPhone.replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
+      setFieldErrors((prev) => ({ ...prev, phone: "Please enter a valid 10-digit mobile number." }));
+      return;
+    }
+
+    setOtpSending(true);
+    setOtpError(null);
+    setDebugOtp(null);
+
+    try {
+      const res = await fetch("/api/bookings/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: cleanPhone,
+          purpose: "NEW_BOOKING",
+          name: customerName.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send verification code.");
+      }
+
+      setShowOtpModal(true);
+      setOtpTimer(45);
+      if (data.debugOtp) {
+        setDebugOtp(data.debugOtp);
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to send verification code.");
+      setOtpError(err.message || "Failed to send verification code.");
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyBookingOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.trim().length < 4) {
+      setOtpError("Please enter the 4-digit verification code.");
+      return;
+    }
+
+    setOtpVerifying(true);
+    setOtpError(null);
+
+    try {
+      const cleanPhone = customerPhone.replace(/\D/g, "");
+      const res = await fetch("/api/bookings/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: cleanPhone,
+          otp: otpCode.trim(),
+          purpose: "NEW_BOOKING",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Invalid verification code.");
+      }
+
+      setIsPhoneVerified(true);
+      setVerifiedPhone(customerPhone);
+      setShowOtpModal(false);
+      setOtpCode("");
+
+      // Continue to slot hold
+      await executeSlotHold();
+    } catch (err: any) {
+      setOtpError(err.message || "Verification failed. Please try again.");
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
+  const executeSlotHold = async () => {
     setLoading(true);
     setError(null);
 
@@ -1115,9 +1231,28 @@ function BookingContent() {
                 {/* Mobile & Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">
-                      Mobile Number <span className="text-rose-500">*</span>
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-medium text-slate-700">
+                        Mobile Number <span className="text-rose-500">*</span>
+                      </label>
+                      {isPhoneVerified && customerPhone === verifiedPhone ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                          <Check className="w-3 h-3 stroke-[2.5]" />
+                          <span>Verified</span>
+                        </span>
+                      ) : (
+                        customerPhone.replace(/\D/g, "").length === 10 && (
+                          <button
+                            type="button"
+                            onClick={sendBookingOtp}
+                            disabled={otpSending}
+                            className="text-[11px] font-semibold text-[#1D68BD] hover:underline"
+                          >
+                            {otpSending ? "Sending..." : "Verify"}
+                          </button>
+                        )
+                      )}
+                    </div>
                     <div className="relative">
                       <input
                         type="tel"
@@ -1127,17 +1262,21 @@ function BookingContent() {
                         placeholder="99477XXXXX"
                         value={customerPhone}
                         onChange={(e) => {
-                          setCustomerPhone(e.target.value);
+                          const val = e.target.value;
+                          setCustomerPhone(val);
+                          if (val !== verifiedPhone) setIsPhoneVerified(false);
                           if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: undefined }));
                           if (error) setError(null);
                         }}
                         className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-medium tracking-normal tabular-nums transition focus:outline-none focus:ring-2 ${
                           fieldErrors.phone
                             ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
+                            : isPhoneVerified && customerPhone === verifiedPhone
+                            ? "bg-emerald-50/40 border border-emerald-300 text-slate-900 focus:ring-emerald-400/30"
                             : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#1D68BD]"
                         }`}
                       />
-                      <Phone className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.phone ? "text-rose-500" : "text-slate-400"}`} />
+                      <Phone className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.phone ? "text-rose-500" : isPhoneVerified && customerPhone === verifiedPhone ? "text-emerald-600" : "text-slate-400"}`} />
                     </div>
                     {fieldErrors.phone && (
                       <p className="text-[11px] font-medium text-rose-600 mt-1 flex items-center gap-1">
@@ -1471,6 +1610,116 @@ function BookingContent() {
                   &larr; Return to Home Page
                 </Link>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Verification OTP Modal */}
+        {showOtpModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
+            <div className="w-full max-w-sm bg-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-slate-100 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight">Verify Mobile Number</h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowOtpModal(false);
+                    setOtpError(null);
+                  }}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition"
+                  aria-label="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-500">
+                A 4-digit verification code was sent to <strong className="text-slate-900 tabular-nums font-semibold">+91 {customerPhone}</strong> via WhatsApp and SMS.
+              </p>
+
+              {otpError && (
+                <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2 font-medium">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                  <span>{otpError}</span>
+                </div>
+              )}
+
+              {debugOtp && (
+                <div className="p-2 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs flex items-center justify-between font-medium">
+                  <span>Test Code: <strong className="font-mono text-xs">{debugOtp}</strong></span>
+                  <button
+                    type="button"
+                    onClick={() => setOtpCode(debugOtp)}
+                    className="px-2 py-0.5 rounded-lg bg-amber-200 text-amber-900 font-semibold text-[10px] hover:bg-amber-300 transition"
+                  >
+                    Auto Fill
+                  </button>
+                </div>
+              )}
+
+              <form onSubmit={handleVerifyBookingOtp} className="space-y-3.5">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-slate-700">Enter 4-Digit Code</span>
+                    {otpTimer > 0 ? (
+                      <span className="text-slate-400 text-[11px]">
+                        Resend in <strong className="tabular-nums font-semibold text-slate-600">{otpTimer}s</strong>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={sendBookingOtp}
+                        disabled={otpSending}
+                        className="text-[11px] font-semibold text-[#1D68BD] hover:underline"
+                      >
+                        Resend Code
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    type="text"
+                    required
+                    autoFocus
+                    maxLength={4}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                    placeholder="••••"
+                    className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-xl font-bold tracking-widest text-slate-900 focus:bg-white focus:border-[#1D68BD] focus:ring-2 focus:ring-[#1D68BD]/20 tabular-nums transition"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowOtpModal(false);
+                      setOtpError(null);
+                    }}
+                    className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={otpVerifying || otpCode.length < 4}
+                    className="px-4 py-2 bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-semibold rounded-xl text-xs shadow-xs transition flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    {otpVerifying ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Verifying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Verify &amp; Continue</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

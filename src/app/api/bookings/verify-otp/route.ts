@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { phone, otp } = body;
+    const { phone, otp, purpose = "LOOKUP" } = body;
 
     if (!phone || !otp) {
       return NextResponse.json(
@@ -62,6 +62,16 @@ export async function POST(req: NextRequest) {
     await prisma.otpVerification.delete({
       where: { phone: last10 },
     }).catch(() => {});
+
+    // If purpose is NEW_BOOKING, return verification confirmation immediately
+    if (purpose === "NEW_BOOKING") {
+      return NextResponse.json({
+        success: true,
+        verified: true,
+        phone: last10,
+        message: "Mobile number verified successfully.",
+      });
+    }
 
     // Fetch pool settings for policy rules
     const settings = await prisma.poolSetting.findUnique({
