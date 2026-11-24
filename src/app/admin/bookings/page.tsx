@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { getPoolDate, formatSlotTime } from "@/lib/timezone";
 import StaffBookingModal from "@/components/admin/StaffBookingModal";
@@ -23,15 +23,22 @@ import {
   Edit3,
   MessageCircle,
   Send,
+  Copy,
+  Check,
+  Waves,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 
 export default function AdminBookingsPage() {
+  const todayStr = useMemo(() => getPoolDate(), []);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<"ALL" | "PUBLIC" | "FAMILY">("ALL");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [selectedDate, setSelectedDate] = useState("");
+  const [filterPendingBalanceOnly, setFilterPendingBalanceOnly] = useState(false);
 
   // Create Staff Booking Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -46,6 +53,13 @@ export default function AdminBookingsPage() {
   // Edit Booking Modal & Toast State
   const [editingBooking, setEditingBooking] = useState<any | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const handleWhatsAppPass = (b: any) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://makindoorpool.com";
@@ -154,16 +168,137 @@ export default function AdminBookingsPage() {
     }
   };
 
+  // Filter list by pending balance if toggle is on
+  const displayedBookings = useMemo(() => {
+    if (!filterPendingBalanceOnly) return bookings;
+    return bookings.filter((b) => b.balanceAmount > 0 && b.status !== "CANCELLED");
+  }, [bookings, filterPendingBalanceOnly]);
+
+  // Fast Analysis Summary Metrics
+  const metrics = useMemo(() => {
+    let totalGuests = 0;
+    let checkedInCount = 0;
+    let pendingBalance = 0;
+    let todayCount = 0;
+
+    for (const b of bookings) {
+      totalGuests += b.guestCount || 0;
+      if (b.notes?.includes("Checked in at") || b.checkInStatus === "CHECKED_IN") {
+        checkedInCount++;
+      }
+      if (b.balanceAmount > 0 && b.status !== "CANCELLED") {
+        pendingBalance += b.balanceAmount;
+      }
+      if (b.bookingDate === todayStr) {
+        todayCount++;
+      }
+    }
+
+    return {
+      totalCount: bookings.length,
+      totalGuests,
+      checkedInCount,
+      pendingBalance,
+      todayCount,
+    };
+  }, [bookings, todayStr]);
+
   return (
     <div className="space-y-4 max-w-7xl mx-auto pb-12">
-      {/* Top Filter Tabs & New Booking Action (Exact Mockup Match) */}
+      {/* 1. Fast Analysis KPI Summary Ribbon */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Metric 1: Total Bookings */}
+        <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(20,60,110,0.04)] flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1D68BD] flex items-center justify-center shrink-0">
+            <Calendar className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              Bookings in View
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-xl font-bold text-slate-900 tabular-nums">{metrics.totalCount}</span>
+              <span className="text-[11px] text-slate-500 font-medium">({metrics.todayCount} today)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 2: Expected Swimmers */}
+        <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(20,60,110,0.04)] flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              Expected Guests
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-xl font-bold text-slate-900 tabular-nums">{metrics.totalGuests}</span>
+              <span className="text-[11px] text-slate-500 font-medium">swimmers</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 3: Admitted / In Pool */}
+        <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(20,60,110,0.04)] flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              Admitted / In Pool
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-xl font-bold text-emerald-700 tabular-nums">{metrics.checkedInCount}</span>
+              <span className="text-[11px] text-emerald-600 font-medium">checked in</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 4: Pending Counter Balance */}
+        <div
+          onClick={() => setFilterPendingBalanceOnly(!filterPendingBalanceOnly)}
+          className={`p-4 rounded-3xl border cursor-pointer transition-all ${
+            filterPendingBalanceOnly
+              ? "bg-amber-100/70 border-amber-300 ring-2 ring-amber-400"
+              : "bg-white border-slate-100 shadow-[0_4px_20px_rgba(20,60,110,0.04)] hover:border-amber-200"
+          } flex items-center gap-3`}
+          title="Click to filter bookings with pending balance"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <IndianRupee className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              Pending Counter Due
+            </span>
+            <div className="flex items-baseline justify-between mt-0.5">
+              <span
+                className={`text-xl font-bold tabular-nums ${
+                  metrics.pendingBalance > 0 ? "text-amber-700" : "text-slate-900"
+                }`}
+              >
+                ₹{metrics.pendingBalance.toLocaleString()}
+              </span>
+              <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">
+                {filterPendingBalanceOnly ? "Filtered" : "Filter"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Top Filter Tabs & New Booking Action */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           <button
             type="button"
-            onClick={() => setFilterType("ALL")}
+            onClick={() => {
+              setFilterType("ALL");
+              setFilterPendingBalanceOnly(false);
+            }}
             className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-              filterType === "ALL"
+              filterType === "ALL" && !filterPendingBalanceOnly
                 ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
                 : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
             }`}
@@ -192,6 +327,24 @@ export default function AdminBookingsPage() {
           >
             Family Booking
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (selectedDate === todayStr) {
+                setSelectedDate("");
+              } else {
+                setSelectedDate(todayStr);
+              }
+            }}
+            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all inline-flex items-center gap-1.5 ${
+              selectedDate === todayStr
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Today Only</span>
+          </button>
         </div>
 
         <div className="flex items-center gap-2">
@@ -213,7 +366,7 @@ export default function AdminBookingsPage() {
         </div>
       </div>
 
-      {/* Filter Bar (Date Picker, Status, Search) */}
+      {/* 3. Filter Bar (Date Picker, Status, Search) */}
       <div className="bg-white p-3.5 rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           {/* Date Picker */}
@@ -239,16 +392,17 @@ export default function AdminBookingsPage() {
             <option value="CANCELLED">Cancelled</option>
           </select>
 
-          {(selectedDate || filterStatus !== "ALL" || search) && (
+          {(selectedDate || filterStatus !== "ALL" || search || filterPendingBalanceOnly) && (
             <button
               onClick={() => {
                 setSelectedDate("");
                 setFilterStatus("ALL");
                 setSearch("");
+                setFilterPendingBalanceOnly(false);
               }}
               className="text-[11px] text-rose-600 font-bold hover:underline px-1.5"
             >
-              Reset
+              Reset Filters
             </button>
           )}
         </div>
@@ -274,70 +428,95 @@ export default function AdminBookingsPage() {
         </form>
       </div>
 
-      {/* Bookings Table (Exact Mockup Match) */}
+      {/* 4. Bookings Ledger Table (Zero Unwanted Wrapping & High Contrast) */}
       <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-slate-400 text-xs">Loading bookings ledger...</div>
-        ) : bookings.length > 0 ? (
+        ) : displayedBookings.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <thead className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <tr>
-                  <th className="px-5 py-3.5">Session Time</th>
-                  <th className="px-5 py-3.5">Booking ID</th>
-                  <th className="px-5 py-3.5">Type</th>
-                  <th className="px-5 py-3.5">Guests</th>
-                  <th className="px-5 py-3.5">Customer</th>
-                  <th className="px-5 py-3.5">Payment</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
+                  <th className="px-4 py-3.5 min-w-[170px] whitespace-nowrap">Session Time</th>
+                  <th className="px-4 py-3.5 min-w-[175px] whitespace-nowrap">Booking ID</th>
+                  <th className="px-4 py-3.5 min-w-[130px] whitespace-nowrap">Type</th>
+                  <th className="px-4 py-3.5 min-w-[100px] whitespace-nowrap">Guests</th>
+                  <th className="px-4 py-3.5 min-w-[190px] whitespace-nowrap">Customer</th>
+                  <th className="px-4 py-3.5 min-w-[125px] whitespace-nowrap">Payment</th>
+                  <th className="px-4 py-3.5 min-w-[110px] whitespace-nowrap">Status</th>
+                  <th className="px-4 py-3.5 min-w-[210px] whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {bookings.map((b) => {
-                  const isCheckedIn = b.notes?.includes("Checked in at");
+                {displayedBookings.map((b) => {
+                  const isCheckedIn = b.notes?.includes("Checked in at") || b.checkInStatus === "CHECKED_IN";
+                  const isToday = b.bookingDate === todayStr;
+
                   return (
-                    <tr key={b.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={b.id} className="hover:bg-blue-50/30 transition-colors">
                       {/* Session Time */}
-                      <td className="px-5 py-3.5 font-bold text-slate-900 whitespace-nowrap">
-                        <div className="font-semibold text-slate-900">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="font-bold text-slate-900 text-xs tabular-nums">
                           {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-mono font-medium">
-                          {b.bookingDate}
+                        <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-600 font-semibold tabular-nums">
+                          <span>{b.bookingDate}</span>
+                          {isToday && (
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                              Today
+                            </span>
+                          )}
                         </div>
                       </td>
 
-                      {/* Booking ID */}
-                      <td className="px-5 py-3.5 font-mono font-extrabold text-[#1D68BD]">
-                        {b.id}
+                      {/* Booking ID (Zero Wrapping + 1-Click Copy) */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-[#1D68BD] font-mono tracking-tight text-xs tabular-nums whitespace-nowrap">
+                            {b.id}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyId(b.id)}
+                            className="p-1 text-slate-400 hover:text-slate-800 transition rounded"
+                            title="Copy Booking ID"
+                          >
+                            {copiedId === b.id ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
                       </td>
 
-                      {/* Type Badge */}
-                      <td className="px-5 py-3.5">
+                      {/* Type Badge (Single Line Pill) */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wide ${
+                          className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight whitespace-nowrap ${
                             b.type === "FAMILY"
-                              ? "bg-purple-50 text-purple-700 border border-purple-200/80"
-                              : "bg-blue-50 text-[#1D68BD] border border-blue-200/80"
+                              ? "bg-purple-100 text-purple-800 border border-purple-200/60"
+                              : "bg-sky-100 text-sky-800 border border-sky-200/60"
                           }`}
                         >
-                          {b.type === "FAMILY" ? "Family (Exclusive)" : "Public Swimming"}
+                          {b.type === "FAMILY" ? "Family Session" : "Public Swimming"}
                         </span>
                       </td>
 
                       {/* Guests */}
-                      <td className="px-5 py-3.5 font-bold text-slate-800">
-                        {b.guestCount} {b.guestCount === 1 ? "Guest" : "Guests"}
+                      <td className="px-4 py-3.5 whitespace-nowrap font-bold text-slate-900 text-xs tabular-nums">
+                        {b.guestCount} {b.guestCount === 1 ? "Swimmer" : "Swimmers"}
                       </td>
 
-                      {/* Customer */}
-                      <td className="px-5 py-3.5">
-                        <div className="font-bold text-slate-900">{b.customerName}</div>
-                        <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
-                          <span>{b.customerPhone}</span>
+                      {/* Customer Info (High Contrast Phone & Name) */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="font-bold text-slate-900 text-xs">{b.customerName}</div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-slate-700 font-semibold text-[11px] tabular-nums">
+                            {b.customerPhone}
+                          </span>
                           {b.customerPlace && (
-                            <span className="inline-flex items-center gap-1 text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded font-sans font-semibold">
+                            <span className="inline-flex items-center gap-0.5 text-[10px] text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
                               <MapPin className="w-2.5 h-2.5" />
                               <span>{b.customerPlace}</span>
                             </span>
@@ -345,95 +524,113 @@ export default function AdminBookingsPage() {
                         </div>
                       </td>
 
-                      {/* Payment */}
-                      <td className="px-5 py-3.5">
-                        <div className="font-bold text-slate-900 tabular-nums">₹{b.totalAmount}</div>
-                        {b.balanceAmount > 0 ? (
-                          <div className="text-[10px] text-amber-600 font-semibold tabular-nums">
-                            Bal: ₹{b.balanceAmount}
-                          </div>
-                        ) : (
-                          <div className="text-[10px] text-emerald-600 font-semibold">Fully Paid</div>
-                        )}
+                      {/* Payment (Clear Balance Warning) */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="font-bold text-slate-900 tabular-nums text-xs">₹{b.totalAmount}</div>
+                        <div className="mt-0.5">
+                          {b.balanceAmount > 0 ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200 tabular-nums whitespace-nowrap">
+                              Due: ₹{b.balanceAmount}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 whitespace-nowrap">
+                              Fully Paid
+                            </span>
+                          )}
+                        </div>
                       </td>
 
-                      {/* Status */}
-                      <td className="px-5 py-3.5">
+                      {/* Status (Single Line Badge) */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wide ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight whitespace-nowrap ${
                             isCheckedIn
-                              ? "bg-sky-50 text-sky-700 border border-sky-200/80"
+                              ? "bg-sky-100 text-sky-800 border border-sky-200/80"
                               : b.status === "CONFIRMED"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200/80"
                               : b.status === "CANCELLED"
-                              ? "bg-rose-50 text-rose-700 border border-rose-200/80"
-                              : "bg-amber-50 text-amber-700 border border-amber-200/80"
+                              ? "bg-rose-100 text-rose-800 border border-rose-200/80"
+                              : "bg-amber-100 text-amber-800 border border-amber-200/80"
                           }`}
                         >
-                          {isCheckedIn ? "Checked In" : b.status === "CONFIRMED" ? "Confirmed" : b.status}
+                          {isCheckedIn ? (
+                            <>
+                              <CheckCircle2 className="w-3 h-3 text-sky-600" />
+                              <span>Checked In</span>
+                            </>
+                          ) : b.status === "CONFIRMED" ? (
+                            <>
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                              <span>Confirmed</span>
+                            </>
+                          ) : (
+                            b.status
+                          )}
                         </span>
                       </td>
 
-                      {/* Actions */}
-                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                          {/* 1-Click WhatsApp Pass */}
-                          <button
-                            type="button"
-                            onClick={() => handleWhatsAppPass(b)}
-                            title="Send Pass to Customer WhatsApp"
-                            className="p-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 transition active:scale-95"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* 1-Click SMS Pass */}
-                          <button
-                            type="button"
-                            onClick={() => handleSendSms(b)}
-                            title="Send SMS Pass"
-                            className="p-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-[#1D68BD] border border-blue-200/80 transition active:scale-95"
-                          >
-                            <Send className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Edit Booking (Staff Only) */}
-                          {b.status !== "CANCELLED" && (
+                      {/* Actions (Segmented Toolbar, Zero Wrapping) */}
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Utility Icons Group (WhatsApp, SMS, Edit) */}
+                          <div className="inline-flex items-center bg-slate-50 border border-slate-200/80 rounded-xl p-0.5 gap-0.5">
+                            {/* 1-Click WhatsApp Pass */}
                             <button
                               type="button"
-                              onClick={() => setEditingBooking(b)}
-                              title="Edit Booking (Time, Guests, Details)"
-                              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95 inline-flex items-center gap-1 text-[11px] font-semibold"
+                              onClick={() => handleWhatsAppPass(b)}
+                              title="Send Pass on WhatsApp"
+                              className="p-1 rounded-lg text-emerald-700 hover:bg-emerald-100 transition active:scale-95"
                             >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span className="hidden xl:inline">Edit</span>
+                              <MessageCircle className="w-3.5 h-3.5" />
                             </button>
-                          )}
 
+                            {/* 1-Click SMS Pass */}
+                            <button
+                              type="button"
+                              onClick={() => handleSendSms(b)}
+                              title="Send SMS Pass"
+                              className="p-1 rounded-lg text-[#1D68BD] hover:bg-blue-100 transition active:scale-95"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Edit Booking (Staff Only) */}
+                            {b.status !== "CANCELLED" && (
+                              <button
+                                type="button"
+                                onClick={() => setEditingBooking(b)}
+                                title="Edit Booking details"
+                                className="p-1 rounded-lg text-slate-700 hover:bg-slate-200 transition active:scale-95"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Primary Operational Action */}
                           {isCheckedIn ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                              Admitted
+                            <span className="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+                              ✓ Admitted
                             </span>
-                          ) : b.status === "CONFIRMED" ? (
+                          ) : b.balanceAmount > 0 && b.status === "CONFIRMED" ? (
                             <button
-                              onClick={() => handleAdmitBooking(b.id)}
-                              className="bg-[#1D68BD] hover:bg-[#155299] text-white text-[11px] font-bold px-3 py-1 rounded-xl shadow-xs active:scale-95 transition"
-                            >
-                              Admit Guest
-                            </button>
-                          ) : null}
-
-                          {b.balanceAmount > 0 && b.status === "CONFIRMED" ? (
-                            <button
+                              type="button"
                               onClick={() => {
                                 setCollectingBooking(b);
                                 setCollectAmount(b.balanceAmount);
                                 setCollectError(null);
                               }}
-                              className="bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold px-3 py-1 rounded-xl shadow-xs active:scale-95 transition"
+                              className="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold px-2.5 py-1 rounded-xl text-[11px] shadow-xs transition whitespace-nowrap"
                             >
                               Collect ₹{b.balanceAmount}
+                            </button>
+                          ) : b.status === "CONFIRMED" ? (
+                            <button
+                              type="button"
+                              onClick={() => handleAdmitBooking(b.id)}
+                              className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-bold px-3 py-1 rounded-xl shadow-xs active:scale-95 transition whitespace-nowrap"
+                            >
+                              Admit Guest
                             </button>
                           ) : null}
                         </div>
@@ -459,24 +656,24 @@ export default function AdminBookingsPage() {
               <h3 className="font-bold text-slate-900 text-sm">Collect Counter Balance</h3>
               <button
                 onClick={() => setCollectingBooking(null)}
-                className="text-slate-400 hover:text-slate-700 p-1"
+                className="text-slate-400 hover:text-slate-600"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {collectError && (
-              <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl flex items-center gap-1.5 border border-red-200">
+              <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{collectError}</span>
               </div>
             )}
 
-            <form onSubmit={handleCollectBalance} className="space-y-4 text-xs">
-              <div className="bg-slate-50 p-3 rounded-2xl space-y-1 text-slate-600 border border-slate-100">
+            <form onSubmit={handleCollectBalance} className="space-y-3 text-xs">
+              <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1.5">
                 <div className="flex justify-between font-semibold">
-                  <span>Booking ID:</span>
-                  <span className="font-mono text-[#1D68BD]">{collectingBooking.id}</span>
+                  <span>Pass ID:</span>
+                  <span className="font-mono text-[#1D68BD] font-bold">{collectingBooking.id}</span>
                 </div>
                 <div className="flex justify-between font-semibold">
                   <span>Customer:</span>
