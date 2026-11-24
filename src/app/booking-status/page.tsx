@@ -13,7 +13,6 @@ import {
   RefreshCw,
   XCircle,
   ShieldCheck,
-  CreditCard,
   ArrowRight,
   Phone,
   KeyRound,
@@ -21,6 +20,9 @@ import {
   ChevronRight,
   Sparkles,
   Ticket,
+  Lock,
+  MessageSquare,
+  QrCode,
 } from "lucide-react";
 import Link from "next/link";
 import BookingPassCard from "@/components/BookingPassCard";
@@ -80,11 +82,14 @@ function BookingStatusContent() {
 
   // Handle direct links: ?ref=...&phone=... (Bypasses OTP for seamless 1-click WhatsApp/SMS entry)
   useEffect(() => {
-    const idParam =
+    const rawId =
       searchParams.get("ref") ||
       searchParams.get("id") ||
       searchParams.get("bookingId");
-    const phoneParam = searchParams.get("phone");
+    const rawPhone = searchParams.get("phone");
+
+    const idParam = rawId?.trim().replace(/[\s_]+/g, "-").toUpperCase();
+    const phoneParam = rawPhone?.trim().replace(/\D/g, "");
 
     if (idParam) {
       setBookingId(idParam);
@@ -187,10 +192,8 @@ function BookingStatusContent() {
 
       setVerifiedBookingsList(data.bookings || []);
       if (data.bookings && data.bookings.length === 1) {
-        // Only 1 booking: auto open pass
         setBookingData(data.bookings[0]);
       } else {
-        // Multiple bookings: let user pick
         setBookingData(null);
       }
     } catch (err: any) {
@@ -207,7 +210,9 @@ function BookingStatusContent() {
       setError("Please enter both Booking ID and Phone number.");
       return;
     }
-    performDirectLookup(bookingId.trim(), phone.trim());
+    const cleanId = bookingId.trim().replace(/[\s_]+/g, "-").toUpperCase();
+    const cleanPhone = phone.trim().replace(/\D/g, "");
+    performDirectLookup(cleanId, cleanPhone);
   };
 
   // Reschedule Booking
@@ -284,94 +289,97 @@ function BookingStatusContent() {
   };
 
   return (
-    <div className="bg-[#F0F5FA] text-slate-800 space-y-10 sm:space-y-14 pb-20">
+    <div className="min-h-screen bg-[#F4F7FB] text-slate-800 space-y-10 sm:space-y-12 pb-24">
       {/* 1. HERO HEADER BANNER */}
-      <section className="relative min-h-[260px] sm:min-h-[290px] flex items-center overflow-hidden bg-[#061426]">
+      <section className="relative min-h-[280px] sm:min-h-[320px] flex items-center justify-center overflow-hidden bg-[#061426]">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center opacity-40 scale-105"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=85')`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#061426]/95 via-[#0A2647]/85 to-[#0A2647]/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#061426]/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061426]/90 via-[#0A2647]/80 to-[#F4F7FB]" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 z-10 w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <div className="max-w-xl space-y-2.5 text-white">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold text-cyan-200">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
-              <span>M.A.K Indoor Pool &bull; Self-Service Pass Portal</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
-              Find Your Digital Pass
-            </h1>
-            <p className="text-xs sm:text-sm text-cyan-100 font-normal leading-relaxed max-w-lg">
-              No need to remember Reference IDs. Enter your registered mobile number to verify with a quick code and view all your active pool reservations.
-            </p>
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center z-10 space-y-3 pt-6 pb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-cyan-200">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+            <span>M.A.K Indoor Pool &bull; Digital Entry Pass</span>
           </div>
 
-          <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-3xl p-4 text-white text-xs space-y-1.5 shadow-xl shrink-0">
-            <div className="flex items-center gap-2 font-bold text-xs text-white">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Secure 1-Click Verification</span>
-            </div>
-            <div className="text-[11px] text-cyan-100">
-              Instant OTP sent via WhatsApp &amp; SMS
-            </div>
-          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Find Your Swimming Pass
+          </h1>
+
+          <p className="text-xs sm:text-sm text-cyan-100/90 font-normal max-w-lg mx-auto leading-relaxed">
+            Enter your mobile number to view active reservations, download scannable QR passes, or manage your time slot.
+          </p>
         </div>
       </section>
 
-      {/* 2. MAIN PORTAL CONTAINER */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-8 relative z-20 space-y-6">
-        {/* If no booking is selected and no verified list is visible, show Search Card */}
+      {/* 2. MAIN CONTENT AREA */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 -mt-16 sm:-mt-20 relative z-20 space-y-6">
+        {/* =========================================================================
+            SEARCH CARD (Focused, Centered, Apple / Stripe Style)
+           ========================================================================= */}
         {!bookingData && verifiedBookingsList.length === 0 && (
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-6">
-            {/* Search Mode Toggle */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">
-                  {searchMode === "OTP" ? "Login with Mobile Number" : "Lookup with Booking Reference ID"}
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {searchMode === "OTP"
-                    ? "We will send a 4-digit verification code to your WhatsApp and SMS"
-                    : "Enter your Booking ID and registered phone number"}
-                </p>
-              </div>
+          <div className="max-w-md mx-auto bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(10,38,71,0.1)] border border-white/80 space-y-5 animate-in fade-in duration-200">
+            {/* Segmented Tab Switcher */}
+            <div className="flex bg-slate-100/90 p-1 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchMode("OTP");
+                  setError(null);
+                }}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
+                  searchMode === "OTP"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                <Phone className="w-3.5 h-3.5 text-[#1D68BD]" />
+                <span>Mobile OTP</span>
+              </button>
 
               <button
                 type="button"
                 onClick={() => {
-                  setSearchMode(searchMode === "OTP" ? "REF" : "OTP");
+                  setSearchMode("REF");
                   setError(null);
                 }}
-                className="text-xs text-[#1D68BD] hover:underline font-semibold shrink-0"
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
+                  searchMode === "REF"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
               >
-                {searchMode === "OTP" ? "Use Reference ID instead →" : "← Use Mobile Number (OTP)"}
+                <Ticket className="w-3.5 h-3.5 text-purple-600" />
+                <span>Booking ID</span>
               </button>
             </div>
 
+            {/* Error Message */}
             {error && (
-              <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-2xl flex items-start gap-2.5">
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-2xl flex items-start gap-2 font-medium">
                 <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
-            {/* MODE 1: Mobile Number + OTP (Option 3) */}
+            {/* MODE 1: Mobile Number + OTP Verification */}
             {searchMode === "OTP" && (
-              <div>
+              <div className="space-y-4">
                 {!otpSent ? (
-                  /* Step 1: Enter Phone Number */
+                  /* Step 1: Mobile Number Input */
                   <form onSubmit={handleSendOtp} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        Registered Mobile Number
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700">
+                        Enter Registered Mobile Number
                       </label>
-                      <div className="relative">
-                        <div className="absolute left-3.5 top-2.5 flex items-center gap-1.5 pointer-events-none text-slate-500 text-xs font-bold">
-                          <Phone className="w-4 h-4 text-slate-400" />
+
+                      <div className="flex items-center rounded-2xl bg-slate-50 border border-slate-200/90 focus-within:bg-white focus-within:border-[#1D68BD] focus-within:ring-4 focus-within:ring-blue-500/10 transition overflow-hidden">
+                        <div className="px-3.5 py-3 bg-slate-100/90 border-r border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1 shrink-0 select-none">
+                          <span className="text-sm">🇮🇳</span>
                           <span>+91</span>
                         </div>
                         <input
@@ -381,19 +389,19 @@ function BookingStatusContent() {
                           maxLength={10}
                           value={mobileNumber}
                           onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ""))}
-                          placeholder="e.g. 9037818750"
-                          className="w-full pl-16 pr-4 py-3 bg-slate-50 border border-slate-200/90 rounded-2xl text-sm font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 tabular-nums transition"
+                          placeholder="90378 18750"
+                          className="w-full px-3.5 py-3 bg-transparent text-sm font-bold text-slate-900 focus:outline-none tabular-nums tracking-wider placeholder:text-slate-400 placeholder:font-medium placeholder:tracking-normal"
                         />
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-1">
-                        Enter the 10-digit mobile number used when creating the reservation.
+                      <p className="text-[11px] text-slate-400">
+                        We will send a 4-digit code to your WhatsApp and SMS.
                       </p>
                     </div>
 
                     <button
                       type="submit"
                       disabled={loading || mobileNumber.length < 10}
-                      className="w-full bg-[#1D68BD] hover:bg-[#155299] text-white font-bold py-3 rounded-full text-xs shadow-md transition flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                      className="w-full bg-[#1D68BD] hover:bg-[#155299] active:scale-[0.98] text-white font-bold py-3.5 rounded-2xl text-xs sm:text-sm shadow-md shadow-blue-700/20 transition flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {loading ? (
                         <>
@@ -402,19 +410,21 @@ function BookingStatusContent() {
                         </>
                       ) : (
                         <>
-                          <span>Send Verification Code (WhatsApp &amp; SMS)</span>
+                          <span>Get Verification Code</span>
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
                     </button>
                   </form>
                 ) : (
-                  /* Step 2: Enter 4-Digit OTP */
+                  /* Step 2: 4-Digit OTP Entry */
                   <form onSubmit={handleVerifyOtp} className="space-y-4 animate-in fade-in">
-                    <div className="p-3 bg-sky-50 border border-sky-100 rounded-2xl flex items-center justify-between text-xs">
+                    <div className="p-3 bg-blue-50/80 border border-blue-100 rounded-2xl flex items-center justify-between text-xs">
                       <div>
-                        <span className="text-slate-500 text-[11px] block">Verification code sent to</span>
-                        <strong className="text-slate-900 font-bold tabular-nums">+91 {mobileNumber}</strong>
+                        <span className="text-slate-500 text-[10px] uppercase font-bold block">Code sent to</span>
+                        <strong className="text-slate-900 font-bold tabular-nums text-xs sm:text-sm">
+                          +91 {mobileNumber}
+                        </strong>
                       </div>
                       <button
                         type="button"
@@ -423,30 +433,30 @@ function BookingStatusContent() {
                           setOtpCode("");
                           setError(null);
                         }}
-                        className="text-xs font-semibold text-[#1D68BD] hover:underline"
+                        className="text-xs font-bold text-[#1D68BD] hover:underline"
                       >
-                        Change Number
+                        Change
                       </button>
                     </div>
 
                     {debugOtp && (
-                      <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs flex items-center justify-between">
-                        <span>Local Test Code: <strong className="font-mono text-sm">{debugOtp}</strong></span>
+                      <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs flex items-center justify-between font-medium">
+                        <span>Test Code: <strong className="font-mono text-sm">{debugOtp}</strong></span>
                         <button
                           type="button"
                           onClick={() => setOtpCode(debugOtp)}
-                          className="px-2 py-0.5 rounded-lg bg-amber-200 text-amber-900 font-bold text-[10px] hover:bg-amber-300"
+                          className="px-2.5 py-1 rounded-lg bg-amber-200 text-amber-900 font-bold text-[10px] hover:bg-amber-300 transition"
                         >
                           Auto Fill
                         </button>
                       </div>
                     )}
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
-                        <span>Enter 4-Digit Code</span>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700">Enter 4-Digit Code</label>
                         {otpTimer > 0 ? (
-                          <span className="text-slate-400 text-[11px] font-normal">
+                          <span className="text-slate-400 text-[11px]">
                             Resend in <strong className="tabular-nums font-bold text-slate-600">{otpTimer}s</strong>
                           </span>
                         ) : (
@@ -459,7 +469,7 @@ function BookingStatusContent() {
                             Resend Code
                           </button>
                         )}
-                      </label>
+                      </div>
 
                       <div className="relative">
                         <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
@@ -471,7 +481,7 @@ function BookingStatusContent() {
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                           placeholder="• • • •"
-                          className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200/90 rounded-2xl text-center text-lg font-bold tracking-widest text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 tabular-nums transition"
+                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200/90 rounded-2xl text-center text-xl font-bold tracking-widest text-slate-900 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-[#1D68BD] tabular-nums transition"
                         />
                       </div>
                     </div>
@@ -479,7 +489,7 @@ function BookingStatusContent() {
                     <button
                       type="submit"
                       disabled={loading || otpCode.length < 4}
-                      className="w-full bg-[#1D68BD] hover:bg-[#155299] text-white font-bold py-3 rounded-full text-xs shadow-md transition flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                      className="w-full bg-[#1D68BD] hover:bg-[#155299] active:scale-[0.98] text-white font-bold py-3.5 rounded-2xl text-xs sm:text-sm shadow-md shadow-blue-700/20 transition flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {loading ? (
                         <>
@@ -488,7 +498,7 @@ function BookingStatusContent() {
                         </>
                       ) : (
                         <>
-                          <span>Verify &amp; View My Bookings</span>
+                          <span>Verify &amp; View Pass</span>
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
@@ -498,49 +508,73 @@ function BookingStatusContent() {
               </div>
             )}
 
-            {/* MODE 2: Manual Reference ID Search */}
+            {/* MODE 2: Manual Reference ID Lookup */}
             {searchMode === "REF" && (
               <form onSubmit={handleRefLookupSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Booking Reference ID *
+                      Booking Reference ID
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={bookingId}
-                      onChange={(e) => setBookingId(e.target.value)}
-                      placeholder="e.g. MAK-20261124-001"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 tabular-nums font-semibold transition"
-                    />
+                    <div className="relative">
+                      <Ticket className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+                      <input
+                        type="text"
+                        required
+                        value={bookingId}
+                        onChange={(e) => setBookingId(e.target.value)}
+                        placeholder="MAK-20261124-001"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/90 rounded-2xl text-xs sm:text-sm text-slate-900 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-[#1D68BD] tabular-nums font-semibold transition"
+                      />
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Registered Phone Number *
+                      Registered Mobile Number
                     </label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="e.g. 9037818750"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 tabular-nums transition"
-                    />
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="90378 18750"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/90 rounded-2xl text-xs sm:text-sm text-slate-900 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-[#1D68BD] tabular-nums font-semibold transition"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#1D68BD] hover:bg-[#155299] text-white font-semibold py-3 rounded-full text-xs shadow-md transition flex items-center justify-center gap-2 active:scale-95"
+                  className="w-full bg-[#1D68BD] hover:bg-[#155299] active:scale-[0.98] text-white font-bold py-3.5 rounded-2xl text-xs sm:text-sm shadow-md shadow-blue-700/20 transition flex items-center justify-center gap-2"
                 >
                   <Search className="w-4 h-4" />
-                  <span>{loading ? "Searching..." : "Find My Booking"}</span>
+                  <span>{loading ? "Searching..." : "Find My Pass"}</span>
                 </button>
               </form>
             )}
+
+            {/* Micro Trust Strip */}
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-center gap-4 text-[11px] text-slate-500 font-medium">
+              <span className="flex items-center gap-1">
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                WhatsApp OTP
+              </span>
+              <span>&bull;</span>
+              <span className="flex items-center gap-1">
+                <QrCode className="w-3.5 h-3.5 text-blue-600" />
+                Digital QR Pass
+              </span>
+              <span>&bull;</span>
+              <span className="flex items-center gap-1">
+                <Lock className="w-3.5 h-3.5 text-purple-600" />
+                Secure
+              </span>
+            </div>
           </div>
         )}
 
@@ -548,7 +582,7 @@ function BookingStatusContent() {
             MULTIPLE BOOKINGS SELECTION LIST (If customer has > 1 booking)
            ========================================================================= */}
         {!bookingData && verifiedBookingsList.length > 1 && (
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4">
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] space-y-4 animate-in fade-in">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">Your Pool Reservations</h3>
@@ -620,7 +654,7 @@ function BookingStatusContent() {
             SELECTED BOOKING PASS & DETAILS
            ========================================================================= */}
         {bookingData && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in">
             {/* Top Navigation Bar when viewing pass */}
             <div className="flex items-center justify-between bg-white px-5 py-3 rounded-2xl border border-white shadow-xs text-xs">
               <button
@@ -850,20 +884,20 @@ function BookingStatusContent() {
       </section>
 
       {/* 3. "READY TO SWIM?" CTA BANNER */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-[#0077B6] via-[#0096C7] to-[#00B4D8] rounded-3xl p-6 sm:p-9 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="bg-gradient-to-r from-[#0077B6] via-[#0096C7] to-[#00B4D8] rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">
               Ready to Swim?
             </h2>
             <p className="text-cyan-100 text-xs sm:text-sm mt-1 max-w-xl font-normal leading-relaxed">
-              Book your slot now and enjoy a clean and premium indoor pool.
+              Book your slot now and enjoy a clean and premium indoor pool experience.
             </p>
           </div>
 
           <Link
             href="/book"
-            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-bold px-7 py-3 rounded-full text-xs sm:text-sm shadow-lg transition inline-flex items-center gap-2 shrink-0"
+            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-bold px-6 py-2.5 rounded-full text-xs sm:text-sm shadow-md transition inline-flex items-center gap-2 shrink-0"
           >
             <span>Book Now</span>
             <ArrowRight className="w-4 h-4" />

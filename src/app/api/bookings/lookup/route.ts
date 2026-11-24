@@ -7,21 +7,30 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const bookingId = searchParams.get("bookingId")?.trim();
-    const phone = searchParams.get("phone")?.trim();
+    const rawBookingId =
+      searchParams.get("bookingId") ||
+      searchParams.get("ref") ||
+      searchParams.get("id");
+    const rawPhone = searchParams.get("phone");
 
-    if (!bookingId || !phone) {
+    if (!rawBookingId || !rawPhone) {
       return NextResponse.json(
         { error: "Both Booking Reference ID and registered Phone Number are required for verification." },
         { status: 400 }
       );
     }
 
+    // Normalize booking ID (handles spaces, hyphens, and casing e.g. "MAK 20261124 001" -> "MAK-20261124-001")
+    const cleanBookingId = decodeURIComponent(rawBookingId)
+      .trim()
+      .replace(/[\s_]+/g, "-")
+      .toUpperCase();
+
     // Clean phone input for robust matching (e.g. +91 9800011111 vs 9800011111)
-    const normalizedQueryPhone = phone.replace(/\D/g, "");
+    const normalizedQueryPhone = rawPhone.replace(/\D/g, "");
 
     const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
+      where: { id: cleanBookingId },
       include: {
         payments: {
           orderBy: { createdAt: "desc" },
