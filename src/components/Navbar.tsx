@@ -217,8 +217,18 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* 3. Right Action Group: Ceramic Book Now Button */}
-        <div className="hidden sm:flex items-center shrink-0">
+        {/* 3. Right Action Group: Find Booking & Ceramic Book Now Button */}
+        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+          <Link
+            href="/booking-status"
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${
+              pathname === "/booking-status"
+                ? "bg-slate-100 text-slate-900 font-bold"
+                : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/70"
+            }`}
+          >
+            Find Booking
+          </Link>
           <Link
             href="/book"
             className="px-4 py-2 rounded-full text-xs font-bold text-white bg-slate-950 hover:bg-slate-800 shadow-[0_2px_10px_rgba(0,0,0,0.18),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center gap-1.5 transition active:scale-95"
@@ -278,7 +288,14 @@ export default function Navbar() {
             })}
           </nav>
 
-          <div className="pt-2 border-t border-slate-200/80">
+          <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
+            <Link
+              href="/booking-status"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full text-center py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 hover:bg-slate-200 transition"
+            >
+              Find My Booking / Pass
+            </Link>
             <Link
               href="/book"
               onClick={() => setMobileMenuOpen(false)}

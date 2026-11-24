@@ -45,11 +45,19 @@ function BookingStatusContent() {
   }, []);
 
   useEffect(() => {
-    const idParam = searchParams.get("id");
+    const idParam =
+      searchParams.get("ref") ||
+      searchParams.get("id") ||
+      searchParams.get("bookingId");
     const phoneParam = searchParams.get("phone");
-    if (idParam && phoneParam) {
+
+    if (idParam) {
       setBookingId(idParam);
+    }
+    if (phoneParam) {
       setPhone(phoneParam);
+    }
+    if (idParam && phoneParam) {
       performLookup(idParam, phoneParam);
     }
   }, [searchParams]);

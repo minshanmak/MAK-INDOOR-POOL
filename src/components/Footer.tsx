@@ -53,6 +53,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/booking-status" className="hover:text-white transition-colors text-cyan-300 font-medium">
+                  Find Booking / Pass
+                </Link>
+              </li>
+              <li>
                 <a
                   href={pathname === "/" ? "#pricing" : "/#pricing"}
                   className="hover:text-white transition-colors"
