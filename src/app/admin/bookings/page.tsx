@@ -160,11 +160,17 @@ export default function AdminBookingsPage() {
           bookingId,
         }),
       });
+      const data = await res.json();
       if (res.ok) {
+        setToastMsg("Guest admitted and checked in successfully!");
+        setTimeout(() => setToastMsg(null), 3000);
         fetchBookings();
+      } else {
+        alert(data.error || "Failed to admit booking.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to admit booking", err);
+      alert(err.message || "Failed to admit booking.");
     }
   };
 
@@ -472,6 +478,8 @@ export default function AdminBookingsPage() {
                 {displayedBookings.map((b) => {
                   const isCheckedIn = b.notes?.includes("Checked in at") || b.checkInStatus === "CHECKED_IN";
                   const isToday = b.bookingDate === todayStr;
+                  const isPast = b.bookingDate < todayStr;
+                  const isFuture = b.bookingDate > todayStr;
 
                   return (
                     <tr key={b.id} className="hover:bg-blue-50/30 transition-colors">
@@ -482,9 +490,17 @@ export default function AdminBookingsPage() {
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-600 font-semibold tabular-nums">
                           <span>{b.bookingDate}</span>
-                          {isToday && (
+                          {isToday ? (
                             <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
                               Today
+                            </span>
+                          ) : isPast ? (
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                              Past Date
+                            </span>
+                          ) : (
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                              Upcoming
                             </span>
                           )}
                         </div>
@@ -646,13 +662,37 @@ export default function AdminBookingsPage() {
                               Collect ₹{b.balanceAmount}
                             </button>
                           ) : b.status === "CONFIRMED" ? (
-                            <button
-                              type="button"
-                              onClick={() => handleAdmitBooking(b.id)}
-                              className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-bold px-3 py-1 rounded-xl shadow-xs active:scale-95 transition whitespace-nowrap"
-                            >
-                              Admit Guest
-                            </button>
+                            isPast ? (
+                              <button
+                                type="button"
+                                onClick={() => setEditingBooking(b)}
+                                title="Booking was for a past date. Please edit/reschedule date to today before admitting."
+                                className="bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-900 border border-amber-300 font-bold px-2.5 py-1 rounded-xl text-[11px] shadow-2xs transition whitespace-nowrap flex items-center gap-1"
+                              >
+                                <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
+                                <span>Reschedule Date</span>
+                              </button>
+                            ) : isFuture ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (confirm(`This booking is scheduled for future date ${b.bookingDate}. Are you sure you want to admit today?`)) {
+                                    handleAdmitBooking(b.id);
+                                  }
+                                }}
+                                className="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 border border-slate-300 font-bold px-2.5 py-1 rounded-xl text-[11px] shadow-2xs transition whitespace-nowrap"
+                              >
+                                Admit Early
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleAdmitBooking(b.id)}
+                                className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-bold px-3 py-1 rounded-xl shadow-xs active:scale-95 transition whitespace-nowrap"
+                              >
+                                Admit Guest
+                              </button>
+                            )
                           ) : null}
                         </div>
                       </td>

@@ -149,6 +149,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Cannot admit: Booking has been cancelled." }, { status: 400 });
   }
 
+  const now = new Date();
+  const todayStr = getPoolDate(now);
+  if (booking.bookingDate !== todayStr) {
+    const isPast = booking.bookingDate < todayStr;
+    return NextResponse.json(
+      {
+        error: `Cannot admit: Pass is for ${booking.bookingDate} (${isPast ? "Past Date" : "Future Date"}), not today (${todayStr}). Please reschedule or update the session date to today first.`,
+      },
+      { status: 400 }
+    );
+  }
+
   if (booking.checkInStatus === "CHECKED_IN") {
     return NextResponse.json(
       { error: `Customer was already admitted at ${booking.admittedAt?.toLocaleTimeString() || "earlier"}.` },

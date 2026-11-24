@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
-import { getPoolTime } from "@/lib/timezone";
+import { getPoolDate, getPoolTime } from "@/lib/timezone";
 import { checkAvailability, timeToMinutes } from "@/lib/booking-engine";
 import { calculateBookingPrice } from "@/lib/pricing";
 import { notificationService } from "@/lib/notifications";
@@ -144,6 +144,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
+    if (b.status === "CANCELLED") {
+      return NextResponse.json({ error: "Cannot admit: Booking has been cancelled." }, { status: 400 });
+    }
+
+    const todayStr = getPoolDate(new Date());
+    if (b.bookingDate !== todayStr) {
+      const isPast = b.bookingDate < todayStr;
+      return NextResponse.json(
+        {
+          error: `Cannot admit: Booking is for ${b.bookingDate} (${isPast ? "Past Date" : "Future Date"}), not today (${todayStr}). Please reschedule or update the session date to today first.`,
+        },
+        { status: 400 }
+      );
+    }
+
     const checkInTimeStr = getPoolTime(new Date());
     const existingNotes = b.notes ? `${b.notes} | ` : "";
     const updatedNotes = `${existingNotes}Checked in at ${checkInTimeStr}`;
@@ -152,6 +167,9 @@ export async function POST(req: NextRequest) {
       where: { id: bookingId },
       data: {
         notes: updatedNotes,
+        checkInStatus: "CHECKED_IN",
+        admittedAt: new Date(),
+        admittedByUserId: user.userId,
       },
     });
 
