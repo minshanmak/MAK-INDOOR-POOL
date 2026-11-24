@@ -20,6 +20,8 @@ import {
   Copy,
   ChevronRight,
   ShieldCheck,
+  MessageCircle,
+  Send,
 } from "lucide-react";
 import { getPoolDate } from "@/lib/timezone";
 
@@ -350,9 +352,52 @@ export default function StaffBookingModal({
     setTimeout(() => setCopiedWhatsApp(false), 3000);
   };
 
+  const [smsSending, setSmsSending] = useState(false);
+  const [smsSent, setSmsSent] = useState(false);
+
+  const handleDirectWhatsApp = () => {
+    if (!customerPhone || !successBooking) return;
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://makindoorpool.com";
+    const passUrl = `${origin}/booking-status?ref=${successBooking.id}&phone=${customerPhone}`;
+    const msg =
+      `🏊‍♂️ *M.A.K INDOOR POOL - BOOKING CONFIRMED* 🏊‍♂️\n\n` +
+      `Hello *${customerName}*, your pool reservation is locked!\n\n` +
+      `📋 *Pass ID:* ${successBooking.id}\n` +
+      `📅 *Date:* ${selectedDate}\n` +
+      `⏰ *Time Slot:* ${format12Hour(selectedSlot)} – ${format12Hour(calculatedEndTime)}\n` +
+      `👥 *Guests:* ${guestCount} Person(s)\n` +
+      `🏷️ *Type:* ${bookingType === "FAMILY" ? "Family (Exclusive Session)" : "Public Swimming"}\n\n` +
+      `💰 *Total:* ₹${pricing.totalPrice}\n` +
+      `✅ *Paid:* ₹${advanceAmount} (${paymentMethod})\n` +
+      (pricing.totalPrice - advanceAmount > 0 ? `💵 *Balance Due:* ₹${pricing.totalPrice - advanceAmount}\n\n` : `✅ *Fully Paid*\n\n`) +
+      `🎫 *Digital Pass:* \n${passUrl}\n\n` +
+      `📍 Kalathingalpara, Moonniyur | 📞 +91 99477 14716`;
+    const cleanPhone = customerPhone.replace(/\D/g, "").slice(-10);
+    window.open(`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  const handleDirectSms = async () => {
+    if (!successBooking) return;
+    setSmsSending(true);
+    try {
+      await fetch("/api/bookings/send-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: successBooking.id, channel: "SMS" }),
+      });
+      setSmsSent(true);
+    } catch {
+      // Ignore
+    } finally {
+      setSmsSending(false);
+    }
+  };
+
   const handleResetAndClose = () => {
     setSuccessBooking(null);
     setErrorMsg(null);
+    setSmsSent(false);
+    setSmsSending(false);
     setCustomerName("");
     setCustomerPhone("");
     setCustomerPlace("");
@@ -437,29 +482,48 @@ export default function StaffBookingModal({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={handleDirectWhatsApp}
+                className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center gap-2"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>WhatsApp to Customer</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDirectSms}
+                disabled={smsSending || smsSent}
+                className="px-4 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-semibold text-xs shadow-md shadow-blue-700/20 transition flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                <Send className="w-4 h-4" />
+                <span>{smsSent ? "SMS Sent!" : smsSending ? "Sending..." : "Send SMS"}</span>
+              </button>
+
               <button
                 type="button"
                 onClick={handleCopyWhatsApp}
-                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center gap-2"
+                className="px-3.5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1.5"
               >
-                <Copy className="w-4 h-4" />
-                <span>{copiedWhatsApp ? "Copied to Clipboard!" : "Copy WhatsApp Message"}</span>
+                <Copy className="w-3.5 h-3.5" />
+                <span>{copiedWhatsApp ? "Copied!" : "Copy"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-extrabold text-xs transition flex items-center justify-center gap-2"
+                className="px-3.5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1.5"
               >
-                <Printer className="w-4 h-4" />
-                <span>Print Receipt</span>
+                <Printer className="w-3.5 h-3.5" />
+                <span>Print</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold text-xs shadow-md shadow-blue-700/20 transition"
+                className="px-5 py-2.5 rounded-2xl bg-[#0F172A] hover:bg-slate-800 active:scale-95 text-white font-semibold text-xs shadow-md transition"
               >
                 Done
               </button>

@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   Lock,
   Waves,
+  MessageCircle,
+  PhoneCall,
 } from "lucide-react";
 import { formatSlotTime } from "@/lib/timezone";
 
@@ -390,6 +392,17 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
         </div>
       </div>
 
+      {/* Confirmation Delivery Notice */}
+      <div className="bg-sky-50/70 border border-sky-200/80 rounded-2xl p-3 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+          <span className="text-slate-700 font-medium text-[11px]">
+            Confirmation sent to SMS &amp; WhatsApp:{" "}
+            <strong className="font-semibold text-slate-900 tabular-nums">{booking.customerPhone}</strong>
+          </span>
+        </div>
+      </div>
+
       {/* Action Buttons: Download + WhatsApp */}
       {showActions && (
         <div className="space-y-2.5 pt-1">
@@ -399,8 +412,8 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
             onClick={handleWhatsAppShare}
             className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-semibold py-3.5 rounded-2xl text-xs shadow-md shadow-emerald-700/20 transition flex items-center justify-center gap-2"
           >
-            <Share2 className="w-4 h-4" />
-            <span>Share Pass on WhatsApp</span>
+            <MessageCircle className="w-4 h-4" />
+            <span>Open &amp; Save Pass on WhatsApp</span>
           </button>
 
           {/* Download Image Button */}
@@ -415,6 +428,28 @@ export default function BookingPassCard({ booking, showActions = true }: Booking
           </button>
         </div>
       )}
+
+      {/* Modification / Help Notice */}
+      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-center text-xs space-y-1">
+        <span className="text-[11px] font-semibold text-slate-600 block">
+          Need to change timing or add swimmers?
+        </span>
+        <p className="text-[11px] text-slate-500">
+          Contact pool reception:{" "}
+          <a href="tel:+919947714716" className="text-[#1D68BD] font-semibold hover:underline tabular-nums">
+            +91 99477 14716
+          </a>{" "}
+          or{" "}
+          <a
+            href="https://wa.me/919947714716"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-700 font-semibold hover:underline"
+          >
+            WhatsApp Help Desk
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

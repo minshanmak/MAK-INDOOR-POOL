@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
 import { getPoolTime } from "@/lib/timezone";
+import { checkAvailability, timeToMinutes } from "@/lib/booking-engine";
+import { calculateBookingPrice } from "@/lib/pricing";
+import { notificationService } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -164,6 +167,144 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, booking: updated });
+  }
+
+  if (action === "UPDATE_BOOKING") {
+    if (!hasPermission(user.role, user.permissions, PERMISSIONS.BOOKINGS_EDIT)) {
+      return NextResponse.json({ error: "Forbidden: You lack permission to edit bookings" }, { status: 403 });
+    }
+
+    const {
+      bookingId,
+      bookingDate: newDate,
+      startTime: newStartTime,
+      endTime: newEndTime,
+      guestCount: rawGuestCount,
+      customerName: newName,
+      customerPhone: newPhone,
+      customerPlace: newPlace,
+      notes: newNotes,
+      staffReason,
+    } = body;
+
+    if (!bookingId) {
+      return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
+    }
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
+
+    if (booking.status === "CANCELLED") {
+      return NextResponse.json({ error: "Cancelled bookings cannot be modified." }, { status: 400 });
+    }
+
+    const targetDate = newDate || booking.bookingDate;
+    const targetStartTime = newStartTime || booking.startTime;
+    const targetEndTime = newEndTime || booking.endTime;
+    const targetGuestCount = rawGuestCount ? Number(rawGuestCount) : booking.guestCount;
+    const targetName = newName !== undefined ? newName.trim() : booking.customerName;
+    const targetPhone = newPhone !== undefined ? newPhone.trim() : booking.customerPhone;
+    const targetPlace = newPlace !== undefined ? newPlace.trim() : booking.customerPlace;
+    const targetNotes = newNotes !== undefined ? newNotes : booking.notes;
+
+    if (targetGuestCount < 1) {
+      return NextResponse.json({ error: "Guest count must be at least 1." }, { status: 400 });
+    }
+
+    // Check slot collision if date or time changed
+    const slotChanged =
+      targetDate !== booking.bookingDate ||
+      targetStartTime !== booking.startTime ||
+      targetEndTime !== booking.endTime;
+
+    if (slotChanged) {
+      const avail = await checkAvailability({
+        bookingType: booking.type as any,
+        date: targetDate,
+        startTime: targetStartTime,
+        endTime: targetEndTime,
+        guestCount: targetGuestCount,
+      });
+
+      if (!avail.available) {
+        return NextResponse.json(
+          { error: avail.reason || "The selected time slot is not available." },
+          { status: 400 }
+        );
+      }
+    }
+
+    const startMin = timeToMinutes(targetStartTime);
+    const endMin = timeToMinutes(targetEndTime);
+    const durationHours = Math.max(1, (endMin - startMin) / 60);
+
+    const settings = await prisma.poolSetting.findUnique({ where: { id: "singleton_settings" } });
+    const pricing = calculateBookingPrice(
+      booking.type as any,
+      durationHours,
+      targetGuestCount,
+      {
+        defaultPublicRate: settings?.defaultPublicRate || 150,
+        defaultFamilyBaseRate: settings?.defaultFamilyBaseRate || 1500,
+        familyBaseGuests: settings?.familyBaseGuests || 12,
+        familyExtraRate: settings?.familyExtraRate || 100,
+        familyAdvanceAmount: settings?.familyAdvanceAmount || 750,
+      }
+    );
+
+    const newTotalAmount = pricing.totalPrice;
+    const newBalance = Math.max(0, Math.round((newTotalAmount - booking.totalPaid) * 100) / 100);
+    const newPaymentStatus = newBalance <= 0 ? "PAID" : (booking.totalPaid > 0 ? "PARTIAL" : "UNPAID");
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const b = await tx.booking.update({
+        where: { id: booking.id },
+        data: {
+          bookingDate: targetDate,
+          startTime: targetStartTime,
+          endTime: targetEndTime,
+          durationHours,
+          guestCount: targetGuestCount,
+          customerName: targetName,
+          customerPhone: targetPhone,
+          customerPlace: targetPlace,
+          notes: targetNotes,
+          totalAmount: newTotalAmount,
+          balanceAmount: newBalance,
+          paymentStatus: newPaymentStatus,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          entityType: "BOOKING",
+          entityId: b.id,
+          action: "UPDATE",
+          performedByUserId: user.userId,
+          userRole: user.role,
+          details: `Staff updated booking ${b.id}: Date ${booking.bookingDate}->${targetDate}, Slot ${booking.startTime}-${booking.endTime}->${targetStartTime}-${targetEndTime}, Guests ${booking.guestCount}->${targetGuestCount}. Total: ₹${newTotalAmount}, Balance: ₹${newBalance}. ${staffReason ? `Reason: ${staffReason}` : ""}`,
+        },
+      });
+
+      return b;
+    });
+
+    // Notify customer in background with updated pass
+    try {
+      await notificationService.sendBookingConfirmation(updated.id);
+    } catch (notifErr) {
+      console.error("Failed to dispatch updated confirmation:", notifErr);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Booking ${updated.id} updated successfully.`,
+      booking: updated,
+    });
   }
 
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });

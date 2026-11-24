@@ -792,8 +792,9 @@ export async function confirmBooking(input: ConfirmBookingInput) {
   // Automated notification and reminder scheduling outside transaction
   try {
     await notificationService.scheduleBookingReminders(result.id);
+    await notificationService.sendBookingConfirmation(result.id);
   } catch (remErr) {
-    console.error("Failed to schedule booking reminders:", remErr);
+    console.error("Failed to schedule booking reminders or send confirmation:", remErr);
   }
 
   return result;

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getPoolDate, formatSlotTime } from "@/lib/timezone";
 import StaffBookingModal from "@/components/admin/StaffBookingModal";
+import EditBookingModal from "@/components/admin/EditBookingModal";
 import {
   Calendar,
   Search,
@@ -19,6 +20,9 @@ import {
   Users,
   MapPin,
   Camera,
+  Edit3,
+  MessageCircle,
+  Send,
 } from "lucide-react";
 
 export default function AdminBookingsPage() {
@@ -38,6 +42,45 @@ export default function AdminBookingsPage() {
   const [collectMethod, setCollectMethod] = useState<"CASH" | "UPI">("CASH");
   const [collecting, setCollecting] = useState(false);
   const [collectError, setCollectError] = useState<string | null>(null);
+
+  // Edit Booking Modal & Toast State
+  const [editingBooking, setEditingBooking] = useState<any | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const handleWhatsAppPass = (b: any) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://makindoorpool.com";
+    const passUrl = `${origin}/booking-status?ref=${b.id}&phone=${b.customerPhone}`;
+    const text =
+      `🏊‍♂️ *M.A.K INDOOR POOL - DIGITAL PASS*\n` +
+      `Pass ID: *${b.id}*\n` +
+      `Date: *${b.bookingDate}* (${formatSlotTime(b.startTime)} – ${formatSlotTime(b.endTime)})\n` +
+      `Swimmers: *${b.guestCount} Guests*\n` +
+      `Paid: ₹${b.totalPaid} | Balance: ₹${b.balanceAmount}\n\n` +
+      `Show QR Pass at counter: \n${passUrl}\n\n` +
+      `Help / Enquiry: +91 99477 14716`;
+    const cleanPhone = b.customerPhone.replace(/\D/g, "").slice(-10);
+    window.open(`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const handleSendSms = async (b: any) => {
+    try {
+      const res = await fetch("/api/bookings/send-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: b.id, channel: "SMS" }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setToastMsg(`SMS confirmation dispatched to ${b.customerPhone}`);
+      } else {
+        setToastMsg(`SMS: ${data.error || "Failed"}`);
+      }
+    } catch {
+      setToastMsg("Failed to dispatch SMS.");
+    } finally {
+      setTimeout(() => setToastMsg(null), 3500);
+    }
+  };
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -334,6 +377,39 @@ export default function AdminBookingsPage() {
                       {/* Actions */}
                       <td className="px-5 py-3.5 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          {/* 1-Click WhatsApp Pass */}
+                          <button
+                            type="button"
+                            onClick={() => handleWhatsAppPass(b)}
+                            title="Send Pass to Customer WhatsApp"
+                            className="p-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 transition active:scale-95"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* 1-Click SMS Pass */}
+                          <button
+                            type="button"
+                            onClick={() => handleSendSms(b)}
+                            title="Send SMS Pass"
+                            className="p-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-[#1D68BD] border border-blue-200/80 transition active:scale-95"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Edit Booking (Staff Only) */}
+                          {b.status !== "CANCELLED" && (
+                            <button
+                              type="button"
+                              onClick={() => setEditingBooking(b)}
+                              title="Edit Booking (Time, Guests, Details)"
+                              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95 inline-flex items-center gap-1 text-[11px] font-semibold"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span className="hidden xl:inline">Edit</span>
+                            </button>
+                          )}
+
                           {isCheckedIn ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
@@ -466,6 +542,27 @@ export default function AdminBookingsPage() {
           fetchBookings();
         }}
       />
+
+      {/* Admin Edit Booking Modal */}
+      <EditBookingModal
+        booking={editingBooking}
+        isOpen={!!editingBooking}
+        onClose={() => setEditingBooking(null)}
+        onSuccess={() => {
+          setEditingBooking(null);
+          fetchBookings();
+          setToastMsg("Booking updated & customer notified!");
+          setTimeout(() => setToastMsg(null), 3500);
+        }}
+      />
+
+      {/* Operational Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#0F172A] text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700/80 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>{toastMsg}</span>
+        </div>
+      )}
     </div>
   );
 }

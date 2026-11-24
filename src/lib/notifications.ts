@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { getPoolDateTime } from "./timezone";
+import { getPoolDateTime, formatSlotTime } from "./timezone";
 
 export type NotificationChannel = "WHATSAPP" | "SMS" | "EMAIL";
 
@@ -15,6 +15,75 @@ export interface NotificationResult {
   messageId?: string;
   error?: string;
   isSimulated: boolean;
+}
+
+/**
+ * Builds formatted WhatsApp confirmation text (used for both automated dispatch and 1-click wa.me URLs)
+ */
+export function buildBookingConfirmationText(booking: {
+  id: string;
+  type: string;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  guestCount: number;
+  customerName: string;
+  customerPlace?: string | null;
+  customerPhone: string;
+  totalAmount: number;
+  totalPaid: number;
+  balanceAmount: number;
+}, appUrl?: string): string {
+  const baseOrigin = appUrl || process.env.NEXT_PUBLIC_APP_URL || "https://makindoorpool.com";
+  const passUrl = `${baseOrigin}/booking-status?ref=${booking.id}&phone=${booking.customerPhone}`;
+  const isFamily = booking.type === "FAMILY";
+  const sessionType = isFamily ? "Exclusive Family & Group" : "Public Swimming";
+
+  const balanceNotice = booking.balanceAmount > 0
+    ? `💵 *Balance Due at Counter:* ₹${booking.balanceAmount}`
+    : `✅ *Status:* Paid in Full [Verified]`;
+
+  return (
+    `🏊‍♂️ *M.A.K INDOOR POOL - BOOKING CONFIRMED* 🏊‍♂️\n` +
+    `Kalathingalpara, Moonniyur, Malappuram\n\n` +
+    `Hello *${booking.customerName}*, your pool reservation is locked!\n\n` +
+    `📋 *Pass ID:* ${booking.id}\n` +
+    `🏊 *Session Type:* ${sessionType}\n` +
+    `📅 *Date:* ${booking.bookingDate}\n` +
+    `⏰ *Time Slot:* ${formatSlotTime(booking.startTime)} – ${formatSlotTime(booking.endTime)}\n` +
+    `👥 *Swimmers:* ${booking.guestCount} ${booking.guestCount === 1 ? "Guest" : "Guests"}\n\n` +
+    `💰 *Total Amount:* ₹${booking.totalAmount}\n` +
+    `💳 *Paid Online:* ₹${booking.totalPaid}\n` +
+    `${balanceNotice}\n\n` +
+    `🎫 *Show Digital QR Pass at Reception:* \n${passUrl}\n\n` +
+    `📍 *Location:* Moonniyur, Malappuram (https://maps.google.com/?q=Kalathingalpara,Moonniyur)\n` +
+    `📞 *Reception Helpline:* +91 99477 14716\n\n` +
+    `_Please show the QR Pass at counter for admission. Have a refreshing swim!_`
+  );
+}
+
+/**
+ * Builds concise 160-char SMS text
+ */
+export function buildBookingConfirmationSms(booking: {
+  id: string;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  guestCount: number;
+  customerPhone: string;
+}, appUrl?: string): string {
+  const baseOrigin = appUrl || process.env.NEXT_PUBLIC_APP_URL || "https://makindoorpool.com";
+  const passUrl = `${baseOrigin}/booking-status?ref=${booking.id}&phone=${booking.customerPhone}`;
+  return `Booking Confirmed! MAK Indoor Pool Pass ID: ${booking.id} on ${booking.bookingDate} (${formatSlotTime(booking.startTime)}-${formatSlotTime(booking.endTime)}) for ${booking.guestCount} guests. Show digital pass: ${passUrl} Help: 9947714716`;
+}
+
+/**
+ * Helper to build direct WhatsApp wa.me URL
+ */
+export function buildWhatsAppDirectUrl(phone: string, message: string): string {
+  const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+  return `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
 
 export class NotificationService {
@@ -42,11 +111,16 @@ export class NotificationService {
 
       if (isSimulated) {
         messageId = `sim_msg_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-        console.log(`[SIMULATED ${params.channel}] To: ${params.recipient} | Template: ${params.templateName} | Payload:`, params.payload);
+        console.log(`[SIMULATED ${params.channel}] To: ${params.recipient} | Template: ${params.templateName}`);
       } else {
-        // Real API integrations (e.g. Meta Cloud API, Twilio, Resend)
-        // Production credentials will be called here
-        messageId = `prod_${Date.now()}`;
+        // Real Gateway Dispatches
+        if (params.channel === "SMS") {
+          messageId = await this.dispatchSms(params.recipient, params.payload.message || params.payload.text || "");
+        } else if (params.channel === "WHATSAPP") {
+          messageId = await this.dispatchWhatsApp(params.recipient, params.payload.message || params.payload.text || "");
+        } else {
+          messageId = `prod_${Date.now()}`;
+        }
       }
 
       // Record in authoritative audit NotificationLog
@@ -67,6 +141,7 @@ export class NotificationService {
         isSimulated,
       };
     } catch (err: any) {
+      console.error(`Failed to send ${params.channel} notification to ${params.recipient}:`, err);
       await prisma.notificationLog.create({
         data: {
           recipient: params.recipient,
@@ -74,7 +149,7 @@ export class NotificationService {
           templateName: params.templateName,
           payload: JSON.stringify(params.payload),
           status: "FAILED",
-          errorMessage: err.message,
+          errorMessage: err.message || "Failed dispatch",
           attempts: 1,
         },
       });
@@ -85,6 +160,177 @@ export class NotificationService {
         isSimulated,
       };
     }
+  }
+
+  /**
+   * Real SMS Gateway Dispatcher (Fast2SMS or Twilio)
+   */
+  private async dispatchSms(recipientPhone: string, messageText: string): Promise<string> {
+    const cleanPhone = recipientPhone.replace(/\D/g, "").slice(-10);
+
+    // 1. Fast2SMS (India Quick SMS route)
+    if (this.smsProvider === "FAST2SMS" && process.env.FAST2SMS_API_KEY) {
+      const res = await fetch("https://www.fast2sms.com/dev/bulkV2", {
+        method: "POST",
+        headers: {
+          "authorization": process.env.FAST2SMS_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          route: "q",
+          message: messageText,
+          numbers: cleanPhone,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.return === false) {
+        throw new Error(data.message || "Fast2SMS dispatch failed");
+      }
+      return data.request_id || `fast2sms_${Date.now()}`;
+    }
+
+    // 2. Twilio SMS
+    if (this.smsProvider === "TWILIO" && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const accountSid = process.env.TWILIO_ACCOUNT_SID;
+      const authToken = process.env.TWILIO_AUTH_TOKEN;
+      const fromPhone = process.env.TWILIO_FROM_PHONE;
+      const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+
+      const params = new URLSearchParams();
+      params.append("To", recipientPhone.startsWith("+") ? recipientPhone : `+91${cleanPhone}`);
+      params.append("From", fromPhone || "");
+      params.append("Body", messageText);
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString("base64")}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Twilio SMS dispatch failed");
+      }
+      return data.sid || `twilio_${Date.now()}`;
+    }
+
+    // Default fallback
+    return `sms_${Date.now()}`;
+  }
+
+  /**
+   * Real WhatsApp Gateway Dispatcher (Meta Cloud API or Twilio)
+   */
+  private async dispatchWhatsApp(recipientPhone: string, messageText: string): Promise<string> {
+    const cleanPhone = recipientPhone.replace(/\D/g, "").slice(-10);
+
+    // 1. Meta WhatsApp Cloud API
+    if (this.whatsappProvider === "META_CLOUD" && process.env.WHATSAPP_API_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID) {
+      const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+      const token = process.env.WHATSAPP_API_TOKEN;
+      const res = await fetch(`https://graph.facebook.com/v19.0/${phoneNumberId}/messages`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: `91${cleanPhone}`,
+          type: "text",
+          text: { preview_url: true, body: messageText },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error?.message || "Meta WhatsApp Cloud dispatch failed");
+      }
+      return data.messages?.[0]?.id || `meta_wa_${Date.now()}`;
+    }
+
+    // 2. Twilio WhatsApp
+    if (this.whatsappProvider === "TWILIO" && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const accountSid = process.env.TWILIO_ACCOUNT_SID;
+      const authToken = process.env.TWILIO_AUTH_TOKEN;
+      const fromWa = process.env.TWILIO_WHATSAPP_FROM || "whatsapp:+14155238886";
+      const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+
+      const params = new URLSearchParams();
+      params.append("To", `whatsapp:+91${cleanPhone}`);
+      params.append("From", fromWa);
+      params.append("Body", messageText);
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString("base64")}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Twilio WhatsApp dispatch failed");
+      }
+      return data.sid || `twilio_wa_${Date.now()}`;
+    }
+
+    return `wa_${Date.now()}`;
+  }
+
+  /**
+   * Dispatches instant booking confirmation across WhatsApp and SMS
+   */
+  async sendBookingConfirmation(
+    bookingId: string,
+    channels: ("WHATSAPP" | "SMS")[] = ["WHATSAPP", "SMS"]
+  ): Promise<{ whatsapp?: NotificationResult; sms?: NotificationResult }> {
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+    if (!booking || !booking.customerPhone) {
+      return {};
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://makindoorpool.com";
+    const waText = buildBookingConfirmationText(booking, appUrl);
+    const smsText = buildBookingConfirmationSms(booking, appUrl);
+
+    const results: { whatsapp?: NotificationResult; sms?: NotificationResult } = {};
+
+    if (channels.includes("WHATSAPP")) {
+      results.whatsapp = await this.send({
+        recipient: booking.customerPhone,
+        channel: "WHATSAPP",
+        templateName: "BOOKING_CONFIRMATION",
+        payload: {
+          bookingId: booking.id,
+          message: waText,
+          customerName: booking.customerName,
+          bookingDate: booking.bookingDate,
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+        },
+      });
+    }
+
+    if (channels.includes("SMS")) {
+      results.sms = await this.send({
+        recipient: booking.customerPhone,
+        channel: "SMS",
+        templateName: "BOOKING_CONFIRMATION_SMS",
+        payload: {
+          bookingId: booking.id,
+          message: smsText,
+          customerName: booking.customerName,
+        },
+      });
+    }
+
+    return results;
   }
 
   /**
@@ -155,4 +401,3 @@ export class NotificationService {
 }
 
 export const notificationService = new NotificationService();
-
