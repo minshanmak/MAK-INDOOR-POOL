@@ -360,3 +360,13 @@ model SystemAlert {
   createdAt          DateTime  @default(now())
 }
 
+model OtpVerification {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  code      String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+
