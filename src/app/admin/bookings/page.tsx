@@ -891,6 +891,7 @@ function AdminBookingsContent() {
         booking={editingBooking}
         isOpen={!!editingBooking}
         onClose={() => setEditingBooking(null)}
+        onRequestCancel={(b) => setCancellingBooking(b)}
         onSuccess={() => {
           setEditingBooking(null);
           fetchBookings();

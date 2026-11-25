@@ -19,6 +19,7 @@ import {
   Sparkles,
   AlertTriangle,
   ArrowRight,
+  XCircle,
 } from "lucide-react";
 import { formatSlotTime, getPoolDate } from "@/lib/timezone";
 
@@ -27,6 +28,7 @@ interface EditBookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (updatedBooking: any) => void;
+  onRequestCancel?: (booking: any) => void;
 }
 
 // 12-hour formatter for slot buttons
@@ -52,6 +54,7 @@ export default function EditBookingModal({
   isOpen,
   onClose,
   onSuccess,
+  onRequestCancel,
 }: EditBookingModalProps) {
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("10:00");
@@ -817,32 +820,50 @@ export default function EditBookingModal({
           </div>
 
           {/* Modal Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={submitting}
-              className="px-4 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting || !!slotConflict}
-              className="px-5 py-2 rounded-2xl bg-[#1D68BD] hover:bg-[#155299] text-white font-bold shadow-md shadow-blue-700/20 active:scale-95 transition flex items-center gap-2 disabled:opacity-50"
-            >
-              {submitting ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Updating &amp; Notifying...</span>
-                </>
-              ) : (
-                <>
-                  <span>Save Changes &amp; Notify</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </>
-              )}
-            </button>
+          <div className="flex items-center justify-between gap-2.5 pt-3 border-t border-slate-100">
+            {onRequestCancel && booking?.status !== "CANCELLED" && booking?.checkInStatus !== "CHECKED_IN" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onRequestCancel(booking);
+                }}
+                className="px-3.5 py-2 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold transition flex items-center gap-1.5 text-xs active:scale-95 border border-rose-200"
+              >
+                <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                <span>Cancel Reservation</span>
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={submitting}
+                className="px-4 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                disabled={submitting || !!slotConflict}
+                className="px-5 py-2 rounded-2xl bg-[#1D68BD] hover:bg-[#155299] text-white font-bold shadow-md shadow-blue-700/20 active:scale-95 transition flex items-center gap-2 disabled:opacity-50"
+              >
+                {submitting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Updating &amp; Notifying...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Save Changes &amp; Notify</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>
