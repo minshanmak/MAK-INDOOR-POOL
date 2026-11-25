@@ -27,10 +27,11 @@ export async function GET(req: NextRequest) {
   if (status && status !== "ALL") where.status = status;
   if (search) {
     where.OR = [
-      { id: { contains: search } },
-      { customerName: { contains: search } },
-      { customerPhone: { contains: search } },
-      { customerPlace: { contains: search } },
+      { id: { contains: search, mode: "insensitive" } },
+      { customerName: { contains: search, mode: "insensitive" } },
+      { customerPhone: { contains: search, mode: "insensitive" } },
+      { customerPlace: { contains: search, mode: "insensitive" } },
+      { startTime: { contains: search, mode: "insensitive" } },
     ];
   }
 

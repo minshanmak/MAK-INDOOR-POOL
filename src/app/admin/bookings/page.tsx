@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { getPoolDate, formatSlotTime } from "@/lib/timezone";
 import StaffBookingModal from "@/components/admin/StaffBookingModal";
 import EditBookingModal from "@/components/admin/EditBookingModal";
@@ -30,15 +31,33 @@ import {
   Sparkles,
 } from "lucide-react";
 
-export default function AdminBookingsPage() {
+function AdminBookingsContent() {
+  const searchParams = useSearchParams();
   const todayStr = useMemo(() => getPoolDate(), []);
+
+  const queryParamSearch = searchParams.get("search") || searchParams.get("q") || "";
+  const queryParamDate = searchParams.get("date");
+  const queryParamType = searchParams.get("type");
+
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "PUBLIC" | "FAMILY">("ALL");
+  const [search, setSearch] = useState(queryParamSearch);
+  const [filterType, setFilterType] = useState<"ALL" | "PUBLIC" | "FAMILY">(
+    queryParamType === "PUBLIC" || queryParamType === "FAMILY" ? queryParamType : "ALL"
+  );
   const [filterStatus, setFilterStatus] = useState("ALL");
-  const [selectedDate, setSelectedDate] = useState(todayStr);
+  const [selectedDate, setSelectedDate] = useState(queryParamDate || todayStr);
   const [filterPendingBalanceOnly, setFilterPendingBalanceOnly] = useState(false);
+
+  // Sync with URL search params changes
+  useEffect(() => {
+    const q = searchParams.get("search") || searchParams.get("q");
+    const d = searchParams.get("date");
+    const t = searchParams.get("type");
+    if (q !== null && q !== undefined) setSearch(q);
+    if (d) setSelectedDate(d);
+    if (t === "PUBLIC" || t === "FAMILY" || t === "ALL") setFilterType(t as any);
+  }, [searchParams]);
 
   // Create Staff Booking Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -96,7 +115,7 @@ export default function AdminBookingsPage() {
     }
   };
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
       let url = `/api/admin/bookings?type=${filterType}&status=${filterStatus}`;
@@ -110,11 +129,11 @@ export default function AdminBookingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterType, filterStatus, selectedDate, search]);
 
   useEffect(() => {
     fetchBookings();
-  }, [filterType, filterStatus, selectedDate]);
+  }, [fetchBookings]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -436,9 +455,19 @@ export default function AdminBookingsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by ID, name or phone..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition-all font-medium"
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#1D68BD]/20 transition-all font-medium"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="text-slate-400 hover:text-slate-600 p-0.5 absolute right-2.5 top-2.5 rounded"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
           <button
             type="submit"
@@ -448,6 +477,29 @@ export default function AdminBookingsPage() {
           </button>
         </form>
       </div>
+
+      {/* Active Filter Banner */}
+      {search && (
+        <div className="bg-purple-50/80 border border-purple-200/80 p-3 rounded-2xl flex items-center justify-between gap-2 text-xs shadow-2xs animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-purple-900">Active Filter:</span>
+            <span className="font-mono bg-white px-2.5 py-0.5 rounded-lg border border-purple-200 text-purple-950 font-bold text-xs">
+              {search}
+            </span>
+            <span className="text-slate-500 text-[11px] hidden sm:inline">
+              Showing matching reservation details
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSearch("")}
+            className="text-xs font-bold text-[#1D68BD] hover:underline flex items-center gap-1"
+          >
+            <span>Clear Filter / Show All</span>
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* 4. Bookings Ledger Table (Zero Unwanted Wrapping & High Contrast) */}
       <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] overflow-hidden">
@@ -814,5 +866,19 @@ export default function AdminBookingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminBookingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 text-center text-slate-400 text-xs">
+          Loading bookings ledger...
+        </div>
+      }
+    >
+      <AdminBookingsContent />
+    </Suspense>
   );
 }

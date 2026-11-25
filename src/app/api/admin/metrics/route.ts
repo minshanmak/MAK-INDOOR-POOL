@@ -239,8 +239,11 @@ export async function GET() {
     const remainingSpots = Math.max(0, maxCapacity - totalSwimmers);
 
     let status = "Available";
-    let customerName = bookedFamily?.customerName;
+    let customerName = bookedFamily?.customerName || (bookedPublic ? bookedPublic.customerName : undefined);
     let guestCount = bookedFamily?.guestCount || (totalSwimmers > 0 ? totalSwimmers : undefined);
+    const bookingId = bookedFamily?.id || bookedPublic?.id;
+    const bookingType = bookedFamily ? "FAMILY" : (bookedPublic ? "PUBLIC" : undefined);
+    const customerPhone = bookedFamily?.customerPhone || bookedPublic?.customerPhone;
 
     if (bookedFamily) {
       status = "Booked";
@@ -256,9 +259,13 @@ export async function GET() {
       label,
       status,
       customerName,
+      customerPhone,
+      bookingId,
+      bookingType,
       guestCount,
       remainingSpots,
       maxCapacity,
+      date: todayStr,
     });
   }
 
