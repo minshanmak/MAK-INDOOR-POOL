@@ -264,11 +264,10 @@ export default function AdminBookingsPage() {
         {/* Metric 4: Pending Counter Balance */}
         <div
           onClick={() => setFilterPendingBalanceOnly(!filterPendingBalanceOnly)}
-          className={`p-4 rounded-3xl border cursor-pointer transition-all ${
-            filterPendingBalanceOnly
-              ? "bg-amber-100/70 border-amber-300 ring-2 ring-amber-400"
-              : "bg-white border-slate-100 shadow-[0_4px_20px_rgba(20,60,110,0.04)] hover:border-amber-200"
-          } flex items-center gap-3`}
+          className={`p-4 rounded-3xl border cursor-pointer transition-all ${filterPendingBalanceOnly
+            ? "bg-amber-100/70 border-amber-300 ring-2 ring-amber-400"
+            : "bg-white border-slate-100 shadow-[0_4px_20px_rgba(20,60,110,0.04)] hover:border-amber-200"
+            } flex items-center gap-3`}
           title="Click to filter bookings with pending balance"
         >
           <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
@@ -280,9 +279,8 @@ export default function AdminBookingsPage() {
             </span>
             <div className="flex items-baseline justify-between mt-0.5">
               <span
-                className={`text-xl font-bold tabular-nums ${
-                  metrics.pendingBalance > 0 ? "text-amber-700" : "text-slate-900"
-                }`}
+                className={`text-xl font-bold tabular-nums ${metrics.pendingBalance > 0 ? "text-amber-700" : "text-slate-900"
+                  }`}
               >
                 ₹{metrics.pendingBalance.toLocaleString()}
               </span>
@@ -303,33 +301,30 @@ export default function AdminBookingsPage() {
               setFilterType("ALL");
               setFilterPendingBalanceOnly(false);
             }}
-            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-              filterType === "ALL" && !filterPendingBalanceOnly
-                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
-                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-            }`}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${filterType === "ALL" && !filterPendingBalanceOnly
+              ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+              }`}
           >
             All Bookings
           </button>
           <button
             type="button"
             onClick={() => setFilterType("PUBLIC")}
-            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-              filterType === "PUBLIC"
-                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
-                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-            }`}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${filterType === "PUBLIC"
+              ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+              }`}
           >
             Public Swimming
           </button>
           <button
             type="button"
             onClick={() => setFilterType("FAMILY")}
-            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-              filterType === "FAMILY"
-                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
-                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-            }`}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${filterType === "FAMILY"
+              ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+              }`}
           >
             Family Booking
           </button>
@@ -342,11 +337,10 @@ export default function AdminBookingsPage() {
                 setSelectedDate(todayStr);
               }
             }}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all inline-flex items-center gap-1.5 ${
-              selectedDate === todayStr
-                ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
-            }`}
+            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all inline-flex items-center gap-1.5 ${selectedDate === todayStr
+              ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+              : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+              }`}
           >
             <Calendar className="w-3.5 h-3.5" />
             <span>Today Only</span>
@@ -530,11 +524,10 @@ export default function AdminBookingsPage() {
                       {/* Type Badge (Single Line Pill) */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight whitespace-nowrap ${
-                            b.type === "FAMILY"
-                              ? "bg-purple-100 text-purple-800 border border-purple-200/60"
-                              : "bg-sky-100 text-sky-800 border border-sky-200/60"
-                          }`}
+                          className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight whitespace-nowrap ${b.type === "FAMILY"
+                            ? "bg-purple-100 text-purple-800 border border-purple-200/60"
+                            : "bg-sky-100 text-sky-800 border border-sky-200/60"
+                            }`}
                         >
                           {b.type === "FAMILY" ? "Family Session" : "Public Swimming"}
                         </span>
@@ -580,15 +573,14 @@ export default function AdminBookingsPage() {
                       {/* Status (Single Line Badge) */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight whitespace-nowrap ${
-                            isCheckedIn
-                              ? "bg-sky-100 text-sky-800 border border-sky-200/80"
-                              : b.status === "CONFIRMED"
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight whitespace-nowrap ${isCheckedIn
+                            ? "bg-sky-100 text-sky-800 border border-sky-200/80"
+                            : b.status === "CONFIRMED"
                               ? "bg-emerald-100 text-emerald-800 border border-emerald-200/80"
                               : b.status === "CANCELLED"
-                              ? "bg-rose-100 text-rose-800 border border-rose-200/80"
-                              : "bg-amber-100 text-amber-800 border border-amber-200/80"
-                          }`}
+                                ? "bg-rose-100 text-rose-800 border border-rose-200/80"
+                                : "bg-amber-100 text-amber-800 border border-amber-200/80"
+                            }`}
                         >
                           {isCheckedIn ? (
                             <>

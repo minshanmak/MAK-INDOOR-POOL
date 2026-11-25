@@ -30,8 +30,10 @@ import {
   Eye,
   Sparkles,
   LifeBuoy,
+  ShieldCheck,
 } from "lucide-react";
 import MakLogo from "@/components/MakLogo";
+import AuditLogsView from "@/components/admin/AuditLogsView";
 import {
   parseGalleryPhotos,
   GalleryPhotoItem,
@@ -57,6 +59,7 @@ export default function AdminSettingsPage() {
     | "retention"
     | "backup"
     | "maintenance"
+    | "audit"
   >("general");
 
   // Public Gallery Studio State
@@ -243,6 +246,7 @@ export default function AdminSettingsPage() {
     { id: "retention", label: "Data Retention", icon: Database },
     { id: "backup", label: "Backup & Recovery", icon: RefreshCw },
     { id: "maintenance", label: "Maintenance Mode", icon: Sliders },
+    { id: "audit", label: "Audit Logs", icon: ShieldCheck },
   ];
 
   const getCategoryBadgeClass = (cat: string) => {
@@ -872,24 +876,46 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
             )}
+
+            {/* Audit Logs Section */}
+            {activeSection === "audit" && (
+              <div className="space-y-4">
+                <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+                  <div>
+                    <h2 className="font-extrabold text-sm text-slate-900">System Audit Trail</h2>
+                    <p className="text-[11px] text-slate-400">Activity and parameter change logs</p>
+                  </div>
+                  <Link
+                    href="/admin/audit-logs"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#1D68BD] hover:underline"
+                  >
+                    <span>Open Full Screen View</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+                <AuditLogsView showHeader={false} />
+              </div>
+            )}
           </div>
 
-          {/* Blue Save Changes Button */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-            <span className="text-[11px] text-slate-400">
-              {activeSection === "gallery"
-                ? `Changes sync to homepage gallery immediately upon saving.`
-                : `Pool settings are applied across client checkout & admin counters.`}
-            </span>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-[#1D68BD] hover:bg-[#155299] active:scale-[0.99] text-white font-extrabold px-6 py-3 rounded-2xl shadow-md shadow-blue-700/20 transition-all text-xs flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              {saving ? "Saving Changes..." : "Save Changes"}
-            </button>
-          </div>
+          {/* Blue Save Changes Button (Hidden on Audit View) */}
+          {activeSection !== "audit" && (
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+              <span className="text-[11px] text-slate-400">
+                {activeSection === "gallery"
+                  ? `Changes sync to homepage gallery immediately upon saving.`
+                  : `Pool settings are applied across client checkout & admin counters.`}
+              </span>
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-[#1D68BD] hover:bg-[#155299] active:scale-[0.99] text-white font-extrabold px-6 py-3 rounded-2xl shadow-md shadow-blue-700/20 transition-all text-xs flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {saving ? "Saving Changes..." : "Save Changes"}
+              </button>
+            </div>
+          )}
         </div>
       </form>
 

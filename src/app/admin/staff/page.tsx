@@ -13,13 +13,14 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { PERMISSIONS } from "@/lib/permissions";
+import AuditLogsView from "@/components/admin/AuditLogsView";
 
 export default function AdminStaffPage() {
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Tabs: "MEMBERS" | "ROLES"
-  const [activeTab, setActiveTab] = useState<"MEMBERS" | "ROLES">("MEMBERS");
+  // Tabs: "MEMBERS" | "ROLES" | "AUDIT_LOGS"
+  const [activeTab, setActiveTab] = useState<"MEMBERS" | "ROLES" | "AUDIT_LOGS">("MEMBERS");
 
   // New Staff Modal State
   const [showCreate, setShowCreate] = useState(false);
@@ -158,22 +159,63 @@ export default function AdminStaffPage() {
           >
             Roles & Permissions
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("AUDIT_LOGS")}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              activeTab === "AUDIT_LOGS"
+                ? "bg-[#1D68BD] text-white shadow-md shadow-blue-600/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Audit Trail</span>
+          </button>
         </div>
 
-        <button
-          onClick={() => {
-            setError(null);
-            setShowCreate(true);
-          }}
-          className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-center"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Staff</span>
-        </button>
+        {activeTab === "MEMBERS" && (
+          <button
+            onClick={() => {
+              setError(null);
+              setShowCreate(true);
+            }}
+            className="bg-[#1D68BD] hover:bg-[#155299] active:scale-95 text-white font-extrabold px-4 py-2 rounded-2xl text-xs shadow-md shadow-blue-700/20 transition flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-center"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Staff</span>
+          </button>
+        )}
       </div>
 
-      {/* Staff Table Card (Exact Mockup Match) */}
-      <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] overflow-hidden">
+      {activeTab === "AUDIT_LOGS" ? (
+        <AuditLogsView showHeader={false} />
+      ) : activeTab === "ROLES" ? (
+        <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] p-6 space-y-4">
+          <div className="border-b border-slate-100 pb-3">
+            <h3 className="text-sm font-bold text-slate-900">System Roles &amp; Permissions Matrix</h3>
+            <p className="text-xs text-slate-500">Security permissions mapped to operational staff roles</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div className="p-4 rounded-2xl border border-purple-100 bg-purple-50/30 space-y-2">
+              <span className="font-bold text-purple-900 block text-sm">Super Admin</span>
+              <p className="text-[11px] text-slate-600">Full system master access. Can configure database, manage owners, access raw logs, and alter operating parameters.</p>
+              <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">100% Capabilities</span>
+            </div>
+            <div className="p-4 rounded-2xl border border-blue-100 bg-blue-50/30 space-y-2">
+              <span className="font-bold text-[#1D68BD] block text-sm">Pool Owner</span>
+              <p className="text-[11px] text-slate-600">Owner-level governance. Can manage staff accounts, adjust ticket pricing, review end-of-day closings, approve cancellations, and inspect audit logs.</p>
+              <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">Owner Access</span>
+            </div>
+            <div className="p-4 rounded-2xl border border-emerald-100 bg-emerald-50/30 space-y-2">
+              <span className="font-bold text-emerald-900 block text-sm">Duty Staff</span>
+              <p className="text-[11px] text-slate-600">Operational front-desk access. Create walk-in entries, verify tickets, collect balances, log pool chemical tests, and submit day closings.</p>
+              <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Operational Level</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Staff Table Card (Exact Mockup Match) */
+        <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-slate-400 text-xs">Loading staff ledger...</div>
         ) : staff.length > 0 ? (
@@ -266,6 +308,7 @@ export default function AdminStaffPage() {
           <div className="p-8 text-center text-slate-400 text-xs">No staff accounts found.</div>
         )}
       </div>
+      )}
 
       {/* Create Staff Modal */}
       {showCreate && (

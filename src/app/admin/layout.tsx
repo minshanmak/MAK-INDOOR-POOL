@@ -29,6 +29,7 @@ import {
   CreditCard,
   QrCode,
   CheckCircle2,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -188,6 +189,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ...(isOwnerOrAdmin
       ? [
           { name: "Staff & Permissions", href: "/admin/staff", icon: Users2 },
+          { name: "Audit Trail", href: "/admin/audit-logs", icon: ShieldCheck },
           { name: "System Settings", href: "/admin/settings", icon: Settings },
         ]
       : []),
@@ -272,6 +274,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return {
         title: "Staff & Permissions",
         subtitle: "Manage staff accounts and their access permissions",
+      };
+    }
+    if (pathname.startsWith("/admin/audit-logs")) {
+      return {
+        title: "Audit Trail",
+        subtitle: "Tamper-proof system activity, staff overrides, and financial audit logs",
       };
     }
     if (pathname.startsWith("/admin/settings")) {

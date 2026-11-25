@@ -667,11 +667,10 @@ function BookingContent() {
                   }`}
               >
                 <div className="flex items-center justify-between pb-2">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
-                    bookingType === "FAMILY"
-                      ? "bg-[#1D68BD] text-white"
-                      : "bg-slate-100 text-slate-600"
-                  }`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${bookingType === "FAMILY"
+                    ? "bg-[#1D68BD] text-white"
+                    : "bg-slate-100 text-slate-600"
+                    }`}>
                     Private Session
                   </span>
 
@@ -724,11 +723,10 @@ function BookingContent() {
                   }`}
               >
                 <div className="flex items-center justify-between pb-2">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
-                    bookingType === "PUBLIC"
-                      ? "bg-[#1D68BD] text-white"
-                      : "bg-slate-100 text-slate-600"
-                  }`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${bookingType === "PUBLIC"
+                    ? "bg-[#1D68BD] text-white"
+                    : "bg-slate-100 text-slate-600"
+                    }`}>
                     Public Entry
                   </span>
 
@@ -898,10 +896,9 @@ function BookingContent() {
                         if (isDisabled) return;
                         setStartTime(slot);
                       }}
-                      className={`p-2.5 rounded-xl border text-center transition-all select-none active:scale-95 ${
-                        isSelected
-                          ? "bg-[#1D68BD] border-[#1D68BD] text-white shadow-xs font-semibold"
-                          : isPast
+                      className={`p-2.5 rounded-xl border text-center transition-all select-none active:scale-95 ${isSelected
+                        ? "bg-[#1D68BD] border-[#1D68BD] text-white shadow-xs font-semibold"
+                        : isPast
                           ? "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed opacity-50"
                           : isBooked
                             ? "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
@@ -913,10 +910,9 @@ function BookingContent() {
                       <div className="text-xs sm:text-sm font-semibold tracking-tight tabular-nums">
                         {formatTimeSlot(slot)}
                       </div>
-                      <div className={`text-[11px] font-medium mt-0.5 ${
-                        isSelected
-                          ? "text-blue-100"
-                          : isPast
+                      <div className={`text-[11px] font-medium mt-0.5 ${isSelected
+                        ? "text-blue-100"
+                        : isPast
                           ? "text-slate-400"
                           : isBooked
                             ? "text-slate-400"
@@ -987,7 +983,7 @@ function BookingContent() {
                             : durationHours === h
                               ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
                               : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
-                          }`}
+                            }`}
                         >
                           <div className="text-xs sm:text-sm tabular-nums">{h} {h === 1 ? "Hour" : "Hours"}</div>
                         </button>
@@ -1045,9 +1041,8 @@ function BookingContent() {
                         key={num}
                         type="button"
                         onClick={() => setGuestCount(num)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 tabular-nums ${
-                          guestCount === num ? "bg-[#1D68BD] text-white font-semibold" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 tabular-nums ${guestCount === num ? "bg-[#1D68BD] text-white font-semibold" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          }`}
                       >
                         {num} {num === 12 ? "(Base)" : ""}
                       </button>
@@ -1058,9 +1053,8 @@ function BookingContent() {
                         key={num}
                         type="button"
                         onClick={() => setGuestCount(num)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 tabular-nums ${
-                          guestCount === num ? "bg-[#1D68BD] text-white font-semibold" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 tabular-nums ${guestCount === num ? "bg-[#1D68BD] text-white font-semibold" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          }`}
                       >
                         {num}
                       </button>
@@ -1212,11 +1206,10 @@ function BookingContent() {
                         if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: undefined }));
                         if (error) setError(null);
                       }}
-                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-normal transition focus:outline-none focus:ring-2 ${
-                        fieldErrors.name
-                          ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
-                          : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#1D68BD]"
-                      }`}
+                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-normal transition focus:outline-none focus:ring-2 ${fieldErrors.name
+                        ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
+                        : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#1D68BD]"
+                        }`}
                     />
                     <User className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.name ? "text-rose-500" : "text-slate-400"}`} />
                   </div>
@@ -1324,11 +1317,10 @@ function BookingContent() {
                         if (fieldErrors.place) setFieldErrors((prev) => ({ ...prev, place: undefined }));
                         if (error) setError(null);
                       }}
-                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-normal transition focus:outline-none focus:ring-2 ${
-                        fieldErrors.place
-                          ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
-                          : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#1D68BD]"
-                      }`}
+                      className={`w-full pl-9 pr-3.5 py-3 sm:py-2.5 rounded-xl text-base sm:text-xs font-normal transition focus:outline-none focus:ring-2 ${fieldErrors.place
+                        ? "bg-rose-50/80 border-2 border-rose-500 text-rose-950 focus:ring-rose-400/30"
+                        : "bg-slate-50 border border-slate-200 text-slate-900 focus:ring-[#1D68BD]"
+                        }`}
                     />
                     <MapPin className={`w-4 h-4 absolute left-3 top-3.5 sm:top-3 pointer-events-none ${fieldErrors.place ? "text-rose-500" : "text-slate-400"}`} />
                   </div>
@@ -1351,11 +1343,10 @@ function BookingContent() {
                           if (fieldErrors.place) setFieldErrors((prev) => ({ ...prev, place: undefined }));
                           if (error) setError(null);
                         }}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 ${
-                          customerPlace.toLowerCase() === town.toLowerCase()
-                            ? "bg-[#1D68BD] text-white font-semibold"
-                            : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition shrink-0 active:scale-95 ${customerPlace.toLowerCase() === town.toLowerCase()
+                          ? "bg-[#1D68BD] text-white font-semibold"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                          }`}
                       >
                         {town}
                       </button>
@@ -1483,11 +1474,10 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => setSelectedPayMethod("UPI")}
-                    className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${
-                      selectedPayMethod === "UPI"
-                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
-                    }`}
+                    className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${selectedPayMethod === "UPI"
+                      ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
+                      }`}
                   >
                     <Smartphone className="w-4 h-4 mx-auto mb-1" />
                     <span className="text-xs block">UPI / QR</span>
@@ -1496,11 +1486,10 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => setSelectedPayMethod("CARD")}
-                    className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${
-                      selectedPayMethod === "CARD"
-                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
-                    }`}
+                    className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${selectedPayMethod === "CARD"
+                      ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
+                      }`}
                   >
                     <CreditCard className="w-4 h-4 mx-auto mb-1" />
                     <span className="text-xs block">Card</span>
@@ -1509,11 +1498,10 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => setSelectedPayMethod("NETBANKING")}
-                    className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${
-                      selectedPayMethod === "NETBANKING"
-                        ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
-                    }`}
+                    className={`py-3 px-2 rounded-xl border text-center transition active:scale-95 select-none ${selectedPayMethod === "NETBANKING"
+                      ? "bg-[#1D68BD] text-white border-[#1D68BD] font-semibold shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium"
+                      }`}
                   >
                     <Lock className="w-4 h-4 mx-auto mb-1" />
                     <span className="text-xs block">Net Banking</span>
