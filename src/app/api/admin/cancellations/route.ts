@@ -41,9 +41,19 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { action, bookingId, refundId, refundAmount, reason } = body;
+  const {
+    action,
+    bookingId,
+    refundId,
+    refundAmount,
+    refundDecision,
+    markProcessed,
+    refundRef,
+    notifyCustomer = true,
+    reason,
+  } = body;
 
-  // 1. APPROVE CANCELLATION (Releases slot)
+  // 1. APPROVE / EXECUTE CANCELLATION (Releases slot)
   if (action === "APPROVE_CANCELLATION") {
     if (!hasPermission(user.role, user.permissions, PERMISSIONS.BOOKINGS_CANCEL_APPROVE)) {
       return NextResponse.json(
@@ -52,55 +62,221 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
-      const b = await tx.booking.findUnique({
-        where: { id: bookingId },
-        include: { payments: true },
-      });
-      if (!b) throw new Error("Booking not found.");
+    if (!bookingId) {
+      return NextResponse.json({ error: "Booking ID is required." }, { status: 400 });
+    }
 
-      // Transition to CANCELLED (this officially releases the slot!)
-      const cancelledBooking = await tx.booking.update({
-        where: { id: b.id },
-        data: {
-          status: "CANCELLED",
-          cancelledAt: new Date(),
-        },
-      });
+    let refundInfoForNotification: { status: string; approvedAmount: number; reason?: string } | undefined;
 
-      // If customer had made payments and refund is requested, create a PENDING refund record
-      if (b.totalPaid > 0) {
-        const proposedRefundAmount = Number(refundAmount) || b.totalPaid;
-        await tx.refund.create({
+    try {
+      const updated = await prisma.$transaction(async (tx) => {
+        const b = await tx.booking.findUnique({
+          where: { id: bookingId },
+          include: { payments: true, refunds: true },
+        });
+        if (!b) throw new Error("Booking not found.");
+
+        if (b.status === "CANCELLED") {
+          throw new Error("This booking has already been cancelled.");
+        }
+
+        if (b.checkInStatus === "CHECKED_IN") {
+          throw new Error("Cannot cancel booking: guests are already checked in.");
+        }
+
+        const isOwnerOrAdmin = user.role === "POOL_OWNER" || user.role === "SUPER_ADMIN";
+
+        // Determine explicit refund amount
+        let finalRefundAmount = 0;
+        if (refundDecision === "NO_REFUND") {
+          finalRefundAmount = 0;
+        } else if (refundAmount !== undefined && refundAmount !== null && refundAmount !== "") {
+          finalRefundAmount = Math.max(0, Math.min(b.totalPaid, Number(refundAmount)));
+        } else if (refundDecision === "FULL_REFUND" || !refundDecision) {
+          finalRefundAmount = b.totalPaid;
+        }
+
+        const finalReason = reason?.trim() || b.cancellationReason || "Cancelled by Management";
+
+        // Transition to CANCELLED (releases slot)
+        const cancelledBooking = await tx.booking.update({
+          where: { id: b.id },
           data: {
-            bookingId: b.id,
-            requestedAmount: b.totalPaid,
-            approvedAmount: user.role === "POOL_OWNER" || user.role === "SUPER_ADMIN" ? proposedRefundAmount : 0,
-            status: user.role === "POOL_OWNER" || user.role === "SUPER_ADMIN" ? "APPROVED" : "PENDING",
-            reason: reason || b.cancellationReason || "Booking cancelled",
-            approvedByUserId: user.role === "POOL_OWNER" || user.role === "SUPER_ADMIN" ? user.userId : null,
+            status: "CANCELLED",
+            cancelledAt: new Date(),
+            cancellationReason: finalReason,
+            paymentStatus: finalRefundAmount >= b.totalPaid && b.totalPaid > 0 ? "REFUNDED" : b.paymentStatus,
           },
+        });
+
+        // Record refund if customer paid anything
+        if (b.totalPaid > 0) {
+          const refundStatus = markProcessed ? "PROCESSED" : isOwnerOrAdmin ? "APPROVED" : "PENDING";
+          const newRefund = await tx.refund.create({
+            data: {
+              bookingId: b.id,
+              requestedAmount: b.totalPaid,
+              approvedAmount: isOwnerOrAdmin ? finalRefundAmount : 0,
+              status: refundStatus,
+              reason: finalReason,
+              approvedByUserId: isOwnerOrAdmin ? user.userId : null,
+              transactionRef: markProcessed ? (refundRef || "Counter Cash/UPI") : null,
+              processedAt: markProcessed ? new Date() : null,
+            },
+          });
+
+          refundInfoForNotification = {
+            status: newRefund.status,
+            approvedAmount: finalRefundAmount,
+            reason: finalReason,
+          };
+        } else {
+          refundInfoForNotification = {
+            status: "NO_PAYMENT",
+            approvedAmount: 0,
+            reason: finalReason,
+          };
+        }
+
+        await tx.auditLog.create({
+          data: {
+            entityType: "BOOKING",
+            entityId: b.id,
+            action: "APPROVE",
+            performedByUserId: user.userId,
+            userRole: user.role,
+            details: `Approved cancellation for booking ${b.id}. Slot released. Refund: ₹${finalRefundAmount} (${markProcessed ? "Processed immediately" : "Approved"}). Reason: ${finalReason}`,
+          },
+        });
+
+        return cancelledBooking;
+      });
+
+      // Cancel any scheduled future reminders
+      await notificationService.cancelObsoleteReminders(bookingId);
+
+      // Dispatch automated WhatsApp & SMS cancellation notice
+      if (notifyCustomer) {
+        notificationService.sendCancellationConfirmation(bookingId, refundInfoForNotification).catch((err) => {
+          console.error("Failed to send cancellation notification:", err);
         });
       }
 
-      await tx.auditLog.create({
-        data: {
-          entityType: "BOOKING",
-          entityId: b.id,
-          action: "APPROVE",
-          performedByUserId: user.userId,
-          userRole: user.role,
-          details: `Approved cancellation for booking ${b.id}. Slot released. Reason: ${reason || "None"}`,
-        },
+      return NextResponse.json({ success: true, booking: updated });
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message || "Failed to cancel booking." }, { status: 400 });
+    }
+  }
+
+  // 2. STAFF CANCELLATION REQUEST (Queues for Owner review, keeps slot locked)
+  if (action === "REQUEST_CANCELLATION") {
+    if (!hasPermission(user.role, user.permissions, PERMISSIONS.BOOKINGS_CANCEL_REQUEST)) {
+      return NextResponse.json(
+        { error: "Forbidden: You lack cancellation request permission." },
+        { status: 403 }
+      );
+    }
+
+    if (!bookingId) {
+      return NextResponse.json({ error: "Booking ID is required." }, { status: 400 });
+    }
+
+    const staffReason = reason?.trim();
+    if (!staffReason) {
+      return NextResponse.json({ error: "A cancellation reason is required." }, { status: 400 });
+    }
+
+    try {
+      const updated = await prisma.$transaction(async (tx) => {
+        const b = await tx.booking.findUnique({
+          where: { id: bookingId },
+        });
+        if (!b) throw new Error("Booking not found.");
+
+        if (b.status === "CANCELLED") {
+          throw new Error("This booking is already cancelled.");
+        }
+
+        if (b.checkInStatus === "CHECKED_IN") {
+          throw new Error("Cannot request cancellation: guests are already checked in.");
+        }
+
+        const formattedReason = `[REQUESTED BY STAFF - ${user.name || "Staff"}]: ${staffReason}`;
+
+        const bookingWithRequest = await tx.booking.update({
+          where: { id: b.id },
+          data: {
+            cancellationReason: formattedReason,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            entityType: "BOOKING",
+            entityId: b.id,
+            action: "UPDATE",
+            performedByUserId: user.userId,
+            userRole: user.role,
+            details: `Staff requested cancellation for booking ${b.id}. Reason: ${staffReason}`,
+          },
+        });
+
+        return bookingWithRequest;
       });
 
-      return cancelledBooking;
-    });
+      return NextResponse.json({ success: true, booking: updated });
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message || "Failed to submit request." }, { status: 400 });
+    }
+  }
 
-    // Cancel any scheduled future reminders
-    await notificationService.cancelObsoleteReminders(bookingId);
+  // 3. REJECT CANCELLATION REQUEST (Dismiss request, keep booking active)
+  if (action === "REJECT_CANCELLATION") {
+    if (!hasPermission(user.role, user.permissions, PERMISSIONS.BOOKINGS_CANCEL_APPROVE)) {
+      return NextResponse.json(
+        { error: "Forbidden: You lack permission to manage cancellations." },
+        { status: 403 }
+      );
+    }
 
-    return NextResponse.json({ success: true, booking: updated });
+    if (!bookingId) {
+      return NextResponse.json({ error: "Booking ID is required." }, { status: 400 });
+    }
+
+    try {
+      const updated = await prisma.$transaction(async (tx) => {
+        const b = await tx.booking.findUnique({
+          where: { id: bookingId },
+        });
+        if (!b) throw new Error("Booking not found.");
+
+        const previousReason = b.cancellationReason;
+
+        const dismissedBooking = await tx.booking.update({
+          where: { id: b.id },
+          data: {
+            cancellationReason: null,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            entityType: "BOOKING",
+            entityId: b.id,
+            action: "UPDATE",
+            performedByUserId: user.userId,
+            userRole: user.role,
+            details: `Owner dismissed cancellation request for booking ${b.id}. Previous request note: "${previousReason}". Booking kept active.`,
+          },
+        });
+
+        return dismissedBooking;
+      });
+
+      return NextResponse.json({ success: true, booking: updated });
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message || "Failed to dismiss request." }, { status: 400 });
+    }
   }
 
   // 2. REFUND DECISION (OWNER ONLY!)

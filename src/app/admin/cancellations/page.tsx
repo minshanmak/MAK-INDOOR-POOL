@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { formatPoolDate, formatSlotTime } from "@/lib/timezone";
+import CancelBookingModal from "@/components/admin/CancelBookingModal";
 import {
   XCircle,
   CheckCircle2,
@@ -11,16 +12,21 @@ import {
   ArrowRight,
   ChevronRight,
   X,
+  RotateCcw,
 } from "lucide-react";
 
 export default function AdminCancellationsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string>("POOL_OWNER");
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   // Active Tab: "REQUESTS" | "REFUNDS" | "ALL"
   const [activeTab, setActiveTab] = useState<"REQUESTS" | "REFUNDS" | "ALL">("REQUESTS");
+
+  // Selected Booking for Cancel / Release Modal
+  const [selectedBookingForCancel, setSelectedBookingForCancel] = useState<any | null>(null);
 
   // Refund Decision Modal State
   const [selectedRefund, setSelectedRefund] = useState<any | null>(null);
@@ -43,9 +49,15 @@ export default function AdminCancellationsPage() {
 
   useEffect(() => {
     fetchData();
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((d) => {
+        if (d?.user?.role) setUserRole(d.user.role);
+      })
+      .catch(() => {});
   }, []);
 
-  const handleApproveCancellation = async (bookingId: string) => {
+  const handleDismissRequest = async (bookingId: string) => {
     setError(null);
     setActionSuccess(null);
     try {
@@ -53,19 +65,18 @@ export default function AdminCancellationsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "APPROVE_CANCELLATION",
+          action: "REJECT_CANCELLATION",
           bookingId,
-          reason: "Approved by management upon review",
         }),
       });
       const resJson = await res.json();
       if (!res.ok) {
-        throw new Error(resJson.error || "Failed to approve cancellation.");
+        throw new Error(resJson.error || "Failed to dismiss cancellation request.");
       }
-      setActionSuccess("Cancellation approved and pool slot successfully released!");
+      setActionSuccess("Cancellation request dismissed. Booking kept active.");
       fetchData();
     } catch (err: any) {
-      setError(err.message || "Failed to approve cancellation.");
+      setError(err.message || "Failed to dismiss request.");
     }
   };
 
@@ -101,6 +112,8 @@ export default function AdminCancellationsPage() {
   };
 
   const { cancellationRequests = [], refunds = [] } = data || {};
+  const pendingRequests = cancellationRequests.filter((b: any) => b.status === "CONFIRMED");
+  const processedCancellations = cancellationRequests.filter((b: any) => b.status === "CANCELLED");
 
   return (
     <div className="space-y-4 max-w-7xl mx-auto pb-12">
@@ -118,7 +131,7 @@ export default function AdminCancellationsPage() {
         </div>
       )}
 
-      {/* Filter Tabs (Exact Mockup Match) */}
+      {/* Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <button
           type="button"
@@ -129,7 +142,7 @@ export default function AdminCancellationsPage() {
               : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
           }`}
         >
-          Cancellation Requests ({cancellationRequests.length})
+          Pending Requests ({pendingRequests.length})
         </button>
         <button
           type="button"
@@ -151,22 +164,22 @@ export default function AdminCancellationsPage() {
               : "bg-white text-slate-600 hover:text-slate-900 border border-white shadow-[0_2px_10px_rgba(20,60,110,0.04)]"
           }`}
         >
-          All
+          All History ({cancellationRequests.length})
         </button>
       </div>
 
-      {/* Main Table Card (Exact Mockup Match) */}
+      {/* Main Table Card */}
       <div className="bg-white rounded-3xl border border-white shadow-[0_4px_20px_rgba(20,60,110,0.05)] overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-slate-400 text-xs">Loading ledger...</div>
+          <div className="p-8 text-center text-slate-400 text-xs">Loading cancellations ledger...</div>
         ) : activeTab === "REQUESTS" || activeTab === "ALL" ? (
           <div className="overflow-x-auto">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <span className="font-extrabold text-xs text-slate-800">
-                Cancellation Requests Queue
+                {activeTab === "ALL" ? "All Cancellation Records" : "Pending Requests Queue"}
               </span>
               <span className="text-[11px] text-slate-400">
-                Authorized review releases slot
+                Authorized review releases slot &amp; determines refund
               </span>
             </div>
             {cancellationRequests.length > 0 ? (
@@ -177,7 +190,8 @@ export default function AdminCancellationsPage() {
                     <th className="px-5 py-3.5">Booking</th>
                     <th className="px-5 py-3.5">Customer</th>
                     <th className="px-5 py-3.5">Reason</th>
-                    <th className="px-5 py-3.5">Request Date</th>
+                    <th className="px-5 py-3.5">Date &amp; Time</th>
+                    <th className="px-5 py-3.5">Paid Online</th>
                     <th className="px-5 py-3.5">Status</th>
                     <th className="px-5 py-3.5 text-right">Action</th>
                   </tr>
@@ -193,28 +207,56 @@ export default function AdminCancellationsPage() {
                       </td>
                       <td className="px-5 py-3.5 font-bold text-slate-900">
                         {b.customerName}
-                      </td>
-                      <td className="px-5 py-3.5 text-slate-600 max-w-xs truncate">
-                        {b.cancellationReason || "Customer schedule change"}
-                      </td>
-                      <td className="px-5 py-3.5 text-slate-500 font-mono">
-                        {formatPoolDate(b.bookingDate)}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200/80">
-                          {b.status === "CONFIRMED" ? "Pending" : "Cancelled"}
+                        <span className="block text-[11px] font-normal text-slate-500 tabular-nums">
+                          {b.customerPhone}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 text-right">
+                      <td className="px-5 py-3.5 text-slate-600 max-w-xs">
+                        <span className="line-clamp-2">
+                          {b.cancellationReason || "Customer schedule change"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-slate-600 font-medium">
+                        <div>{b.bookingDate}</div>
+                        <div className="text-[11px] text-slate-400">
+                          {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 font-extrabold text-emerald-700 tabular-nums">
+                        ₹{b.totalPaid || 0}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span
+                          className={`px-3 py-1 rounded-full text-[10px] font-extrabold ${
+                            b.status === "CONFIRMED"
+                              ? "bg-amber-50 text-amber-700 border border-amber-200/80"
+                              : "bg-slate-100 text-slate-600 border border-slate-200"
+                          }`}
+                        >
+                          {b.status === "CONFIRMED" ? "Pending Review" : "Cancelled"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
                         {b.status === "CONFIRMED" ? (
-                          <button
-                            onClick={() => handleApproveCancellation(b.id)}
-                            className="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-[11px] font-bold px-3 py-1 rounded-xl shadow-xs transition"
-                          >
-                            Approve & Release
-                          </button>
+                          <div className="inline-flex items-center gap-1.5 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedBookingForCancel(b)}
+                              className="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-xs transition"
+                            >
+                              Review &amp; Release
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDismissRequest(b.id)}
+                              title="Dismiss request and keep booking active"
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 transition"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
                         ) : (
-                          <span className="text-slate-400 text-[10px]">Released</span>
+                          <span className="text-slate-400 text-[10px] font-semibold">Slot Released</span>
                         )}
                       </td>
                     </tr>
@@ -223,18 +265,18 @@ export default function AdminCancellationsPage() {
               </table>
             ) : (
               <div className="p-8 text-center text-slate-400 text-xs">
-                No pending cancellation requests in queue.
+                No cancellation requests in queue.
               </div>
             )}
           </div>
         ) : null}
 
-        {/* Refunds Sub-Table (if Refunds or All selected) */}
+        {/* Refunds Sub-Table */}
         {(activeTab === "REFUNDS" || activeTab === "ALL") && (
           <div className="overflow-x-auto border-t border-slate-100">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <span className="font-extrabold text-xs text-slate-800">
-                Refund Requests & Settlements
+                Refund Requests &amp; Settlements
               </span>
               <span className="text-[11px] text-slate-400">
                 Owner approval strictly enforced
@@ -309,6 +351,19 @@ export default function AdminCancellationsPage() {
           </div>
         )}
       </div>
+
+      {/* Cancel & Release Modal */}
+      <CancelBookingModal
+        booking={selectedBookingForCancel}
+        isOpen={!!selectedBookingForCancel}
+        userRole={userRole}
+        onClose={() => setSelectedBookingForCancel(null)}
+        onSuccess={() => {
+          setSelectedBookingForCancel(null);
+          setActionSuccess("Cancellation approved and pool slot successfully released!");
+          fetchData();
+        }}
+      />
 
       {/* Review Refund Modal */}
       {selectedRefund && (

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { getPoolDate, formatSlotTime } from "@/lib/timezone";
 import StaffBookingModal from "@/components/admin/StaffBookingModal";
 import EditBookingModal from "@/components/admin/EditBookingModal";
+import CancelBookingModal from "@/components/admin/CancelBookingModal";
 import {
   Calendar,
   Search,
@@ -15,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
+  XCircle,
   Printer,
   ChevronRight,
   Clock,
@@ -71,8 +73,22 @@ function AdminBookingsContent() {
 
   // Edit Booking Modal & Toast State
   const [editingBooking, setEditingBooking] = useState<any | null>(null);
+  const [cancellingBooking, setCancellingBooking] = useState<any | null>(null);
+  const [userRole, setUserRole] = useState<string>("STAFF");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Fetch current user role for RBAC actions
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user?.role) setUserRole(data.user.role);
+      })
+      .catch(() => {});
+  }, []);
+
+  const isOwnerOrAdmin = userRole === "POOL_OWNER" || userRole === "SUPER_ADMIN";
 
   const handleCopyId = (id: string) => {
     navigator.clipboard.writeText(id);
@@ -624,36 +640,49 @@ function AdminBookingsContent() {
 
                       {/* Status (Single Line Badge) */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight whitespace-nowrap ${isCheckedIn
-                            ? "bg-sky-100 text-sky-800 border border-sky-200/80"
-                            : b.status === "CONFIRMED"
-                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200/80"
-                              : b.status === "CANCELLED"
-                                ? "bg-rose-100 text-rose-800 border border-rose-200/80"
-                                : "bg-amber-100 text-amber-800 border border-amber-200/80"
-                            }`}
-                        >
-                          {isCheckedIn ? (
-                            <>
-                              <CheckCircle2 className="w-3 h-3 text-sky-600" />
-                              <span>Checked In</span>
-                            </>
-                          ) : b.status === "CONFIRMED" ? (
-                            <>
-                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                              <span>Confirmed</span>
-                            </>
-                          ) : (
-                            b.status
+                        <div className="flex flex-col gap-1 items-start">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight whitespace-nowrap ${isCheckedIn
+                              ? "bg-sky-100 text-sky-800 border border-sky-200/80"
+                              : b.status === "CONFIRMED"
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-200/80"
+                                : b.status === "CANCELLED"
+                                  ? "bg-rose-100 text-rose-800 border border-rose-200/80"
+                                  : "bg-amber-100 text-amber-800 border border-amber-200/80"
+                              }`}
+                          >
+                            {isCheckedIn ? (
+                              <>
+                                <CheckCircle2 className="w-3 h-3 text-sky-600" />
+                                <span>Checked In</span>
+                              </>
+                            ) : b.status === "CONFIRMED" ? (
+                              <>
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                                <span>Confirmed</span>
+                              </>
+                            ) : (
+                              b.status
+                            )}
+                          </span>
+
+                          {/* Pending Cancel Request Notice */}
+                          {b.status === "CONFIRMED" && b.cancellationReason && (
+                            <span
+                              title={b.cancellationReason}
+                              className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-300 shadow-2xs flex items-center gap-1"
+                            >
+                              <AlertCircle className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                              <span>Cancel Pending</span>
+                            </span>
                           )}
-                        </span>
+                        </div>
                       </td>
 
                       {/* Actions (Segmented Toolbar, Zero Wrapping) */}
                       <td className="px-4 py-3.5 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
-                          {/* Utility Icons Group (WhatsApp, SMS, Edit) */}
+                          {/* Utility Icons Group (WhatsApp, SMS, Edit, Cancel) */}
                           <div className="inline-flex items-center bg-slate-50 border border-slate-200/80 rounded-xl p-0.5 gap-0.5">
                             {/* 1-Click WhatsApp Pass */}
                             <button
@@ -684,6 +713,18 @@ function AdminBookingsContent() {
                                 className="p-1 rounded-lg text-slate-700 hover:bg-slate-200 transition active:scale-95"
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+
+                            {/* Cancel / Request Cancel Booking */}
+                            {b.status !== "CANCELLED" && b.status !== "COMPLETED" && !isCheckedIn && (
+                              <button
+                                type="button"
+                                onClick={() => setCancellingBooking(b)}
+                                title={isOwnerOrAdmin ? "Cancel Booking & Release Slot" : "Request Cancellation from Owner"}
+                                className="p-1 rounded-lg text-rose-600 hover:bg-rose-100 transition active:scale-95"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
                               </button>
                             )}
                           </div>
@@ -855,6 +896,24 @@ function AdminBookingsContent() {
           fetchBookings();
           setToastMsg("Booking updated & customer notified!");
           setTimeout(() => setToastMsg(null), 3500);
+        }}
+      />
+
+      {/* Admin Cancel Booking Modal */}
+      <CancelBookingModal
+        booking={cancellingBooking}
+        isOpen={!!cancellingBooking}
+        userRole={userRole}
+        onClose={() => setCancellingBooking(null)}
+        onSuccess={(data) => {
+          setCancellingBooking(null);
+          fetchBookings();
+          setToastMsg(
+            isOwnerOrAdmin
+              ? "Booking cancelled & slot released!"
+              : "Cancellation request submitted for owner approval."
+          );
+          setTimeout(() => setToastMsg(null), 4000);
         }}
       />
 

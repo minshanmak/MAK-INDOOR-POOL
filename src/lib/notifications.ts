@@ -79,6 +79,72 @@ export function buildBookingConfirmationSms(booking: {
 }
 
 /**
+ * Builds cancellation WhatsApp message text
+ */
+export function buildBookingCancellationText(
+  booking: {
+    id: string;
+    bookingDate: string;
+    startTime: string;
+    endTime: string;
+    guestCount: number;
+    customerName: string;
+    customerPhone: string;
+    totalPaid?: number;
+  },
+  refundInfo?: {
+    status?: string;
+    approvedAmount?: number;
+    reason?: string;
+  }
+): string {
+  const refundText =
+    refundInfo?.approvedAmount !== undefined && refundInfo.approvedAmount > 0
+      ? `💰 *Refund Status:* Approved (₹${refundInfo.approvedAmount})\n_Refund will be credited back via original payment mode / at counter._`
+      : refundInfo?.status === "REJECTED" || refundInfo?.approvedAmount === 0
+      ? `ℹ️ *Refund Status:* Non-refundable / ₹0 (Late Cancellation)`
+      : `ℹ️ *Refund Status:* Under management review`;
+
+  const reasonLine = refundInfo?.reason ? `📌 *Reason:* ${refundInfo.reason}\n` : "";
+
+  return (
+    `❌ *M.A.K INDOOR POOL - RESERVATION CANCELLED*\n` +
+    `Kalathingalpara, Moonniyur, Malappuram\n\n` +
+    `Hello *${booking.customerName}*, your pool reservation has been cancelled.\n\n` +
+    `📋 *Pass ID:* ${booking.id}\n` +
+    `📅 *Date:* ${booking.bookingDate}\n` +
+    `⏰ *Time Slot:* ${formatSlotTime(booking.startTime)} – ${formatSlotTime(booking.endTime)}\n` +
+    `👥 *Guests:* ${booking.guestCount} Persons\n` +
+    `${reasonLine}` +
+    `${refundText}\n\n` +
+    `The reserved slot has now been released.\n` +
+    `For queries or rebooking, call helpline: +91 99477 14716`
+  );
+}
+
+/**
+ * Builds cancellation SMS message text
+ */
+export function buildBookingCancellationSms(
+  booking: {
+    id: string;
+    bookingDate: string;
+    startTime: string;
+    endTime: string;
+    customerName: string;
+  },
+  refundInfo?: {
+    approvedAmount?: number;
+  }
+): string {
+  const refundPart =
+    refundInfo?.approvedAmount !== undefined && refundInfo.approvedAmount > 0
+      ? ` Refund: Rs.${refundInfo.approvedAmount}.`
+      : "";
+  return `MAK Indoor Pool: Booking ${booking.id} on ${booking.bookingDate} (${formatSlotTime(booking.startTime)}) is CANCELLED.${refundPart} Slot released. Helpline: 9947714716`;
+}
+
+/**
  * Helper to build direct WhatsApp wa.me URL
  */
 export function buildWhatsAppDirectUrl(phone: string, message: string): string {
@@ -387,6 +453,61 @@ export class NotificationService {
         });
       }
     }
+  }
+
+  /**
+   * Dispatches cancellation notice across WhatsApp and SMS
+   */
+  async sendCancellationConfirmation(
+    bookingId: string,
+    refundInfo?: {
+      status?: string;
+      approvedAmount?: number;
+      reason?: string;
+    },
+    channels: ("WHATSAPP" | "SMS")[] = ["WHATSAPP", "SMS"]
+  ): Promise<{ whatsapp?: NotificationResult; sms?: NotificationResult }> {
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+    if (!booking || !booking.customerPhone) {
+      return {};
+    }
+
+    const waText = buildBookingCancellationText(booking, refundInfo);
+    const smsText = buildBookingCancellationSms(booking, refundInfo);
+
+    const results: { whatsapp?: NotificationResult; sms?: NotificationResult } = {};
+
+    if (channels.includes("WHATSAPP")) {
+      results.whatsapp = await this.send({
+        recipient: booking.customerPhone,
+        channel: "WHATSAPP",
+        templateName: "BOOKING_CANCELLATION",
+        payload: {
+          bookingId: booking.id,
+          message: waText,
+          customerName: booking.customerName,
+          bookingDate: booking.bookingDate,
+          refundAmount: refundInfo?.approvedAmount ?? 0,
+        },
+      });
+    }
+
+    if (channels.includes("SMS")) {
+      results.sms = await this.send({
+        recipient: booking.customerPhone,
+        channel: "SMS",
+        templateName: "BOOKING_CANCELLATION_SMS",
+        payload: {
+          bookingId: booking.id,
+          message: smsText,
+          customerName: booking.customerName,
+        },
+      });
+    }
+
+    return results;
   }
 
   /**
